@@ -15,18 +15,16 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             var baseUri = new Uri(job.HostName.TrimEnd('/'));
             var url = new Uri(baseUri, job.UrlPath.TrimStart('/')).ToString();
 
-            // Header parametrelerini ekle
+           
             if (!string.IsNullOrEmpty(job.HeaderParameters))
             {
                 var headers = JsonConvert.DeserializeObject<Dictionary<string, string>>(job.HeaderParameters);
+
                 foreach (var header in headers)
                 {
-                    this.Headers.Add(header.Key, header.Value);
+                    this.Headers[header.Key] = header.Value;
                 }
             }
-
-            // Body parametrelerini işleme al
-            var bodyContent = PrepareRequestBody(job);
 
             try
             {
@@ -39,16 +37,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                     case HttpMethodType.TRACE:
                         // Bu HTTP metotları body almaz, query string üzerinden parametreleri ekle
                         url = AppendQueryString(url, job.BodyParameters);
-                        return DownloadString(url);
+                        return ExecuteWebRequest(url, job.HttpMethod.ToString(), null);
 
                     case HttpMethodType.POST:
-                        return UploadString(url, "POST", bodyContent ?? string.Empty);
-
                     case HttpMethodType.PUT:
-                        return UploadString(url, "PUT", bodyContent ?? string.Empty);
-
                     case HttpMethodType.PATCH:
-                        return ExecuteWebRequest(url, "PATCH", bodyContent);
+                        var bodyContent = PrepareRequestBody(job);
+                        return ExecuteWebRequest(url, job.HttpMethod.ToString(), bodyContent);
 
                     default:
                         throw new NotSupportedException($"HTTP method {job.HttpMethod} is not supported.");
@@ -56,12 +51,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             }
             catch (WebException ex)
             {
-                var stream = ex.Response?.GetResponseStream();
-
-                if (stream == null) return ex.GetAllMessages();
-                using var reader = new System.IO.StreamReader(stream);
-                string errorResponse = reader.ReadToEnd();
-                return errorResponse;
+                return HandleWebException(ex);
             }
         }
 
@@ -140,30 +130,39 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
             foreach (var headerKey in this.Headers.AllKeys)
             {
-                httpWebRequest.Headers.Add(headerKey, this.Headers[headerKey]);
+                httpWebRequest.Headers[headerKey] = this.Headers[headerKey];
             }
 
-            if (!string.IsNullOrEmpty(bodyContent) && method is "PATCH" or "POST" or "PUT")
+            if (!string.IsNullOrEmpty(bodyContent) && (method == "PATCH" || method == "POST" || method == "PUT"))
             {
                 var requestData = Encoding.UTF8.GetBytes(bodyContent);
-
                 httpWebRequest.ContentLength = requestData.Length;
 
                 using var requestStream = httpWebRequest.GetRequestStream();
-
                 requestStream.Write(requestData, 0, requestData.Length);
             }
 
             using var response = (HttpWebResponse)httpWebRequest.GetResponse();
+            using var stream = response.GetResponseStream();
 
-            var stream = response.GetResponseStream();
-
-            if (stream == null) return "Stream not found!";
+            if (stream == null)
+            {
+                return "Stream not found!";
+            }
 
             using var reader = new System.IO.StreamReader(stream);
             string responseData = reader.ReadToEnd();
 
             return responseData;
+        }
+
+        private string HandleWebException(WebException ex)
+        {
+            var responseStream = ex.Response?.GetResponseStream();
+            if (responseStream == null) return ex.Message;
+
+            using var reader = new System.IO.StreamReader(responseStream);
+            return reader.ReadToEnd();
         }
     }
 }
