@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 using Hangfire;
 using Newtonsoft.Json.Schema;
+using System.Text.RegularExpressions;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers;
 
@@ -19,7 +20,7 @@ internal sealed class GetCurrentAssemblyTypeMethodJsonSchemaDispatcher : IDashbo
         var parameters = AssemblyInfoStorage.GetMethod(type, method).GetParameterNamesAndDefaults();
         var json = JsonConvert.SerializeObject(parameters);
         var schema =  await NJsonSchema.JsonSchema.FromJsonAsync(json);
-        var shemaString = schema.ToJson();
+        var shemaString = Regex.Replace(schema.ToJson(), "\"\\$schema\"\\s*:\\s*\"[^\"]*\",?", string.Empty);
         await context.Response.WriteAsync(new
         {
             Json = json,
