@@ -10,7 +10,7 @@ public class RecurringJobWebRequest : RecurringJobBase
     public string UrlPath { get; set; }
     public HttpMethodType HttpMethod { get; set; }
     public BodyParameterType BodyParameterType { get; set; }
-    public List<BodyParameter> BodyParameters { get; set; }
-    public List<HeaderParameter> HeaderParameters { get; set; }
+    public string BodyParameters { get; set; }
+    public string HeaderParameters { get; set; }
 
 }

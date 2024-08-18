@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 
@@ -6,7 +8,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
 public static class JsonSchemaExtensions
 {
-    public static JSchema GenerateJSchema(this string jsonString)
+    public static JSchema GenerateJSchema(this string jsonString,params string[] requiredParams)
     {
         var jsonObject = JObject.Parse(jsonString);
         var schema = new JSchema
@@ -103,6 +105,14 @@ public static class JsonSchemaExtensions
             schema.Properties.Add(property.Name, propertySchema);
         }
 
+        if (requiredParams.Any())
+        {
+            foreach (var requiredParam in requiredParams)
+            {
+                schema.Required.Add(requiredParam);
+            }
+        }
+    
         return schema;
     }
 }

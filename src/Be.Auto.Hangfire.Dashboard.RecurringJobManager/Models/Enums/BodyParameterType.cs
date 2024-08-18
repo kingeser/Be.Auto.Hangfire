@@ -8,21 +8,30 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums
     public enum BodyParameterType
     {
         /// <summary>
-        /// Represents a JSON formatted body parameter.
+        /// The body content is in JSON format.
         /// </summary>
-        [Description("Json")]
         Json,
 
         /// <summary>
-        /// Represents an XML formatted body parameter.
+        /// The body content is in XML format.
         /// </summary>
-        [Description("Xml")]
         Xml,
 
         /// <summary>
-        /// Represents a body parameter formatted as form data, typically used in POST requests.
+        /// The body content is in application/x-www-form-urlencoded format.
+        /// This format is typically used for form submissions.
         /// </summary>
-        [Description("Form Data")]
+        FormUrlEncoded,
+
+        /// <summary>
+        /// The body content is in plain text format.
+        /// </summary>
+        PlainText,
+
+        /// <summary>
+        /// The body content is in multipart/form-data format.
+        /// This format is typically used for file uploads.
+        /// </summary>
         FormData
     }
 

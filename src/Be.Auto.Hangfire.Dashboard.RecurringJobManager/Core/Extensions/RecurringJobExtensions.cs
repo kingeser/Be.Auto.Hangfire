@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Hangfire.Common;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Hangfire;
@@ -15,15 +16,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             if (string.IsNullOrEmpty(job.Id))
                 throw new RecurringJobException("Job registration failed: 'Id' field cannot be null or empty.");
 
-            if (job is RecurringJobMethodCall methodCallJob)
-            {
-                if (string.IsNullOrEmpty(methodCallJob.Method))
-                    throw new RecurringJobException("Job registration failed: 'Method' field cannot be null or empty.");
-
-                if (string.IsNullOrEmpty(methodCallJob.Class))
-                    throw new RecurringJobException("Job registration failed: 'Class' field cannot be null or empty.");
-
-            }
 
             if (string.IsNullOrEmpty(job.Cron))
                 throw new RecurringJobException("Job registration failed: 'Cron' expression cannot be null or empty.");
@@ -42,25 +34,55 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             switch (job.JobType)
             {
                 case JobType.WebRequest:
-                    // WebRequest işleme kodu buraya eklenebilir
+                    if (job is RecurringJobWebRequest webRequestJob)
+                    {
+                        if (string.IsNullOrEmpty(webRequestJob.HostName))
+                            throw new RecurringJobException("Job registration failed: 'HostName' field cannot be null or empty.");
+
+                        if (string.IsNullOrEmpty(webRequestJob.UrlPath))
+                            throw new RecurringJobException("Job registration failed: 'UrlPath' field cannot be null or empty.");
+
+                        try
+                        {
+
+                            new global::Hangfire.RecurringJobManager(JobStorage.Current).AddOrUpdate(job.Id, new Job(typeof(RecurringJobWebClient), typeof(RecurringJobWebClient).GetMethod(nameof(RecurringJobWebClient.CallRequest)), job), job.Cron, new RecurringJobOptions()
+                            {
+                                TimeZone = job.TimeZone,
+                                MisfireHandling = job.MisfireHandlingMode,
+                            });
+
+                            RecurringJobAgent.SaveJobDetails(job);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new RecurringJobException("Job registration failed: An unexpected error occurred while registering the job. See the inner exception for more details.", e);
+                        }
+                    }
                     break;
 
                 case JobType.MethodCall:
                     {
-                        if (job is RecurringJobMethodCall jobMethod)
+
+                        if (job is RecurringJobMethodCall methodCallJob)
                         {
-                            var type = AssemblyInfoStorage.GetType(jobMethod);
+                            if (string.IsNullOrEmpty(methodCallJob.Method))
+                                throw new RecurringJobException("Job registration failed: 'Method' field cannot be null or empty.");
+
+                            if (string.IsNullOrEmpty(methodCallJob.Class))
+                                throw new RecurringJobException("Job registration failed: 'Class' field cannot be null or empty.");
+
+                            var type = AssemblyInfoStorage.GetType(methodCallJob);
 
                             if (type == null)
                             {
-                                throw new RecurringJobException($"Job registration failed: The specified job type '{jobMethod.Class}' could not be found in the assembly. Please check if the type name is correct and available.");
+                                throw new RecurringJobException($"Job registration failed: The specified job type '{methodCallJob.Class}' could not be found in the assembly. Please check if the type name is correct and available.");
                             }
 
-                            var method = AssemblyInfoStorage.GetMethod(jobMethod);
+                            var method = AssemblyInfoStorage.GetMethod(methodCallJob);
 
                             if (method == null)
                             {
-                                throw new RecurringJobException($"Job registration failed: The specified method '{jobMethod.Method}' could not be found in type '{jobMethod.Class}'. Please ensure the method name is correct and exists.");
+                                throw new RecurringJobException($"Job registration failed: The specified method '{methodCallJob.Method}' could not be found in type '{methodCallJob.Class}'. Please ensure the method name is correct and exists.");
                             }
 
                             var defaultParameters = method.GetDefaultParameters();
@@ -80,7 +102,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                                 throw new RecurringJobException("Job registration failed: An unexpected error occurred while registering the job. See the inner exception for more details.", e);
                             }
                         }
-                       
+
                     }
                     break;
 

@@ -53,7 +53,7 @@
 
 <div id="app">
 
-    <modal v-if="showModal" @close="closeModal">
+    <modal class="modal" v-if="showModal" @close="closeModal">
 
         <form slot="body" id="formJob">
             <div class="form-group">
@@ -139,61 +139,24 @@
                 </select>
             </div>
 
-            <div class="form-group table-group" itemid="httpHeaderParameters" :style="{ display: job.JobType === 'WebRequest' ? 'block' : 'none' }">
-                <label for="headerParametersTable">Header Parameters</label>
-                <br />
-
-                <svg style=" float: right; margin-top: -27px;" title="Add" @click="addNewHeaderValue()" height="24" version="1.1" width="24" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><g transform="translate(0 -1028.4)"><path d="m22 12c0 5.523-4.477 10-10 10-5.5228 0-10-4.477-10-10 0-5.5228 4.4772-10 10-10 5.523 0 10 4.4772 10 10z" fill="#27ae60" transform="translate(0 1029.4)" /><path d="m22 12c0 5.523-4.477 10-10 10-5.5228 0-10-4.477-10-10 0-5.5228 4.4772-10 10-10 5.523 0 10 4.4772 10 10z" fill="#2ecc71" transform="translate(0 1028.4)" /><path d="m6.0001 1042.4h4.9999v5h2v-5h5v-2h-5v-5h-2v5h-4.9999v2z" fill="#27ae60" /><path d="m6 1041.4h5v5h2v-5h5v-2h-5v-5h-2v5h-5v2z" fill="#ecf0f1" /></g></svg>
-
-                <table id="headerParametersTable">
-                    <thead>
-                        <tr>
-                            <th>Header Name</th>
-                            <th>Header Value</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(header, index) in job.HeaderParameters" :key="header.id">
-                            <td>
-                                <input type="text"
-                                       :id="'HeaderParameters[' + index + '].Name'"
-                                       :name="'HeaderParameters[' + index + '].Name'"
-                                       :v-model="header.Name"
-                                       class="form-control"
-                                       placeholder="Enter Header Name" />
-                            </td>
-                            <td>
-                                <input type="text"
-                                       :id="'HeaderParameters[' + index + '].Value'"
-                                       :name="'HeaderParameters[' + index + '].Value'"
-                                       :v-model="header.Value"
-                                       class="form-control"
-                                       placeholder="Enter Header Value" />
-                            </td>
-                            <td>
-
-
-                                <svg title="Delete" @click="deleteHeaderValue(index)" height="24" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M53.21 467c1.562 24.84 23.02 45 47.9 45h245.8c24.88 0 46.33-20.16 47.9-45L416 128H32L53.21 467zM432 32H320l-11.58-23.16c-2.709-5.42-8.25-8.844-14.31-8.844H153.9c-6.061 0-11.6 3.424-14.31 8.844L128 32H16c-8.836 0-16 7.162-16 16V80c0 8.836 7.164 16 16 16h416c8.838 0 16-7.164 16-16V48C448 39.16 440.8 32 432 32z" /></svg>
-
-
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="form-group table-group" itemid="HeaderParameters" :style="{ display: job.JobType === 'WebRequest' ? 'block' : 'none' }">
+                <label for="headerParametersJsonEditor">Header Parameters</label>
+                <input type="hidden" id="HeaderParameters" name="HeaderParameters" v-model="job.HeaderParameters" />
+                <div id="headerParametersJsonEditor" style="width: 600px; height: 400px;"></div>
             </div>
 
-            <div class="form-group table-group" itemid="bodyParameters" :style="{ display: job.JobType === 'WebRequest' ? 'block' : 'none' }">
-                <label for="bodyParametersTableJsonEditor">Body Parameters</label>
-                <div id="bodyParametersTableJsonEditor" style="width: 600px; height: 400px;"></div>
-                <br />
-                <div class="form-group">
-                    <label for="BodyParameterType">Type</label>
-                    <select id="BodyParameterType" class="form-control" name="BodyParameterType" v-model="job.BodyParameterType" placeholder="Please Select Body Type" @change="onBodyParameterTypeChange">
-                        <option value="">Please select</option>
-                        <option v-for="(item, index) in bodyParameterTypes" :key="index" :value="item.Value">{{item.Text}}</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label for="BodyParameterType">Body Type</label>
+                <select id="BodyParameterType" name="BodyParameterType" class="form-control" v-model="job.BodyParameterType" placeholder="Please Select">
+                    <option value="">Please select</option>
+                    <option v-for="(item, index) in bodyParameterTypes" :key="index" :value="item.Value">{{item.Text}}</option>
+                </select>
+
+            </div>
+            <div class="form-group table-group" itemid="BodyParameters" :style="{ display: job.JobType === 'WebRequest' ? 'block' : 'none' }">
+                <label for="bodyParametersJsonEditor">Body Parameters</label>
+                <input type="hidden" id="BodyParameters" name="BodyParameters" v-model="job.BodyParameters" />
+                <div id="bodyParametersJsonEditor" style="width: 600px; height: 400px;"></div>
             </div>
 
             <div class="form-group">
@@ -346,6 +309,8 @@
                 httpMethods: [],
                 misfireHandlingModes: [],
                 methodParametersJsonEditor: null,
+                headerParametersJsonEditor: null,
+                bodyParametersJsonEditor: null,
                 job: {
                     Id: '',
                     Cron: '',
@@ -355,8 +320,8 @@
                     HttpMethod: '',
                     BodyParameterType: '',
                     MisfireHandlingMode: '',
-                    BodyParameters: [],
-                    HeaderParameters: [],
+                    BodyParameters: '',
+                    HeaderParameters: '',
                     HostName: '',
                     UrlPath: '',
                     JobState: '',
@@ -380,7 +345,100 @@
         },
         methods: {
 
+            initBodyParametersJsonEditor() {
 
+                if (this.bodyParametersJsonEditor === null || this.bodyParametersJsonEditor === undefined) {
+
+                    this.bodyParametersJsonEditor = new JSONEditor(document.getElementById('bodyParametersJsonEditor'), {
+                        mode: 'tree',
+                        schema: {
+                            "$schema": "http://json-schema.org/draft-07/schema#",
+                            "title": "BodyParameters",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "Name": {
+                                        "type": "string",
+                                        "description": "The name of the body parameter."
+                                    },
+                                    "Value": {
+                                        "type": "string",
+                                        "description": "The value of the body parameter."
+                                    }
+                                },
+                                "required": ["Name", "Value"]
+                            }
+                        },
+                        search: false,
+                        history: false,
+                        navigationBar: true,
+                        statusBar: false,
+                        mainMenuBar: false,
+                        onChange: function () {
+                            const updatedJson = this.bodyParametersJsonEditor.get();
+                            this.BodyParameters = updatedJson;
+                        },
+                        onValidate: function (json) {
+
+                            const errors = [];
+
+                            return errors;
+                        }
+                    });
+
+                }
+                
+                this.bodyParametersJsonEditor.expandAll();
+
+            },
+            initHeaderParametersJsonEditor() {
+
+                if (this.headerParametersJsonEditor === null || this.headerParametersJsonEditor === undefined) {
+
+                    this.headerParametersJsonEditor = new JSONEditor(document.getElementById('headerParametersJsonEditor'), {
+                        mode: 'tree',
+                        schema: {
+                            "$schema": "http://json-schema.org/draft-07/schema#",
+                            "title": "HeaderParameters",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "Name": {
+                                        "type": "string",
+                                        "description": "The name of the body parameter."
+                                    },
+                                    "Value": {
+                                        "type": "string",
+                                        "description": "The value of the body parameter."
+                                    }
+                                },
+                                "required": ["Name", "Value"]
+                            }
+                        },
+                        search: false,
+                        history: false,
+                        navigationBar: true,
+                        statusBar: false,
+                        mainMenuBar: false,
+                        onChange: function () {
+                            const updatedJson = this.headerParametersJsonEditor.get();
+                            this.HeaderParameters = updatedJson;
+                        },
+                        onValidate: function (json) {
+
+                            const errors = [];
+
+                            return errors;
+                        }
+                    });
+
+                }
+               
+                this.headerParametersJsonEditor.expandAll();
+
+            },
             onBodyParameterTypeChange(e) {
 
                 this.job.BodyParameterType = e.target.value
@@ -462,8 +520,8 @@
                         this.job.HttpMethod = response.data.Object.HttpMethod || '';
                         this.job.BodyParameterType = response.data.Object.BodyParameterType || '';
                         this.job.MisfireHandlingMode = response.data.Object.MisfireHandlingMode || '';
-                        this.job.BodyParameters = response.data.Object.BodyParameters || [];
-                        this.job.HeaderParameters = response.data.Object.HeaderParameters || [];
+                        this.job.BodyParameters = response.data.Object.BodyParameters || '';
+                        this.job.HeaderParameters = response.data.Object.HeaderParameters || '';
                         this.job.JobState = response.data.Object.JobState || '';
                         this.job.NextExecution = response.data.Object.NextExecution || '';
                         this.job.LastJobId = response.data.Object.LastJobId || '';
@@ -578,7 +636,7 @@
 
                 axios.get('recurring-job-manager/get-current-assembly-type-method-json-schema?Class=' + this.job.Class + '&Method=' + this.job.Method).then(response => {
 
-                  
+
                     if (this.methodParametersJsonEditor === null || this.methodParametersJsonEditor === undefined) {
 
                         this.methodParametersJsonEditor = new JSONEditor(document.getElementById(id), {
@@ -601,9 +659,9 @@
                                 };
                             },
                             onValidate: function (json) {
-                               
+
                                 const errors = [];
-                               
+
                                 return errors;
                             }
                         });
@@ -677,10 +735,10 @@
                     HttpMethod: '',
                     BodyParameterType: '',
                     MisfireHandlingMode: '',
-                    BodyParameters: [],
-                    HeaderParameters: [],
+                    BodyParameters: '',
+                    HeaderParameters: '',
                     HostName: '',
-                    UrlPath:'',
+                    UrlPath: '',
                     JobState: '',
                     NextExecution: '',
                     LastJobId: '',
@@ -736,17 +794,8 @@
                             this.errors.push("HTTP Method is required. Please select the HTTP method (e.g., GET, POST).");
                         }
 
-                        if (this.job.HeaderParameters && this.job.HeaderParameters.length > 0 && this.job.HeaderParameters.some(param => !param.Name || !param.Value)) {
-                            this.errors.push("Header Parameters contain empty Name or Value fields. Please fill out both.");
-                        }
 
-                        if (this.job.BodyParameters && this.job.BodyParameters.length > 0 && this.job.BodyParameters.some(param => !param.Name || !param.Value)) {
-                            this.errors.push("Body Parameters contain empty Name or Value fields. Please fill out both.");
-                        }
 
-                        if (this.job.BodyParameters && this.job.BodyParameters.length > 0 && !this.job.BodyParameterType) {
-                            this.errors.push("Body Parameter Type is required when Body Parameters are provided. Please select a type.");
-                        }
                         break;
 
                     case "MethodCall":
@@ -777,7 +826,8 @@
             }
         },
         created() {
-
+            this.initBodyParametersJsonEditor();
+            this.initHeaderParametersJsonEditor();
             this.getMisfireHandlingModes();
             this.gethttpMethods();
             this.getAssemblyTypes();

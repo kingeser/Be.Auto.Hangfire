@@ -76,8 +76,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                         TimeZoneId = context.Request.GetQuery(nameof(RecurringJobBase.TimeZoneId)),
                         BodyParameterType = (BodyParameterType)Enum.Parse(typeof(BodyParameterType), context.Request.GetQuery(nameof(RecurringJobWebRequest.BodyParameterType))),
                         HttpMethod = (HttpMethodType)Enum.Parse(typeof(HttpMethodType), context.Request.GetQuery(nameof(RecurringJobWebRequest.HttpMethod))),
-                        BodyParameters = GetBodyParameters(context),
-                        HeaderParameters = GetHeaderParameters(context),
+                        BodyParameters = context.Request.GetQuery(nameof(RecurringJobWebRequest.BodyParameters)),
+                        HeaderParameters = context.Request.GetQuery(nameof(RecurringJobWebRequest.HeaderParameters)),
                         MisfireHandlingMode = (MisfireHandlingMode)Enum.Parse(typeof(MisfireHandlingMode), context.Request.GetQuery(nameof(RecurringJobBase.MisfireHandlingMode))),
                         LastJobState = string.Empty,
                         NextExecution = string.Empty,
@@ -106,47 +106,5 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
             await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
         }
 
-
-        private static List<HeaderParameter> GetHeaderParameters(DashboardContext context)
-        {
-            return GetParameters<HeaderParameter>(context, nameof(RecurringJobWebRequest.HeaderParameters));
-        }
-
-        private static List<BodyParameter> GetBodyParameters(DashboardContext context)
-        {
-            return GetParameters<BodyParameter>(context, nameof(RecurringJobWebRequest.BodyParameters));
-        }
-
-        private static List<T> GetParameters<T>(DashboardContext context, string parameterName) where T : new()
-        {
-            var result = new List<T>();
-
-            var index = 0;
-
-            while (true)
-            {
-                var name = context.Request.GetQuery($"{parameterName}[{index}].Name");
-
-                var value = context.Request.GetQuery($"{parameterName}[{index}].Value");
-
-                if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(value))
-                {
-                    break;
-                }
-
-                var parameter = new T();
-                var nameProperty = typeof(T).GetProperty("Name");
-                var valueProperty = typeof(T).GetProperty("Value");
-
-                nameProperty?.SetValue(parameter, name);
-                valueProperty?.SetValue(parameter, value);
-
-                result.Add(parameter);
-
-                index++;
-            }
-
-            return result;
-        }
     }
 }
