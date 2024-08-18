@@ -90,7 +90,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
         private static void AddEmbeddedResources()
         {
-            AddDashboardRouteToEmbeddedResource("/recurring-job-manager/css/img/jsoneditor-icons.svg", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.css.img.jsoneditor-icons.svg");
+            AddDashboardRouteToEmbeddedResource("/recurring-job-manager/css/img/jsoneditor-icons.svg", "image/svg+xml", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.css.img.jsoneditor-icons.svg");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/css/jsoneditor", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.css.jsoneditor.min.css");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/css/jobExtension", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.css.JobExtension.css");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/css/cron-expression-input", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.css.cron-expression-input.css");
