@@ -1,0 +1,224 @@
+/** Main */
+#app {
+    position: relative !important;
+    left: 0px !important;
+    margin: 0px !important;
+}
+
+    #app > div > div {
+        margin-top: 30px !important;
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+
+/* Modal */
+.modal-mask {
+    overflow-y: scroll;
+    position: fixed !important;
+    z-index: 9998;
+    width: 100vw !important;
+    left: 0 !important;
+    top: 0 !important;
+    min-width: 100vw !important;
+    height: calc(100vh + 120px);
+    background-color: rgba(0, 0, 0, .5);
+    display: table;
+    transition: opacity .3s ease;
+}
+
+.modal-wrapper {
+    display: table-cell;
+    vertical-align: top;
+    padding-top: 50px; /*same as .modal-mask top: -200px; */
+}
+
+.modal-container {
+    width: 50%;
+    margin: 0px auto;
+    padding: 20px 30px;
+    background-color: #fff;
+    border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+    transition: all .3s ease;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+.modal-scroll {
+    height: 70vh;
+    overflow-y: scroll;
+}
+
+.modal-header h3 {
+    margin-top: 0;
+    color: #42b983;
+}
+
+.modal-body {
+    margin: 20px 0;
+}
+
+.modal-default-button {
+    float: right;
+}
+
+.app table {
+    margin: 0 !important;
+}
+
+/*
+    * The following styles are auto-applied to elements with
+    * transition="modal" when their visibility is toggled
+    * by Vue.js.
+    *
+    * You can easily play with the modal transition by editing
+    * these styles.
+    */
+
+.modal-enter {
+    opacity: 0;
+}
+
+.modal-leave-active {
+    opacity: 0;
+}
+
+    .modal-enter .modal-container, .modal-leave-active .modal-container {
+        -webkit-transform: scale(1.1);
+        transform: scale(1.1);
+    }
+
+/* Customize check */
+.check-container {
+    width: 50px;
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+    .check-container input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+
+    .check-container .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 25px;
+        width: 25px;
+        background-color: #eee;
+    }
+
+    .check-container:hover input ~ .check-container .checkmark {
+        background-color: #ccc;
+    }
+
+    .check-container input:checked ~ .checkmark {
+        background-color: #2196F3;
+    }
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.check-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.check-container .checkmark:after {
+    left: 9px;
+    top: 5px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.check-container input:disabled ~ .checkmark {
+    background-color: #dddddd !important;
+}
+
+/* CronInput */
+.cronContainer {
+    position: relative;
+}
+
+    .cronContainer input[type=text] {
+        width: 96%;
+    }
+
+    .cronContainer button {
+        position: absolute;
+        right: 0px;
+        height: 34px;
+    }
+
+        .cronContainer button:hover, .cronContainer button:active, .cronContainer button:focus {
+            height: 34px !important;
+            outline: none !important;
+        }
+
+#headersTable, #bodyParametersTable {
+    width: 100%;
+    text-align: center;
+    border-top: 1px solid #cccccc;
+    margin: 3px;
+}
+
+
+svg {
+    cursor: pointer;
+}
+
+
+.table-group {
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+#joblist {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+
+    #joblist th {
+        white-space: nowrap;
+        text-align: left;
+        padding: 8px;
+        font-weight: bold;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    #joblist td {
+        padding: 8px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+
+
+@media screen and (max-width: 768px) {
+    #joblist th, #joblist td {
+        white-space: normal;
+    }
+}

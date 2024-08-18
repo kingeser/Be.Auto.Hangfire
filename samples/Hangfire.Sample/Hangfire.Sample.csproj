@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <UserSecretsId>e29a6006-e829-4724-957c-1cb6008d5655</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove=".DS_Store" />
+    <None Remove="HangfireSampleDb" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.14" />
+    <PackageReference Include="HangFire.SqlServer" Version="1.8.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.8" Condition="'$(TargetFramework)' == 'net462'" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Hangfire.Sample.Library\Hangfire.Sample.Library.csproj" />
+    <ProjectReference Include="..\..\src\Be.Auto.Hangfire.Dashboard.RecurringJobManager\Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj" />
+  </ItemGroup>
+
+</Project>

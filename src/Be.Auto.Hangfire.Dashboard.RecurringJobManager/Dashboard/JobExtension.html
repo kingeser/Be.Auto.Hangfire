@@ -1,0 +1,795 @@
+﻿<link rel="stylesheet" type="text/css" href="recurring-job-manager/css/jobExtension" />
+<link rel="stylesheet" type="text/css" href="recurring-job-manager/css/cron-expression-input" />
+<link rel="stylesheet" type="text/css" href="recurring-job-manager/css/jsoneditor" />
+
+<script src="recurring-job-manager/js/vue"></script>
+<script src="recurring-job-manager/js/axio"></script>
+<script src="recurring-job-manager/js/sweetalert"></script>
+<script defer src="recurring-job-manager/js/page"></script>
+<script src="recurring-job-manager/js/daysjs"></script>
+<script src="recurring-job-manager/js/relativeTime"></script>
+<script>dayjs.extend(dayjs_plugin_relativeTime);</script>
+<script src="recurring-job-manager/js/vuejsPaginate"></script>
+<script src="recurring-job-manager/js/cron-expression-input"></script>
+<script src="recurring-job-manager/js/jsoneditor"></script>
+
+<script type="text/x-template" id="modal-template">
+    <transition name="modal">
+        <div class="modal-mask">
+            <div class="modal-wrapper">
+                <div class="modal-container">
+
+                    <div class="modal-header">
+                        <slot name="header">
+                            default header
+                        </slot>
+                    </div>
+
+
+                    <div class="modal-scroll">
+
+                        <div class="modal-body">
+                            <slot name="body">
+                                default body
+                            </slot>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="modal-default-button btn btn-danger pull-left" @click="closeModal">
+                            Close
+                        </button>
+                        <slot name="footer">
+                            <button class="modal-default-button btn btn-success" @click="closeModal">
+                                Save
+                            </button>
+                        </slot>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+</script>
+
+<div id="app">
+
+    <modal v-if="showModal" @close="closeModal">
+
+        <form slot="body" id="formJob">
+            <div class="form-group">
+                <label for="JobType">Job Type</label>
+                <select id="JobType" name="JobType" class="form-control" v-model="job.JobType" placeholder="Please Select" @change="onJobTypeChange">
+                    <option value="">Please select</option>
+                    <option v-for="(item, index) in jobTypes" :key="index" :value="item.Value">{{item.Text}}</option>
+                </select>
+
+            </div>
+
+            <div class="form-group">
+                <label for="MisfireHandlingMode">Misfire Handling Mode</label>
+                <select id="MisfireHandlingMode" name="MisfireHandlingMode" class="form-control" v-model="job.MisfireHandlingMode" placeholder="Please Select">
+                    <option value="">Please select</option>
+                    <option v-for="(item, index) in misfireHandlingModes" :key="index" :value="item.Value">{{item.Text}}</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="Id">Job Id</label>
+                <input type="text" class="form-control" v-model="job.Id" id="Id" name="Id" aria-describedby="emailHelp" placeholder="Enter Job Id">
+            </div>
+            <div class="form-group">
+                <label for="Cron">Cron</label>
+                <input type="hidden" id="Cron" name="Cron" v-model="job.Cron" />
+                <cron-expression-input :value="job.Cron" v-on:input="job.Cron = $event.detail.value" color="d58512" />
+            </div>
+
+            <div class="form-group">
+                <label for="TimeZoneId">Time Zone</label>
+                <select id="TimeZoneId" name="TimeZoneId" class="form-control" v-model="job.TimeZoneId" placeholder="Enter the Time Zone">
+                    <option value="">Please select</option>
+                    <option v-for="(item, index) in timeZones" :key="index" :value="item.Item1">{{item.Item2}}</option>
+                </select>
+            </div>
+
+
+
+
+            <div class="form-group" :style="{display: job.JobType ==='MethodCall' ? 'block' : 'none' }">
+                <label itemid="class-label" for="class">Class</label>
+                <select id="Class" name="Class" class="form-control" v-model="job.Class" placeholder="Select Class" @change="onClassChange">
+                    <option value="">Please select</option>
+                    <option v-for="(item, index) in assemblyTypes" :key="index" :value="item">{{item}}</option>
+                </select>
+            </div>
+
+
+            <div class="form-group" :style="{display: job.JobType ==='MethodCall' ? 'block' : 'none' }">
+                <label itemid="method-label" for="method">Method</label>
+                <select id="Method" name="Method" class="form-control" v-model="job.Method" @change="getGetCurrentAssemblyTypeMethodJsonSchema('methodParametersJsonEditor',false)" placeholder="Select Method">
+                    <option value="">Please select</option>
+                    <option v-for="(item, index) in assemblyTypeMethods" :key="index" :value="item">{{item}}</option>
+                </select>
+            </div>
+
+            <div class="form-group" :style="{display: job.JobType ==='MethodCall' ? 'block' : 'none' }">
+                <label itemid="method-label" for="methodParametersJsonEditor">Method Parameters</label>
+                <input type="hidden" id="MethodParameters" name="MethodParameters" v-model="job.MethodParameters" />
+                <div id="methodParametersJsonEditor" style="width: 600px; height: 400px;"></div>
+            </div>
+
+            <div class="form-group" :style="{display: job.JobType ==='WebRequest' ? 'block' : 'none' }">
+
+                <label itemid="class-label" for="Domain">Domain</label>
+                <input type="text" class="form-control" v-model="job.Domain" id="Domain" name="Domain" aria-describedby="emailHelp" placeholder="Example : http://domain.com">
+
+            </div>
+
+
+            <div class="form-group" :style="{ display: job.JobType ==='WebRequest' ? 'block' : 'none' }">
+                <label itemid="class-label" for="DomainPath">Path</label>
+                <input type="text" class="form-control" v-model="job.DomainPath" id="DomainPath" name="DomainPath" aria-describedby="emailHelp" placeholder="Example : /api/get-products">
+
+            </div>
+
+            <div class="form-group" :style="{display: job.JobType ==='WebRequest' ? 'block' : 'none' }">
+                <label itemid="method-label" for="HttpMethod">Http Method</label>
+                <select id="HttpMethod" name="HttpMethod" class="form-control" v-model="job.HttpMethod" placeholder="Select Method">
+                    <option value="">Please select</option>
+                    <option v-for="(item, index) in httpMethods" :key="index" :value="item">{{item}}</option>
+                </select>
+            </div>
+
+            <div class="form-group table-group" itemid="httpHeaderParameters" :style="{ display: job.JobType === 'WebRequest' ? 'block' : 'none' }">
+                <label for="headerParametersTable">Header Parameters</label>
+                <br />
+
+                <svg style=" float: right; margin-top: -27px;" title="Add" @click="addNewHeaderValue()" height="24" version="1.1" width="24" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><g transform="translate(0 -1028.4)"><path d="m22 12c0 5.523-4.477 10-10 10-5.5228 0-10-4.477-10-10 0-5.5228 4.4772-10 10-10 5.523 0 10 4.4772 10 10z" fill="#27ae60" transform="translate(0 1029.4)" /><path d="m22 12c0 5.523-4.477 10-10 10-5.5228 0-10-4.477-10-10 0-5.5228 4.4772-10 10-10 5.523 0 10 4.4772 10 10z" fill="#2ecc71" transform="translate(0 1028.4)" /><path d="m6.0001 1042.4h4.9999v5h2v-5h5v-2h-5v-5h-2v5h-4.9999v2z" fill="#27ae60" /><path d="m6 1041.4h5v5h2v-5h5v-2h-5v-5h-2v5h-5v2z" fill="#ecf0f1" /></g></svg>
+
+                <table id="headerParametersTable">
+                    <thead>
+                        <tr>
+                            <th>Header Name</th>
+                            <th>Header Value</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(header, index) in job.HeaderParameters" :key="header.id">
+                            <td>
+                                <input type="text"
+                                       :id="'HeaderParameters[' + index + '].Name'"
+                                       :name="'HeaderParameters[' + index + '].Name'"
+                                       :v-model="header.Name"
+                                       class="form-control"
+                                       placeholder="Enter Header Name" />
+                            </td>
+                            <td>
+                                <input type="text"
+                                       :id="'HeaderParameters[' + index + '].Value'"
+                                       :name="'HeaderParameters[' + index + '].Value'"
+                                       :v-model="header.Value"
+                                       class="form-control"
+                                       placeholder="Enter Header Value" />
+                            </td>
+                            <td>
+
+
+                                <svg title="Delete" @click="deleteHeaderValue(index)" height="24" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M53.21 467c1.562 24.84 23.02 45 47.9 45h245.8c24.88 0 46.33-20.16 47.9-45L416 128H32L53.21 467zM432 32H320l-11.58-23.16c-2.709-5.42-8.25-8.844-14.31-8.844H153.9c-6.061 0-11.6 3.424-14.31 8.844L128 32H16c-8.836 0-16 7.162-16 16V80c0 8.836 7.164 16 16 16h416c8.838 0 16-7.164 16-16V48C448 39.16 440.8 32 432 32z" /></svg>
+
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="form-group table-group" itemid="bodyParameters" :style="{ display: job.JobType === 'WebRequest' ? 'block' : 'none' }">
+                <label for="bodyParametersTableJsonEditor">Body Parameters</label>
+                <div id="bodyParametersTableJsonEditor" style="width: 600px; height: 400px;"></div>
+                <br />
+                <div class="form-group">
+                    <label for="BodyParameterType">Type</label>
+                    <select id="BodyParameterType" class="form-control" name="BodyParameterType" v-model="job.BodyParameterType" placeholder="Please Select Body Type" @change="onBodyParameterTypeChange">
+                        <option value="">Please select</option>
+                        <option v-for="(item, index) in bodyParameterTypes" :key="index" :value="item.Value">{{item.Text}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <p v-if="errors.length> 0">
+                    <b style="color:red">Please correct the following error(s):</b>
+                    <ul>
+                        <li v-for="error in errors" style="color:red">{{ error }}</li>
+                    </ul>
+                </p>
+            </div>
+        </form>
+
+        <div slot="footer">
+            <button class="btn btn-success" @click="addJob">
+                Save
+            </button>
+        </div>
+
+        <h3 slot="header">{{title}}</h3>
+    </modal>
+
+    <div class="row">
+        <div class="col-md-12" style="margin:0px;padding:0px;">
+            <h1 class="page-header">Recurring Jobs <span class="badge badge-warning">{{getItems.length}}</span></h1>
+            <button type="button" class="btn btn-primary" @click="OpenModal">Add new Job</button>
+
+            <div class="table-responsive">
+                <table id="joblist" class="table">
+
+                    <thead>
+                        <tr>
+                            <th>Actions</th>
+                            <th>Id</th>
+                            <th>Cron</th>
+                            <th>Misfire Handling Mode</th>
+                            <th>State</th>
+                            <th>JobType</th>
+                            <th>Class / Domain</th>
+                            <th>Method / Path</th>
+                            <th>TimeZone</th>
+                            <th>Last Execution</th>
+                            <th>Next Execution</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="job in getItems">
+                            <td>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <button type="button" class="btn btn-warning" style="padding-top: 10px; margin-right: 5px;">
+                                                <svg width="18px" height="18px" viewBox="0 0 16 16" class="bi bi-pencil-square" fill="currentColor" @click="GetJob(job.Id)">
+                                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                                                </svg>
+                                            </button>
+
+                                        </td>
+                                        <td>
+                                            <button v-if="job.JobState == 'Stopped'" type="button" class="btn btn-success" style="padding: 4px 10px;">
+                                                <svg width="24px" height="25px" viewBox="-1 -1.5 16 16" class="bi bi-play" fill="currentColor" @click="StartJob(job.Id)">
+                                                    <path fill-rule="evenodd" d="M10.804 8L5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
+                                                </svg>
+                                            </button>
+                                            <button v-if="job.JobState == 'Running'" type="button" class="btn btn-danger" style="padding: 4px 10px;">
+                                                <svg width="24px" height="25px" viewBox="-0.5 -1.5 16 16" class="bi bi-stop" fill="currentColor" @click="StopJob(job.Id)">
+                                                    <path fill-rule="evenodd" d="M3.5 5A1.5 1.5 0 0 1 5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5zM5 4.5a.5.5 0 0 0-.5.5v6a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5H5z" />
+                                                </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td>{{job.Id}}</td>
+                            <td>{{job.Cron}}</td>
+                            <td>{{job.MisfireHandlingMode}}</td>
+                            <td>
+                                <span v-if="job.JobState == 'Running'" class="label label-success">{{job.JobState}}</span>
+                                <span v-if="job.JobState == 'Stopped'" class="label label-danger">{{job.JobState}}</span>
+                            </td>
+                            <td>{{job.JobType}}</td>
+                            <td>{{job.Class}}</td>
+                            <td>{{job.Method}}</td>
+                            <td>{{job.TimeZoneId}}</td>
+
+                            <td>
+                                <button type="button" class="btn btn-primary">
+                                    {{getTime(job.LastExecution)}}&nbsp;&nbsp;
+                                    <span class="badge" style="width: 124px;">{{capitalizeString(dayjs().from(dayjs(job.LastExecution)))}}</span>
+                                </button>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-primary">
+                                    {{getTime(job.NextExecution)}}&nbsp;&nbsp;
+                                    <span class="badge" style="width: 124px;">{{capitalizeString(dayjs().to(dayjs(job.NextExecution)))}}</span>
+                                </button>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+
+            </div>
+
+
+            <div style="float: right;">
+                <paginate :page-count="getPageCount"
+                          :page-range="3"
+                          :margin-pages="2"
+                          :click-handler="clickCallbackPagination"
+                          :prev-text="'＜'"
+                          :next-text="'＞'"
+                          :container-class="'pagination'"
+                          :page-class="'page-item'">
+                </paginate>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    Vue.component('modal', {
+        template: '#modal-template',
+        methods: {
+            closeModal() {
+                this.$emit('close');
+            }
+        }
+    });
+
+    var appJob = new Vue({
+        el: '#app',
+        components: {
+            'paginate': VuejsPaginate
+        },
+        data() {
+            return {
+                title: 'Add New Job',
+                jobs: null,
+                showModal: false,
+                errors: [],
+                timeZones: [],
+                jobTypes: [],
+                bodyParameterTypes: [],
+                assemblyTypes: [],
+                assemblyTypeMethods: [],
+                httpMethods: [],
+                misfireHandlingModes: [],
+                methodParametersJsonEditor: null,
+                job: {
+                    Id: '',
+                    Cron: '',
+                    JobType: '',
+                    Class: '',
+                    Method: '',
+                    HttpMethod: '',
+                    BodyParameterType: '',
+                    MisfireHandlingMode: '',
+                    BodyParameters: [],
+                    HeaderParameters: [],
+                    JobState: '',
+                    NextExecution: '',
+                    LastJobId: '',
+                    LastJobState: '',
+                    LastExecution: '',
+                    CreatedAt: '',
+                    Removed: false,
+                    TimeZoneId: '',
+                    Error: '',
+                    MethodParameters: []
+                },
+                pagination: {
+                    parPage: 10,
+                    currentPage: 1
+                },
+                selectedJobType: '',
+                headerCount: 0
+            }
+        },
+        methods: {
+
+
+            onBodyParameterTypeChange(e) {
+
+                this.job.BodyParameterType = e.target.value
+
+            },
+            onJobTypeChange(e) {
+
+                this.job.JobType = e.target.value
+
+
+            },
+
+            onClassChange(e) {
+
+                this.job.Class = e.target.value;
+
+                this.addJob.assemblyTypeMethods = [];
+
+                this.getAssemblyTypeMethods();
+
+
+            },
+            addNewBodyParameter(name, value) {
+                this.job.BodyParameters.push({
+                    id: this.generateUUID(),
+                    name: name,
+                    value: value
+                });
+            },
+            deleteBodyParameter(index) {
+                this.job.BodyParameters.splice(index, 1);
+            },
+            addNewHeaderValue(name, value) {
+                this.job.HeaderParameters.push({
+                    id: this.generateUUID(),
+                    name: name,
+                    value: value
+                });
+            },
+
+            deleteHeaderValue(index) {
+                this.job.HeaderParameters.splice(index, 1);
+            },
+            addJob() {
+                this.UpdateJob(this.job);
+            },
+            generateUUID() { // Public Domain/MIT
+                var d = new Date().getTime();//Timestamp
+                var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                    var r = Math.random() * 16;//random number between 0 and 16
+                    if (d > 0) {//Use timestamp until depleted
+                        r = (d + r) % 16 | 0;
+                        d = Math.floor(d / 16);
+                    } else {//Use microseconds since page-load if supported
+                        r = (d2 + r) % 16 | 0;
+                        d2 = Math.floor(d2 / 16);
+                    }
+                    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+                });
+            },
+            GetJobs() {
+                axios.get('recurring-job-manager/get-jobs')
+                    .then(res => (this.jobs = res.data))
+            },
+            GetJob(_Id) {
+                this.title = 'Edit Job';
+                axios.get('recurring-job-manager/get-job?Id=' + _Id).then(response => {
+
+                    if (response.data != null) {
+
+                        this.showModal = true;
+
+                        this.job.Id = response.data.Object.Id || '';
+                        this.job.Cron = response.data.Object.Cron || '';
+                        this.job.JobType = response.data.Object.JobType || '';
+                        this.job.Class = response.data.Object.Class || '';
+                        this.job.Method = response.data.Object.Method || '';
+                        this.job.HttpMethod = response.data.Object.HttpMethod || '';
+                        this.job.BodyParameterType = response.data.Object.BodyParameterType || '';
+                        this.job.MisfireHandlingMode = response.data.Object.MisfireHandlingMode || '';
+                        this.job.BodyParameters = response.data.Object.BodyParameters || [];
+                        this.job.HeaderParameters = response.data.Object.HeaderParameters || [];
+                        this.job.JobState = response.data.Object.JobState || '';
+                        this.job.NextExecution = response.data.Object.NextExecution || '';
+                        this.job.LastJobId = response.data.Object.LastJobId || '';
+                        this.job.LastJobState = response.data.Object.LastJobState || '';
+                        this.job.LastExecution = response.data.Object.LastExecution || '';
+                        this.job.CreatedAt = response.data.Object.CreatedAt || '';
+                        this.job.Removed = response.data.Object.Removed || false;
+                        this.job.TimeZoneId = response.data.Object.TimeZoneId || '';
+                        this.job.Error = response.data.Object.Error || '';
+                        this.job.MethodParameters = response.data.Object.MethodParameters || [];
+
+
+                    }
+                }).catch(e => {
+                    console.log(e);
+                });
+            },
+            StartJob(_jobId) {
+                axios.get('recurring-job-manager/job-agent?Id=' + _jobId + "&Action=Start").then(response => {
+
+                    if (!response.data.Status) {
+
+                        this.showModal = false;
+
+                        Swal.fire({
+                            title: 'Error!',
+                            text: response.data.Message,
+                            type: 'error',
+                            confirmButtonText: 'Okay'
+                        }).then((result) => {
+                            this.closeModal();
+                        });
+                    } else {
+                        this.closeModal();
+                        this.GetJobs();
+                    }
+
+                }).catch(e => {
+                    console.log(e);
+                });
+            },
+            StopJob(_jobId) {
+                axios.get('recurring-job-manager/job-agent?Id=' + _jobId + "&Action=Stop").then(response => {
+
+                    if (!response.data.Status) {
+
+                        this.showModal = false;
+
+                        Swal.fire({
+                            title: 'Error!',
+                            text: response.data.Message,
+                            type: 'error',
+                            confirmButtonText: 'Okay'
+                        }).then((result) => {
+                            this.closeModal();
+                        });
+                    } else {
+
+                        this.closeModal();
+                        this.GetJobs();
+                    }
+
+                }).catch(e => {
+                    console.log(e);
+                });
+            },
+            UpdateJob(job) {
+                if (this.checkForm()) {
+
+
+                    const formData = new FormData(document.getElementById('formJob'));
+                    const params = new URLSearchParams();
+                    for (const [key, value] of formData.entries()) {
+                        params.append(key, value);
+                    }
+
+                    axios.get('recurring-job-manager/update-jobs?' + params.toString()).then(response => {
+
+                        if (!response.data.Status) {
+
+                            this.showModal = false;
+
+                            Swal.fire({
+                                title: 'Error!',
+                                text: response.data.Message,
+                                type: 'error',
+                                confirmButtonText: 'Okay'
+                            }).then((result) => {
+                                this.closeModal();
+                            });
+                        } else {
+
+                            this.closeModal();
+                            this.GetJobs();
+                        }
+
+                    }).catch(e => {
+                        console.log(e);
+                    });
+                }
+            },
+
+            getTimeZones() {
+                axios.get('recurring-job-manager/get-time-zones').then(response => {
+                    this.timeZones = response.data;
+                }).catch(e => {
+                    console.log(e);
+                });
+            },
+            getGetCurrentAssemblyTypeMethodJsonSchema(id, fieldIsEditable) {
+
+                axios.get('recurring-job-manager/get-current-assembly-type-method-json-schema?Class=' + this.job.Class + '&Method=' + this.job.Method).then(response => {
+
+                    this.initJsonEditor(id, fieldIsEditable, , 'MethodParameters');
+
+                    if (this.methodParametersJsonEditor === null || this.methodParametersJsonEditor === undefined) {
+
+                        this.methodParametersJsonEditor = new JSONEditor(document.getElementById(id), {
+                            mode: 'tree',
+                            schema: response.data.Schema,
+                            search: false,
+                            history: false,
+                            navigationBar: true,
+                            statusBar: false,
+                            mainMenuBar: false,
+                            onChange: function () {
+                                const updatedJson = this.methodParametersJsonEditor.get();
+                                this.MethodParameters JSON.parse(updatedJson);
+                            },
+                            onEditable: function (node) {
+
+                                return {
+                                    field: false,
+                                    value: true
+                                };
+                            },
+                            onValidate: function (json) {
+                               
+                                const errors = [];
+                               
+                                return errors;
+                            }
+                        });
+
+                    }
+                    editor.set(JSON.parse(response.data.Json));
+
+                    editor.expandAll();
+
+
+                }).catch(e => {
+                    console.log(e);
+                });
+            },
+            getMisfireHandlingModes() {
+                axios.get('recurring-job-manager/get-misfire-handling-modes').then(response => {
+                    this.misfireHandlingModes = response.data;
+                }).catch(e => {
+                    console.log(e);
+                });
+
+            },
+            gethttpMethods() {
+
+                axios.get('recurring-job-manager/get-http-methods').then(response => {
+                    this.httpMethods = response.data;
+                }).catch(e => {
+                    console.log(e);
+                });
+            },
+            getBodyParameterTypes() {
+                axios.get('recurring-job-manager/get-body-parameter-types').then(response => {
+                    this.bodyParameterTypes = response.data;
+                }).catch(e => {
+                    console.log(e);
+                });
+            },
+            getJobTypes() {
+                axios.get('recurring-job-manager/get-job-types').then(response => {
+                    this.jobTypes = response.data;
+
+                }).catch(e => {
+                    console.log(e);
+                });
+            },
+            getAssemblyTypes() {
+                axios.get('recurring-job-manager/get-current-assembly-types').then(response => {
+                    this.assemblyTypes = response.data;
+
+                }).catch(e => {
+                    console.log(e);
+                });
+            },
+            getAssemblyTypeMethods() {
+                axios.get('recurring-job-manager/get-current-assembly-type-methods?Class=' + this.job.Class).then(response => {
+                    this.assemblyTypeMethods = response.data;
+
+                }).catch(e => {
+                    console.log(e);
+                });
+            },
+            closeModal() {
+                this.job = {
+                    Id: '',
+                    Cron: '',
+                    JobType: '',
+                    Class: '',
+                    Method: '',
+                    HttpMethod: '',
+                    BodyParameterType: '',
+                    MisfireHandlingMode: '',
+                    BodyParameters: [],
+                    HeaderParameters: [],
+                    JobState: '',
+                    NextExecution: '',
+                    LastJobId: '',
+                    LastJobState: '',
+                    LastExecution: '',
+                    CreatedAt: '',
+                    Removed: false,
+                    TimeZoneId: '',
+                    Error: '',
+                    MethodParameters: []
+                };
+                this.errors = [];
+                this.showModal = false;
+            },
+            OpenModal() {
+                this.title = 'Add New Job';
+                this.showModal = true;
+            },
+            checkForm: function (e) {
+                this.errors = [];
+
+
+                if (!this.job.JobType) {
+                    this.errors.push("Please select a Job Type to proceed.");
+                }
+
+                if (!this.job.MisfireHandlingMode) {
+                    this.errors.push("Please select a Misfire Handling Mode to proceed.");
+                }
+
+                if (!this.job.Id) {
+                    this.errors.push("Job ID is missing. Please provide a unique identifier for the job.");
+                }
+
+
+                if (!this.job.Cron) {
+                    this.errors.push("Cron expression is missing. Please specify the schedule for the job.");
+                }
+
+
+                switch (this.job.JobType) {
+                    case "WebRequest":
+
+                        if (!this.job.Domain) {
+                            this.errors.push("Domain URL is required. Please provide the domain for the web request.");
+                        }
+
+                        if (!this.job.DomainPath) {
+                            this.errors.push("Domain Path is required. Please specify the path for the web request.");
+                        }
+
+                        if (!this.job.HttpMethod) {
+                            this.errors.push("HTTP Method is required. Please select the HTTP method (e.g., GET, POST).");
+                        }
+
+                        if (this.job.HeaderParameters && this.job.HeaderParameters.length > 0 && this.job.HeaderParameters.some(param => !param.Name || !param.Value)) {
+                            this.errors.push("Header Parameters contain empty Name or Value fields. Please fill out both.");
+                        }
+
+                        if (this.job.BodyParameters && this.job.BodyParameters.length > 0 && this.job.BodyParameters.some(param => !param.Name || !param.Value)) {
+                            this.errors.push("Body Parameters contain empty Name or Value fields. Please fill out both.");
+                        }
+
+                        if (this.job.BodyParameters && this.job.BodyParameters.length > 0 && !this.job.BodyParameterType) {
+                            this.errors.push("Body Parameter Type is required when Body Parameters are provided. Please select a type.");
+                        }
+                        break;
+
+                    case "MethodCall":
+
+                        if (!this.job.Class) {
+                            this.errors.push("Class is required for Method Call jobs. Please select a class.");
+                        }
+
+                        if (!this.job.Method) {
+                            this.errors.push("Method is required for Method Call jobs. Please select a method.");
+                        }
+                        break;
+                }
+
+                if (!this.errors.length) return true;
+
+                if (this.errors.length) return false;
+
+            },
+            capitalizeString(s) {
+                return s.charAt(0).toUpperCase() + s.slice(1);
+            },
+            getTime(date) {
+                return dayjs(date).format('hh:mm:ss A');
+            },
+            clickCallbackPagination(pageNum) {
+                this.pagination.currentPage = Number(pageNum);
+            }
+        },
+        created() {
+
+            this.getMisfireHandlingModes();
+            this.gethttpMethods();
+            this.getAssemblyTypes();
+            this.getBodyParameterTypes();
+            this.getTimeZones();
+            this.getJobTypes();
+            this.GetJobs();
+        },
+        computed: {
+            getItems: function () {
+                let current = this.pagination.currentPage * this.pagination.parPage;
+                let start = current - this.pagination.parPage;
+                if (this.jobs != null) return this.jobs.slice(start, current);
+                else return null;
+            },
+            getPageCount: function () {
+                return Math.ceil(this.jobs.length / this.pagination.parPage);
+            }
+        }
+    });
+</script>
