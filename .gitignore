@@ -1,0 +1,8 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/samples/Hangfire.Sample/obj
+/samples/Hangfire.Sample.Library/obj
+/src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/obj
