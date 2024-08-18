@@ -6,3 +6,6 @@
 /samples/Hangfire.Sample/obj
 /samples/Hangfire.Sample.Library/obj
 /src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/obj
+/src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/bin/Debug
+/samples/Hangfire.Sample/bin/Debug/net8.0
+/samples/Hangfire.Sample.Library/bin/Debug/netstandard2.0
