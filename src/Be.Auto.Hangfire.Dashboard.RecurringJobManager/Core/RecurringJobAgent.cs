@@ -1,68 +1,89 @@
 ﻿using Hangfire.Common;
-using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Hangfire.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 using Hangfire;
 using Newtonsoft.Json;
+
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 {
     public static class RecurringJobAgent
     {
-        public const string TagRecurringJob = "recurring-job";
+        public const string TagRecurringJobBase = "recurring-job";
         public const string TagStopJob = "recurring-jobs-stop";
         public static void StartBackgroundJob(string jobId)
         {
             using var connection = JobStorage.Current.GetConnection();
             using var transaction = connection.CreateWriteTransaction();
             transaction.RemoveFromSet(TagStopJob, jobId);
-            transaction.AddToSet($"{TagRecurringJob}s", jobId);
+            transaction.AddToSet($"{TagRecurringJobBase}s", jobId);
             transaction.Commit();
         }
         public static void StopBackgroundJob(string jobId)
         {
             using var connection = JobStorage.Current.GetConnection();
             using var transaction = connection.CreateWriteTransaction();
-            transaction.RemoveFromSet($"{TagRecurringJob}s", jobId);
+            transaction.RemoveFromSet($"{TagRecurringJobBase}s", jobId);
             transaction.AddToSet($"{TagStopJob}", jobId);
             transaction.Commit();
         }
-        public static void SaveJobDetails(PeriodicJob job)
+        public static void SaveJobDetails(RecurringJobBase job)
         {
             using var connection = JobStorage.Current.GetConnection();
             using var transaction = connection.CreateWriteTransaction();
-            transaction.SetRangeInHash($"{TagRecurringJob}:{job.Id}", new KeyValuePair<string, string>[]
+
+            var details = new List<KeyValuePair<string, string>>
             {
                 new(nameof(job.JobType), job.JobType.ToString()),
-                new(nameof(job.HttpMethod), job.HttpMethod.ToString()),
-                new(nameof(job.BodyParameterType), job.BodyParameterType.ToString()),
-                new(nameof(job.MisfireHandlingMode), job.MisfireHandlingMode.ToString()),
-                new(nameof(job.BodyParameters), JsonConvert.SerializeObject(job.BodyParameters)),
-                new(nameof(job.HeaderParameters), JsonConvert.SerializeObject(job.HeaderParameters)),
-                new(nameof(job.MethodParameters), JsonConvert.SerializeObject(job.MethodParameters)),
+                new(nameof(job.MisfireHandlingMode), job.MisfireHandlingMode.ToString())
+            };
 
-            });
+            switch (job.JobType)
+            {
+                case JobType.MethodCall:
+                    if (job is RecurringJobMethodCall methodCallJob)
+                    {
+                        details.Add(new(nameof(methodCallJob.MethodParameters), JsonConvert.SerializeObject(methodCallJob.MethodParameters)));
+
+                    }
+
+                    break;
+                case JobType.WebRequest:
+                    if (job is RecurringJobWebRequest webRequestJob)
+                    {
+                        details.Add(new(nameof(webRequestJob.HttpMethod), webRequestJob.HttpMethod.ToString()));
+                        details.Add(new(nameof(webRequestJob.BodyParameterType), webRequestJob.BodyParameterType.ToString()));
+                        details.Add(new(nameof(webRequestJob.BodyParameters), JsonConvert.SerializeObject(webRequestJob.BodyParameters)));
+                        details.Add(new(nameof(webRequestJob.HeaderParameters), JsonConvert.SerializeObject(webRequestJob.HeaderParameters)));
+
+                    }
+                    break;
+            }
+
+            transaction.SetRangeInHash($"{TagRecurringJobBase}:{job.Id}", details);
 
             transaction.Commit();
         }
 
-        public static List<PeriodicJob> GetAllJobStopped() => GetAllJobs().Where(t => t.JobState == "Stopped").ToList();
+        public static List<RecurringJobBase> GetAllJobStopped() => GetAllJobs().Where(t => t.JobState == "Stopped").ToList();
 
-        public static PeriodicJob GetJob(string jobId) => GetAllJobs().Find(t => t.Id == jobId);
-        public static List<PeriodicJob> GetAllJobs()
+        public static RecurringJobBase GetJob(string jobId) => GetAllJobs().Find(t => t.Id == jobId);
+        public static List<RecurringJobBase> GetAllJobs()
         {
-            var result = new List<PeriodicJob>();
+            var result = new List<RecurringJobBase>();
 
             using var connection = JobStorage.Current.GetConnection();
 
-            var runnigJobs = connection.GetRecurringJobs();
+            var runningJobs = connection.GetRecurringJobs();
 
-            runnigJobs.ForEach(recurringJobDto =>
+            runningJobs.ForEach(recurringJobBaseDto =>
             {
-                var dto = MapPeriodicJob(connection, recurringJobDto.Id, "Running");
+                var dto = MapPeriodicJob(connection, recurringJobBaseDto.Id, "Running", recurringJobBaseDto.Removed);
                 if (dto == null) return;
                 result.Add(dto);
             });
@@ -71,20 +92,44 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
             allJobStopped.ForEach(jobId =>
             {
-                var dto = MapPeriodicJob(connection, jobId, "Stopped");
+                var dto = MapPeriodicJob(connection, jobId, "Stopped", false);
                 if (dto == null) return;
                 result.Add(dto);
             });
             return result;
         }
 
-        private static PeriodicJob MapPeriodicJob(IStorageConnection connection, string jobId, string status)
+        private static RecurringJobBase MapPeriodicJob(IStorageConnection connection, string jobId, string status, bool removed)
         {
-            var dataJob = connection.GetAllEntriesFromHash($"{TagRecurringJob}:{jobId}");
+            var dataJob = connection.GetAllEntriesFromHash($"{TagRecurringJobBase}:{jobId}");
 
             if (dataJob == null) return default;
 
-            var dto = dataJob.BindFromDictionary<PeriodicJob>();
+            JobType jobType;
+            if (dataJob.TryGetValue(nameof(RecurringJobBase.JobType), out var jobTypeValue) && !string.IsNullOrWhiteSpace(jobTypeValue))
+            {
+                jobType = (JobType)Enum.Parse(typeof(JobType), jobTypeValue);
+            }
+            else
+            {
+                return default;
+            }
+
+            RecurringJobBase dto = null;
+
+
+            switch (jobType)
+            {
+                case JobType.MethodCall:
+                    dto = dataJob.BindFromDictionary<RecurringJobMethodCall>();
+                    break;
+                case JobType.WebRequest:
+                    dto = dataJob.BindFromDictionary<RecurringJobWebRequest>();
+                    break;
+
+            }
+
+            if (dto == null) return default;
 
 
             dto.Id = jobId;
@@ -95,10 +140,14 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             {
                 if (dataJob.TryGetValue("Job", out var payload) && !string.IsNullOrWhiteSpace(payload))
                 {
-                    var invocationData = InvocationData.DeserializePayload(payload);
-                    var job = invocationData.DeserializeJob();
-                    dto.Method = job.Method.Name;
-                    dto.Class = job.Type.Name;
+                    if (dto is RecurringJobMethodCall methodCallJob)
+                    {
+                        var invocationData = InvocationData.DeserializePayload(payload);
+                        var job = invocationData.DeserializeJob();
+                        methodCallJob.Method = job.Method.Name;
+                        methodCallJob.Class = job.Type.Name;
+                    }
+
 
                 }
             }
@@ -151,13 +200,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
                 dto.Error = error;
             }
 
-            dto.Removed = false;
+            dto.Removed = removed;
             dto.JobState = status;
 
             return dto;
         }
 
-        public static bool IsValidJobId(string jobId, string tag = TagRecurringJob)
+        public static bool IsValidJobId(string jobId, string tag = TagRecurringJobBase)
         {
             var result = false;
             using var connection = JobStorage.Current.GetConnection();

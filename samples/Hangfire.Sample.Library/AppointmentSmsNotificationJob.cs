@@ -19,7 +19,7 @@ namespace Hangfire.Sample.Library
             await Task.Delay(180000, source.Token);
         }
         [RecurringJob("*/1 * * * *", "default", RecurringJobId = "RunDelayJob2",Enabled = true)]
-        public async Task RunDelayJob2(string delayTime)
+        public async Task RunDelayJob2(string delayTime,bool start,int count)
         {
             var id = Guid.NewGuid();
             Console.WriteLine(id);
@@ -27,7 +27,7 @@ namespace Hangfire.Sample.Library
             await Task.Delay(180000, source.Token);
         }
         [RecurringJob("*/1 * * * *", "default", RecurringJobId = "RunDelayJob3",Enabled = true)]
-        public async Task RunDelayJob3(string delayTime)
+        public async Task RunDelayJob3(string delayTime,DateTime next)
         {
             var id = Guid.NewGuid();
             Console.WriteLine(id);

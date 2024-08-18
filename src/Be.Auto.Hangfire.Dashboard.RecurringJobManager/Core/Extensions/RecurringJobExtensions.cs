@@ -5,23 +5,36 @@ using Hangfire;
 using Cronos;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 
+
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {
     public static class RecurringJobExtensions
     {
-        public static void Register(this PeriodicJob job)
+        public static void Register(this RecurringJobBase job)
         {
             if (string.IsNullOrEmpty(job.Id))
-                throw new RecurringJobException("Job registration failed: 'Id' field cannot be null or empty. Please provide a valid Job Id.");
+                throw new RecurringJobException("Job registration failed: 'Id' field cannot be null or empty.");
 
-            if (string.IsNullOrEmpty(job.Method))
-                throw new RecurringJobException("Job registration failed: 'Method' field cannot be null or empty. Please provide the method name to execute.");
+            if (job is RecurringJobMethodCall methodCallJob)
+            {
+                if (string.IsNullOrEmpty(methodCallJob.Method))
+                    throw new RecurringJobException("Job registration failed: 'Method' field cannot be null or empty.");
+
+                if (string.IsNullOrEmpty(methodCallJob.Class))
+                    throw new RecurringJobException("Job registration failed: 'Class' field cannot be null or empty.");
+
+            }
 
             if (string.IsNullOrEmpty(job.Cron))
-                throw new RecurringJobException("Job registration failed: 'Cron' expression cannot be null or empty. Please provide a valid Cron expression.");
+                throw new RecurringJobException("Job registration failed: 'Cron' expression cannot be null or empty.");
+
+
+            if (string.IsNullOrEmpty(job.TimeZoneId))
+                throw new RecurringJobException("Job registration failed: 'TimeZoneId' field cannot be null or empty.");
+
 
             if (job.TimeZone == null)
-                throw new RecurringJobException("Job registration failed: 'TimeZone' field cannot be null. Please specify a valid time zone.");
+                throw new RecurringJobException("Job registration failed: 'TimeZone' field cannot be found. Please specify a valid time zone.");
 
             if (!CronExpression.TryParse(job.Cron, out _))
                 throw new RecurringJobException($"Job registration failed: The provided Cron expression '{job.Cron}' is invalid. Please provide a valid Cron expression.");
@@ -34,36 +47,40 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
                 case JobType.MethodCall:
                     {
-                        var type = AssemblyInfoStorage.GetType(job);
-
-                        if (type == null)
+                        if (job is RecurringJobMethodCall jobMethod)
                         {
-                            throw new RecurringJobException($"Job registration failed: The specified job type '{job.Class}' could not be found in the assembly. Please check if the type name is correct and available.");
-                        }
+                            var type = AssemblyInfoStorage.GetType(jobMethod);
 
-                        var method = AssemblyInfoStorage.GetMethod(job);
-
-                        if (method == null)
-                        {
-                            throw new RecurringJobException($"Job registration failed: The specified method '{job.Method}' could not be found in type '{job.Class}'. Please ensure the method name is correct and exists.");
-                        }
-
-                        var defaultParameters = method.GetDefaultParameters();
-
-                        try
-                        {
-                            new global::Hangfire.RecurringJobManager(JobStorage.Current).AddOrUpdate(job.Id, new Job(type, method, defaultParameters), job.Cron, new RecurringJobOptions()
+                            if (type == null)
                             {
-                                TimeZone = job.TimeZone,
-                                MisfireHandling = job.MisfireHandlingMode,
-                            });
+                                throw new RecurringJobException($"Job registration failed: The specified job type '{jobMethod.Class}' could not be found in the assembly. Please check if the type name is correct and available.");
+                            }
 
-                            RecurringJobAgent.SaveJobDetails(job);
+                            var method = AssemblyInfoStorage.GetMethod(jobMethod);
+
+                            if (method == null)
+                            {
+                                throw new RecurringJobException($"Job registration failed: The specified method '{jobMethod.Method}' could not be found in type '{jobMethod.Class}'. Please ensure the method name is correct and exists.");
+                            }
+
+                            var defaultParameters = method.GetDefaultParameters();
+
+                            try
+                            {
+                                new global::Hangfire.RecurringJobManager(JobStorage.Current).AddOrUpdate(job.Id, new Job(type, method, defaultParameters), job.Cron, new RecurringJobOptions()
+                                {
+                                    TimeZone = job.TimeZone,
+                                    MisfireHandling = job.MisfireHandlingMode,
+                                });
+
+                                RecurringJobAgent.SaveJobDetails(job);
+                            }
+                            catch (Exception e)
+                            {
+                                throw new RecurringJobException("Job registration failed: An unexpected error occurred while registering the job. See the inner exception for more details.", e);
+                            }
                         }
-                        catch (Exception e)
-                        {
-                            throw new RecurringJobException("Job registration failed: An unexpected error occurred while registering the job. See the inner exception for more details.", e);
-                        }
+                       
                     }
                     break;
 

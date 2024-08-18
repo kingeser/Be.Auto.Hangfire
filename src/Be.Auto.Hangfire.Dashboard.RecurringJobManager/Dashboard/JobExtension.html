@@ -119,15 +119,15 @@
 
             <div class="form-group" :style="{display: job.JobType ==='WebRequest' ? 'block' : 'none' }">
 
-                <label itemid="class-label" for="Domain">Domain</label>
-                <input type="text" class="form-control" v-model="job.Domain" id="Domain" name="Domain" aria-describedby="emailHelp" placeholder="Example : http://domain.com">
+                <label itemid="class-label" for="HostName">HostName</label>
+                <input type="text" class="form-control" v-model="job.HostName" id="HostName" name="HostName" aria-describedby="emailHelp" placeholder="Example : http://HostName.com">
 
             </div>
 
 
             <div class="form-group" :style="{ display: job.JobType ==='WebRequest' ? 'block' : 'none' }">
-                <label itemid="class-label" for="DomainPath">Path</label>
-                <input type="text" class="form-control" v-model="job.DomainPath" id="DomainPath" name="DomainPath" aria-describedby="emailHelp" placeholder="Example : /api/get-products">
+                <label itemid="class-label" for="UrlPath">Path</label>
+                <input type="text" class="form-control" v-model="job.UrlPath" id="UrlPath" name="UrlPath" aria-describedby="emailHelp" placeholder="Example : /api/get-products">
 
             </div>
 
@@ -231,7 +231,7 @@
                             <th>Misfire Handling Mode</th>
                             <th>State</th>
                             <th>JobType</th>
-                            <th>Class / Domain</th>
+                            <th>Class / HostName</th>
                             <th>Method / Path</th>
                             <th>TimeZone</th>
                             <th>Last Execution</th>
@@ -357,6 +357,8 @@
                     MisfireHandlingMode: '',
                     BodyParameters: [],
                     HeaderParameters: [],
+                    HostName: '',
+                    UrlPath: '',
                     JobState: '',
                     NextExecution: '',
                     LastJobId: '',
@@ -366,7 +368,7 @@
                     Removed: false,
                     TimeZoneId: '',
                     Error: '',
-                    MethodParameters: []
+                    MethodParameters: ''
                 },
                 pagination: {
                     parPage: 10,
@@ -425,7 +427,7 @@
             addJob() {
                 this.UpdateJob(this.job);
             },
-            generateUUID() { // Public Domain/MIT
+            generateUUID() { // Public HostName/MIT
                 var d = new Date().getTime();//Timestamp
                 var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
                 return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -471,8 +473,9 @@
                         this.job.Removed = response.data.Object.Removed || false;
                         this.job.TimeZoneId = response.data.Object.TimeZoneId || '';
                         this.job.Error = response.data.Object.Error || '';
-                        this.job.MethodParameters = response.data.Object.MethodParameters || [];
-
+                        this.job.MethodParameters = response.data.Object.MethodParameters || '';
+                        this.job.HostName = response.data.Object.HostName || '';
+                        this.job.UrlPath = response.data.Object.UrlPath || '';
 
                     }
                 }).catch(e => {
@@ -575,13 +578,12 @@
 
                 axios.get('recurring-job-manager/get-current-assembly-type-method-json-schema?Class=' + this.job.Class + '&Method=' + this.job.Method).then(response => {
 
-                    this.initJsonEditor(id, fieldIsEditable, , 'MethodParameters');
-
+                  
                     if (this.methodParametersJsonEditor === null || this.methodParametersJsonEditor === undefined) {
 
                         this.methodParametersJsonEditor = new JSONEditor(document.getElementById(id), {
                             mode: 'tree',
-                            schema: response.data.Schema,
+                            schema: JSON.parse(response.data.Schema),
                             search: false,
                             history: false,
                             navigationBar: true,
@@ -589,7 +591,7 @@
                             mainMenuBar: false,
                             onChange: function () {
                                 const updatedJson = this.methodParametersJsonEditor.get();
-                                this.MethodParameters JSON.parse(updatedJson);
+                                this.MethodParameters = updatedJson;
                             },
                             onEditable: function (node) {
 
@@ -607,9 +609,11 @@
                         });
 
                     }
-                    editor.set(JSON.parse(response.data.Json));
+                    this.methodParametersJsonEditor.setSchema(JSON.parse(response.data.Schema));
 
-                    editor.expandAll();
+                    this.methodParametersJsonEditor.set(JSON.parse(response.data.Json));
+
+                    this.methodParametersJsonEditor.expandAll();
 
 
                 }).catch(e => {
@@ -675,6 +679,8 @@
                     MisfireHandlingMode: '',
                     BodyParameters: [],
                     HeaderParameters: [],
+                    HostName: '',
+                    UrlPath:'',
                     JobState: '',
                     NextExecution: '',
                     LastJobId: '',
@@ -684,7 +690,7 @@
                     Removed: false,
                     TimeZoneId: '',
                     Error: '',
-                    MethodParameters: []
+                    MethodParameters: ''
                 };
                 this.errors = [];
                 this.showModal = false;
@@ -718,12 +724,12 @@
                 switch (this.job.JobType) {
                     case "WebRequest":
 
-                        if (!this.job.Domain) {
-                            this.errors.push("Domain URL is required. Please provide the domain for the web request.");
+                        if (!this.job.HostName) {
+                            this.errors.push("HostName URL is required. Please provide the HostName for the web request.");
                         }
 
-                        if (!this.job.DomainPath) {
-                            this.errors.push("Domain Path is required. Please specify the path for the web request.");
+                        if (!this.job.UrlPath) {
+                            this.errors.push("HostName Path is required. Please specify the path for the web request.");
                         }
 
                         if (!this.job.HttpMethod) {

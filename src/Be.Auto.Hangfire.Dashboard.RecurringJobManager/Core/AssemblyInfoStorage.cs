@@ -15,7 +15,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             Assemblies.AddRange(assemblies.Select(t => new AssemblyInfo(t)));
         }
 
-        public static Type? GetType(PeriodicJob job)
+        public static Type? GetType(RecurringJobMethodCall job)
         {
             return Assemblies.SelectMany(t => t.TypeMethods).Where(t => t.Key.FullName == job.Class).Select(t => t.Key).FirstOrDefault();
         }
@@ -27,11 +27,11 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
         {
             return GetType(type) != null;
         }
-        public static bool IsValidType(PeriodicJob job)
+        public static bool IsValidType(RecurringJobMethodCall job)
         {
             return GetType(job) != null;
         }
-        public static MethodInfo? GetMethod(PeriodicJob job)
+        public static MethodInfo? GetMethod(RecurringJobMethodCall job)
         {
             return Assemblies.SelectMany(t => t.TypeMethods).Where(t => t.Key.FullName == job.Class).SelectMany(t => t.Value).FirstOrDefault(t => t.Name == job.Method);
         }
@@ -43,7 +43,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
         {
             return GetMethod(type, method) != null;
         }
-        public static bool IsValidMethod(PeriodicJob job)
+        public static bool IsValidMethod(RecurringJobMethodCall job)
         {
             return GetMethod(job) != null;
         }

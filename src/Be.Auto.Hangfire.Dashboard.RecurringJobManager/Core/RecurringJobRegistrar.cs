@@ -25,10 +25,9 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
                         if (!RecurringJobAgent.IsValidJobId(attribute.RecurringJobId) && !RecurringJobAgent.IsValidJobId(attribute.RecurringJobId, RecurringJobAgent.TagStopJob))
                         {
-                            new PeriodicJob()
+                            new RecurringJobMethodCall()
                             {
                                 Id = attribute.RecurringJobId,
-                                JobType = JobType.MethodCall,
                                 TimeZoneId = attribute.TimeZone.Id,
                                 Class = type.Key.FullName,
                                 Method = method.Name,
@@ -36,7 +35,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
                                 CreatedAt = DateTime.Now,
                                 JobState = EnqueuedState.StateName,
                                 MisfireHandlingMode = attribute.MisfireHandlingMode,
-
+                                Removed = false,
+                                MethodParameters = method.GetParameterNamesAndDefaults().SerializeObjectToJson(),
+                                Error = string.Empty,
+                                LastJobState = string.Empty,
+                                LastExecution = string.Empty,
+                                LastJobId = string.Empty,
+                                NextExecution = string.Empty
                             }.Register();
                         }
 

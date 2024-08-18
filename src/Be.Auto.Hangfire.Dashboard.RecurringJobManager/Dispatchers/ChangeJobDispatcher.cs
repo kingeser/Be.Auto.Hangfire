@@ -20,9 +20,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 
             try
             {
-
-
-                var job = CreatePeriodicJob(context);
+                var job = CreateRecurringJob(context);
 
                 job.Register();
 
@@ -41,26 +39,63 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
             }
         }
 
-        private static PeriodicJob CreatePeriodicJob(DashboardContext context)
+        private static RecurringJobBase CreateRecurringJob(DashboardContext context)
         {
-            var jobType = (JobType)Enum.Parse(typeof(JobType), context.Request.GetQuery(nameof(PeriodicJob.JobType)));
-            var methodParameters = context.Request.GetQuery(nameof(PeriodicJob.MethodParameters));
-            return new PeriodicJob
-            {
-                Id = context.Request.GetQuery(nameof(PeriodicJob.Id)),
-                Cron = context.Request.GetQuery(nameof(PeriodicJob.Cron)),
-                Class = jobType == JobType.MethodCall ? context.Request.GetQuery(nameof(PeriodicJob.Class)) : context.Request.GetQuery("Domain"),
-                Method = jobType == JobType.MethodCall ? context.Request.GetQuery(nameof(PeriodicJob.Method)) : context.Request.GetQuery("DomainPath"),
-                TimeZoneId = context.Request.GetQuery(nameof(PeriodicJob.TimeZoneId)),
-                JobType = jobType,
-                BodyParameterType = (BodyParameterType)Enum.Parse(typeof(BodyParameterType), context.Request.GetQuery(nameof(PeriodicJob.BodyParameterType))),
-                HttpMethod = (HttpMethodType)Enum.Parse(typeof(HttpMethodType), context.Request.GetQuery(nameof(PeriodicJob.HttpMethod))),
-                BodyParameters = GetBodyParameters(context),
-                HeaderParameters = GetHeaderParameters(context),
-                MisfireHandlingMode = (MisfireHandlingMode)Enum.Parse(typeof(MisfireHandlingMode), context.Request.GetQuery(nameof(PeriodicJob.MisfireHandlingMode))),
-                MethodParameters = JsonConvert.DeserializeObject<object[]>(methodParameters)
+            var jobType = (JobType)Enum.Parse(typeof(JobType), context.Request.GetQuery(nameof(RecurringJobBase.JobType)));
 
-            };
+            switch (jobType)
+            {
+                case JobType.MethodCall:
+                    return new RecurringJobMethodCall()
+                    {
+                        Id = context.Request.GetQuery(nameof(RecurringJobBase.Id)),
+                        Cron = context.Request.GetQuery(nameof(RecurringJobBase.Cron)),
+                        Class = context.Request.GetQuery(nameof(RecurringJobMethodCall.Class)),
+                        Method = context.Request.GetQuery(nameof(RecurringJobMethodCall.Method)),
+                        TimeZoneId = context.Request.GetQuery(nameof(RecurringJobBase.TimeZoneId)),
+                        MisfireHandlingMode = (MisfireHandlingMode)Enum.Parse(typeof(MisfireHandlingMode), context.Request.GetQuery(nameof(RecurringJobBase.MisfireHandlingMode))),
+                        MethodParameters = context.Request.GetQuery(nameof(RecurringJobMethodCall.MethodParameters)),
+                        LastJobState = string.Empty,
+                        NextExecution = string.Empty,
+                        CreatedAt = DateTime.Now,
+                        Error = string.Empty,
+                        JobState = string.Empty,
+                        Removed = false,
+                        LastExecution = string.Empty,
+                        LastJobId = string.Empty
+
+                    };
+
+                case JobType.WebRequest:
+                    return new RecurringJobWebRequest()
+                    {
+                        Id = context.Request.GetQuery(nameof(RecurringJobBase.Id)),
+                        Cron = context.Request.GetQuery(nameof(RecurringJobBase.Cron)),
+                        HostName = context.Request.GetQuery(nameof(RecurringJobWebRequest.HostName)),
+                        UrlPath = context.Request.GetQuery(nameof(RecurringJobWebRequest.UrlPath)),
+                        TimeZoneId = context.Request.GetQuery(nameof(RecurringJobBase.TimeZoneId)),
+                        BodyParameterType = (BodyParameterType)Enum.Parse(typeof(BodyParameterType), context.Request.GetQuery(nameof(RecurringJobWebRequest.BodyParameterType))),
+                        HttpMethod = (HttpMethodType)Enum.Parse(typeof(HttpMethodType), context.Request.GetQuery(nameof(RecurringJobWebRequest.HttpMethod))),
+                        BodyParameters = GetBodyParameters(context),
+                        HeaderParameters = GetHeaderParameters(context),
+                        MisfireHandlingMode = (MisfireHandlingMode)Enum.Parse(typeof(MisfireHandlingMode), context.Request.GetQuery(nameof(RecurringJobBase.MisfireHandlingMode))),
+                        LastJobState = string.Empty,
+                        NextExecution = string.Empty,
+                        CreatedAt = DateTime.Now,
+                        Error = string.Empty,
+                        JobState = string.Empty,
+                        Removed = false,
+                        LastExecution = string.Empty,
+                        LastJobId = string.Empty
+
+                    };
+
+                default: return default;
+
+
+            }
+
+
         }
 
         private static async Task WriteErrorResponse(DashboardContext context, Response response, string message)
@@ -74,12 +109,12 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 
         private static List<HeaderParameter> GetHeaderParameters(DashboardContext context)
         {
-            return GetParameters<HeaderParameter>(context, nameof(PeriodicJob.HeaderParameters));
+            return GetParameters<HeaderParameter>(context, nameof(RecurringJobWebRequest.HeaderParameters));
         }
 
         private static List<BodyParameter> GetBodyParameters(DashboardContext context)
         {
-            return GetParameters<BodyParameter>(context, nameof(PeriodicJob.BodyParameters));
+            return GetParameters<BodyParameter>(context, nameof(RecurringJobWebRequest.BodyParameters));
         }
 
         private static List<T> GetParameters<T>(DashboardContext context, string parameterName) where T : new()
