@@ -18,8 +18,8 @@ internal sealed class GetCurrentAssemblyTypeMethodJsonSchemaDispatcher : IDashbo
         var method = context.Request.GetQuery(nameof(RecurringJobMethodCall.Method));
         var parameters = AssemblyInfoStorage.GetMethod(type, method).GetParameterNamesAndDefaults();
         var json = JsonConvert.SerializeObject(parameters);
-        var schema = json.GenerateJSchema();
-        var shemaString = schema.ToString();
+        var schema =  await NJsonSchema.JsonSchema.FromJsonAsync(json);
+        var shemaString = schema.ToJson();
         await context.Response.WriteAsync(new
         {
             Json = json,
