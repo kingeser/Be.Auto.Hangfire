@@ -351,25 +351,7 @@
 
                     this.bodyParametersJsonEditor = new JSONEditor(document.getElementById('bodyParametersJsonEditor'), {
                         mode: 'tree',
-                        schema: {
-                            "$schema": "http://json-schema.org/draft-07/schema#",
-                            "title": "BodyParameters",
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "Name": {
-                                        "type": "string",
-                                        "description": "The name of the body parameter."
-                                    },
-                                    "Value": {
-                                        "type": "string",
-                                        "description": "The value of the body parameter."
-                                    }
-                                },
-                                "required": ["Name", "Value"]
-                            }
-                        },
+                      
                         search: false,
                         history: false,
                         navigationBar: true,
@@ -398,30 +380,7 @@
 
                     this.headerParametersJsonEditor = new JSONEditor(document.getElementById('headerParametersJsonEditor'), {
                         mode: 'tree',
-                        schema: {
-                            "$schema": "http://json-schema.org/draft-07/schema#",
-                            "title": "HeaderParameters",
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "Name": {
-                                        "type": "string",
-                                        "description": "The name of the body parameter."
-                                    },
-                                    "Value": {
-                                        "type": "string",
-                                        "description": "The value of the body parameter."
-                                    }
-                                },
-                                "required": ["Name", "Value"]
-                            }
-                        },
-                        search: false,
-                        history: false,
-                        navigationBar: true,
-                        statusBar: false,
-                        mainMenuBar: false,
+                      
                         onChange: function () {
                             const updatedJson = this.headerParametersJsonEditor.get();
                             this.HeaderParameters = updatedJson;

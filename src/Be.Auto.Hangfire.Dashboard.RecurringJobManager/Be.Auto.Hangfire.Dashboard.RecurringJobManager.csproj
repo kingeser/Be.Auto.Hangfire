@@ -29,12 +29,12 @@
     <None Remove="Dashboard\Content\css\cron-expression-input.css" />
     <None Remove="Dashboard\Content\css\img\jsoneditor-icons.svg" />
     <None Remove="Dashboard\Content\css\JobExtension.css" />
-    <None Remove="Dashboard\Content\css\jsoneditor.css" />
+    <None Remove="Dashboard\Content\css\jsoneditor.min.css" />
     <None Remove="Dashboard\Content\js\axios.min.js" />
     <None Remove="Dashboard\Content\js\cron-expression-input.js" />
     <None Remove="Dashboard\Content\js\daysjs.min.js" />
     <None Remove="Dashboard\Content\js\jobextension.js" />
-    <None Remove="Dashboard\Content\js\jsoneditor.js" />
+    <None Remove="Dashboard\Content\js\jsoneditor.min.js" />
     <None Remove="Dashboard\Content\js\relativeTime.min.js" />
     <None Remove="Dashboard\Content\js\sweetalert.js" />
     <None Remove="Dashboard\Content\js\vue.js" />
@@ -53,7 +53,7 @@
     <EmbeddedResource Include="Dashboard\Content\css\JobExtension.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\css\jsoneditor.css">
+    <EmbeddedResource Include="Dashboard\Content\css\jsoneditor.min.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Content\js\axios.min.js">
@@ -62,7 +62,7 @@
     <EmbeddedResource Include="Dashboard\Content\js\cron-expression-input.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\js\jsoneditor.js">
+    <EmbeddedResource Include="Dashboard\Content\js\jsoneditor.min.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Content\js\relativeTime.min.js">

@@ -91,7 +91,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
         private static void AddEmbeddedResources()
         {
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/css/img/jsoneditor-icons.svg", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.css.img.jsoneditor-icons.svg");
-            AddDashboardRouteToEmbeddedResource("/recurring-job-manager/css/jsoneditor", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.css.jsoneditor.css");
+            AddDashboardRouteToEmbeddedResource("/recurring-job-manager/css/jsoneditor", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.css.jsoneditor.min.css");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/css/jobExtension", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.css.JobExtension.css");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/css/cron-expression-input", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.css.cron-expression-input.css");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/js/page", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.jobextension.js");
@@ -102,7 +102,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/js/vuejsPaginate", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.vuejs-paginate.js");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/js/sweetalert", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.sweetalert.js");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/js/cron-expression-input", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.cron-expression-input.js");
-            AddDashboardRouteToEmbeddedResource("/recurring-job-manager/js/jsoneditor", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.jsoneditor.js");
+            AddDashboardRouteToEmbeddedResource("/recurring-job-manager/js/jsoneditor", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.jsoneditor.min.js");
         }
 
         private static void AddDashboardRouteToEmbeddedResource(string route, string contentType, string resourceName)
