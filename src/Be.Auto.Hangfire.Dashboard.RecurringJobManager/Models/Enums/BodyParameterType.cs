@@ -28,11 +28,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums
         /// </summary>
         PlainText,
 
-        /// <summary>
-        /// The body content is in multipart/form-data format.
-        /// This format is typically used for file uploads.
-        /// </summary>
-        FormData
     }
 
 }

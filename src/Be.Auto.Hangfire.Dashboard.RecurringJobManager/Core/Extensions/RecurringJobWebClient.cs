@@ -35,8 +35,9 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                     case HttpMethodType.HEAD:
                     case HttpMethodType.OPTIONS:
                     case HttpMethodType.TRACE:
-                        // Bu HTTP metotları body almaz, query string üzerinden parametreleri ekle
+                      
                         url = AppendQueryString(url, job.BodyParameters);
+                       
                         return ExecuteWebRequest(url, job.HttpMethod.ToString(), null);
 
                     case HttpMethodType.POST:
@@ -90,10 +91,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                     this.Headers[HttpRequestHeader.ContentType] = "text/plain";
                     return job.BodyParameters;
 
-                case BodyParameterType.FormData:
-                    this.Headers[HttpRequestHeader.ContentType] = "multipart/form-data";
-                    throw new NotSupportedException("FormData body type requires specific handling and is not implemented in this example.");
-
                 default:
                     throw new NotSupportedException($"Body parameter type {job.BodyParameterType} is not supported.");
             }
@@ -107,6 +104,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             }
 
             var queryData = JsonConvert.DeserializeObject<Dictionary<string, string>>(bodyParameters);
+
             var queryString = new StringBuilder();
 
             foreach (var kvp in queryData)
@@ -119,6 +117,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             }
 
             var separator = url.Contains("?") ? "&" : "?";
+
             return $"{url}{separator}{queryString}";
         }
 
