@@ -36,7 +36,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
                                 JobState = EnqueuedState.StateName,
                                 MisfireHandlingMode = attribute.MisfireHandlingMode,
                                 Removed = false,
-                                MethodParameters = method.GetParameterNamesAndDefaults().SerializeObjectToJson(),
+                                MethodParameters = method.GetDefaultParameters().SerializeObjectToJson(),
                                 Error = string.Empty,
                                 LastJobState = string.Empty,
                                 LastExecution = string.Empty,

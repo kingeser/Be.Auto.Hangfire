@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json.Schema.Generation;
+using Newtonsoft.Json.Schema;
+using Newtonsoft.Json;
+using NJsonSchema.Infrastructure;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -12,18 +16,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
         public static object[] GetDefaultParameters(this MethodInfo method)
         {
             return (method?.GetParameters() ?? []).Select(p => CreateInstanceWithDefaults(p.ParameterType)).ToArray();
-        }
-
-        public static object GetParameterNamesAndDefaults(this MethodInfo method)
-        {
-            var expando = new ExpandoObject() as IDictionary<string, object>;
-
-            foreach (var param in method?.GetParameters() ?? [])
-            {
-                expando[param.Name] = CreateInstanceWithDefaults(param.ParameterType);
-            }
-
-            return expando;
         }
 
         private static object CreateInstanceWithDefaults(Type type)
@@ -108,6 +100,44 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             }
 
             return instance;
+        }
+
+        public static string GetJsonSchema(this MethodInfo method)
+        {
+            var parameterTypes = new Dictionary<string, Type>();
+
+            foreach (var param in method?.GetParameters() ?? [])
+            {
+                parameterTypes[param.Name] = param.ParameterType;
+            }
+
+            var generator = new JSchemaGenerator()
+            {
+                ContractResolver = new PropertyRenameAndIgnoreSerializerContractResolver(),
+                DefaultRequired = Required.Default,
+                SchemaIdGenerationHandling = SchemaIdGenerationHandling.TypeName,
+                SchemaLocationHandling = SchemaLocationHandling.Inline,
+                SchemaPropertyOrderHandling = SchemaPropertyOrderHandling.Alphabetical,
+                SchemaReferenceHandling = SchemaReferenceHandling.All,
+
+            };
+
+            var schemas = parameterTypes.ToDictionary(parameter => parameter.Key, parameter => generator.Generate(parameter.Value));
+
+            var combinedSchema = new JSchema
+            {
+                Type = JSchemaType.Object,
+
+            };
+
+            foreach (var jSchema in schemas)
+            {
+                combinedSchema.Properties.Add(jSchema.Key, jSchema.Value);
+            }
+
+            var shemaString = combinedSchema.ToString();
+
+            return shemaString;
         }
     }
 

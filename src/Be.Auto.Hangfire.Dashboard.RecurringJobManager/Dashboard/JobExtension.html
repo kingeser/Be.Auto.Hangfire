@@ -320,16 +320,8 @@
                 bodyParametersJsonEditor.value = new JSONEditor(element, {
                     schema: {
                         
-                        "type": "object",
-                        "properties": {
-                            "dictionary": {
-                                "type": "object",
-                                "additionalProperties": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "required": ["dictionary"]
+                        "type": "object"
+                        
                     }
                 });
             };
@@ -494,9 +486,13 @@
 
             const getAssemblyTypeMethodJsonSchema = () => {
                 axios.get('recurring-job-manager/get-current-assembly-type-method-json-schema?Class=' + job.value.Class + '&Method=' + job.value.Method).then(response => {
+
+                
                     methodParametersJsonEditor.value = new JSONEditor(document.getElementById('methodParametersJsonEditor'), {
-                        schema: JSON.parse(response.data.Schema),
+
+                        schema: JSON.parse(response.data.Schema)
                     });
+
                 }).catch(e => {
                     console.log(e);
                 });
@@ -700,16 +696,6 @@
 
             JSONEditor.defaults.options.theme = 'html';
            
-            JSONEditor.defaults.options.enable_array_copy = true;
-            JSONEditor.defaults.options.disable_collapse = true;
-            JSONEditor.defaults.options.disable_edit_json = true;
-            JSONEditor.defaults.options.disable_properties = true;
-            JSONEditor.defaults.options.array_controls_top = true;
-            JSONEditor.defaults.options.remove_button_labels = true;
-            JSONEditor.defaults.options.no_additional_properties = true;
-            JSONEditor.defaults.options.prompt_before_delete = true;
-
-
             this.getMisfireHandlingModes();
             this.gethttpMethods();
             this.getAssemblyTypes();
