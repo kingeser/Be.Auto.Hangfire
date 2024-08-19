@@ -27,9 +27,7 @@
 
   <ItemGroup>
     <None Remove="Dashboard\Content\css\cron-expression-input.css" />
-    <None Remove="Dashboard\Content\css\img\jsoneditor-icons.svg" />
     <None Remove="Dashboard\Content\css\JobExtension.css" />
-    <None Remove="Dashboard\Content\css\jsoneditor.min.css" />
     <None Remove="Dashboard\Content\js\axios.min.js" />
     <None Remove="Dashboard\Content\js\cron-expression-input.js" />
     <None Remove="Dashboard\Content\js\daysjs.min.js" />
@@ -38,7 +36,6 @@
     <None Remove="Dashboard\Content\js\relativeTime.min.js" />
     <None Remove="Dashboard\Content\js\sweetalert.js" />
     <None Remove="Dashboard\Content\js\vue.js" />
-    <None Remove="Dashboard\Content\js\vuejs-paginate.js" />
     <None Remove="Dashboard\JobExtension.html" />
     <None Remove="Dashboard\JobsStopped.html" />
   </ItemGroup>
@@ -47,13 +44,7 @@
     <EmbeddedResource Include="Dashboard\Content\css\cron-expression-input.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\css\img\jsoneditor-icons.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Content\css\JobExtension.css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\css\jsoneditor.min.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Content\js\axios.min.js">
@@ -75,9 +66,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Content\js\sweetalert.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\js\vuejs-paginate.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Content\js\vue.js">

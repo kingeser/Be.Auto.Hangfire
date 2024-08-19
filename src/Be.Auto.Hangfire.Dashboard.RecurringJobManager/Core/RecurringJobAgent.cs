@@ -105,15 +105,12 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
             if (dataJob == null) return default;
 
-            JobType jobType;
+            var jobType = JobType.MethodCall;
             if (dataJob.TryGetValue(nameof(RecurringJobBase.JobType), out var jobTypeValue) && !string.IsNullOrWhiteSpace(jobTypeValue))
             {
                 jobType = (JobType)Enum.Parse(typeof(JobType), jobTypeValue);
             }
-            else
-            {
-                return default;
-            }
+          
 
             RecurringJobBase dto = null;
 
