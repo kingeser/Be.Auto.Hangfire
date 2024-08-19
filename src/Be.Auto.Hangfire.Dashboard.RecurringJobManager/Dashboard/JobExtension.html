@@ -99,7 +99,7 @@
                 <div class="form-group" v-if="job.JobType === 'MethodCall'">
                     <label for="methodParametersJsonEditor">Method Parameters</label>
                     <input type="hidden" id="MethodParameters" name="MethodParameters" v-model="job.MethodParameters">
-                    <div id="methodParametersJsonEditor" style="width: 600px; height: 400px;"></div>
+                    <div id="methodParametersJsonEditor" ></div>
                 </div>
                 <div class="form-group" v-if="job.JobType === 'WebRequest'">
                     <label for="HostName">HostName</label>
@@ -119,7 +119,7 @@
                 <div class="form-group table-group" v-if="job.JobType === 'WebRequest'">
                     <label for="headerParametersJsonEditor">Header Parameters</label>
                     <input type="hidden" id="HeaderParameters" name="HeaderParameters" v-model="job.HeaderParameters">
-                    <div id="headerParametersJsonEditor" style="width: 600px; height: 400px;"></div>
+                    <div id="headerParametersJsonEditor" ></div>
                 </div>
                 <div class="form-group">
                     <label for="BodyParameterType">Body Type</label>
@@ -131,7 +131,7 @@
                 <div class="form-group table-group" v-if="job.JobType === 'WebRequest'">
                     <label for="bodyParametersJsonEditor">Body Parameters</label>
                     <input type="hidden" id="BodyParameters" name="BodyParameters" v-model="job.BodyParameters">
-                    <div id="bodyParametersJsonEditor" style="width: 600px; height: 400px;"></div>
+                    <div id="bodyParametersJsonEditor"></div>
                 </div>
                 <div class="form-group" v-if="errors.length > 0">
                     <b style="color:red">Please correct the following error(s):</b>
@@ -346,7 +346,7 @@
                             "properties": {
                                 "name": {
                                     "title": "Key",
-                                    "type": "string"
+                                    "type": "string",
                                 },
                                 "value": {
                                     "title": "value",
@@ -697,6 +697,18 @@
             };
         },
         mounted() {
+
+            JSONEditor.defaults.options.theme = 'html';
+           
+            JSONEditor.defaults.options.enable_array_copy = true;
+            JSONEditor.defaults.options.disable_collapse = true;
+            JSONEditor.defaults.options.disable_edit_json = true;
+            JSONEditor.defaults.options.disable_properties = true;
+            JSONEditor.defaults.options.array_controls_top = true;
+            JSONEditor.defaults.options.remove_button_labels = true;
+            JSONEditor.defaults.options.no_additional_properties = true;
+            JSONEditor.defaults.options.prompt_before_delete = true;
+
 
             this.getMisfireHandlingModes();
             this.gethttpMethods();

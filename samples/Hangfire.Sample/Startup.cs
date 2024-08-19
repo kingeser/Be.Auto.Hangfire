@@ -50,7 +50,10 @@ namespace Hangfire.JobExtensions
                 app.UseHsts();
             }
 
-            app.UseHangfireDashboard();
+            app.UseHangfireDashboard("/hangfire",new DashboardOptions()
+            {
+                DarkModeEnabled = false
+            });
 
             var manager = new RecurringJobManager();
             manager.AddOrUpdate("ReadTransactionJob", Job.FromExpression(() => Console.WriteLine("")), "*/5 * * * *");
