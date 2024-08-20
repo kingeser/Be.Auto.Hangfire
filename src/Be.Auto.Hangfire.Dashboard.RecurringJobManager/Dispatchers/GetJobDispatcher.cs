@@ -1,11 +1,7 @@
 ﻿using Hangfire.Annotations;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
-using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Hangfire.Storage;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.Dashboard;

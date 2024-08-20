@@ -56,6 +56,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
                 case JobType.WebRequest:
                     if (job is RecurringJobWebRequest webRequestJob)
                     {
+                        details.Add(new(nameof(webRequestJob.UrlPath), webRequestJob.UrlPath));
+                        details.Add(new(nameof(webRequestJob.HostName), webRequestJob.HostName));
                         details.Add(new(nameof(webRequestJob.HttpMethod), webRequestJob.HttpMethod.ToString()));
                         details.Add(new(nameof(webRequestJob.BodyParameterType), webRequestJob.BodyParameterType.ToString()));
                         details.Add(new(nameof(webRequestJob.BodyParameters), JsonConvert.SerializeObject(webRequestJob.BodyParameters)));

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
-using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core

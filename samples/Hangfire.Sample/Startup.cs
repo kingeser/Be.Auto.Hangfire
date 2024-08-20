@@ -1,5 +1,3 @@
-using System;
-using Hangfire.Common;
 using Hangfire.Sample.Library;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

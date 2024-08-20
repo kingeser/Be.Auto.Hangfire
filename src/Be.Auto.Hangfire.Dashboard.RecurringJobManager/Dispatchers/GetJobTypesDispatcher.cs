@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Hangfire.Annotations;
 using Hangfire.Dashboard;
-using Newtonsoft.Json;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 

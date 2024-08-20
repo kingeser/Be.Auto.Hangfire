@@ -27,7 +27,12 @@
 
   <ItemGroup>
     <None Remove="Dashboard\Content\css\cron-expression-input.css" />
+    <None Remove="Dashboard\Content\css\fontawesome.css" />
     <None Remove="Dashboard\Content\css\JobExtension.css" />
+    <None Remove="Dashboard\Content\fonts\fa-brands-400.eot" />
+    <None Remove="Dashboard\Content\fonts\fa-brands-400.ttf" />
+    <None Remove="Dashboard\Content\fonts\fa-solid-900.ttf" />
+    <None Remove="Dashboard\Content\fonts\fa-solid-900.woff2" />
     <None Remove="Dashboard\Content\js\axios.min.js" />
     <None Remove="Dashboard\Content\js\cron-expression-input.js" />
     <None Remove="Dashboard\Content\js\daysjs.min.js" />
@@ -44,7 +49,22 @@
     <EmbeddedResource Include="Dashboard\Content\css\cron-expression-input.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Dashboard\Content\css\fontawesome.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Content\css\JobExtension.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dashboard\Content\fonts\fa-brands-400.eot">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dashboard\Content\fonts\fa-brands-400.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dashboard\Content\fonts\fa-solid-900.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dashboard\Content\fonts\fa-solid-900.woff2">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Content\js\axios.min.js">

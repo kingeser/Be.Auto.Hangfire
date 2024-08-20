@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes;
-using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
-using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 
 namespace Hangfire.Sample.Library
 {

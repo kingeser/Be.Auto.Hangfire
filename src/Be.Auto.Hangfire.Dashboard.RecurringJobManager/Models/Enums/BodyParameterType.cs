@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums
+﻿namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums
 {
     /// <summary>
     /// Represents the different types of body parameters that can be used in HTTP requests.

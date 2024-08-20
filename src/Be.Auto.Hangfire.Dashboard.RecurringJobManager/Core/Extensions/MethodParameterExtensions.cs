@@ -1,15 +1,9 @@
-﻿using Newtonsoft.Json.Schema.Generation;
-using Newtonsoft.Json.Schema;
-using Newtonsoft.Json;
-using NJsonSchema.Infrastructure;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Reflection;
-using Newtonsoft.Json.Serialization;
-using System.Data.Common;
+using NJsonSchema;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {
@@ -106,7 +100,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
         public static string GetJsonSchema(this MethodInfo method)
         {
-
             if (method == null) return null;
 
             var parameterTypes = new Dictionary<string, Type>();
@@ -118,50 +111,38 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
             if (parameterTypes.Count == 0) return null;
 
-            var generator = new JSchemaGenerator()
-            {
-                ContractResolver = new PropertyRenameAndIgnoreSerializerContractResolver(),
-                DefaultRequired = Required.Default,
-                SchemaIdGenerationHandling = SchemaIdGenerationHandling.TypeName,
-                SchemaLocationHandling = SchemaLocationHandling.Inline,
-                SchemaPropertyOrderHandling = SchemaPropertyOrderHandling.Alphabetical,
-                SchemaReferenceHandling = SchemaReferenceHandling.All,
-                GenerationProviders =
-                {
-                    new StringEnumGenerationProvider(new CamelCaseNamingStrategy()),
-                },
-
-            };
-
-            var schemas = new Dictionary<string, JSchema>();
-
+            var schemas = new Dictionary<string, NJsonSchema.JsonSchema>();
 
             foreach (var parameter in parameterTypes)
             {
-                var subSchema = generator.Generate(parameter.Value);
+                var subSchema = NJsonSchema.JsonSchema.FromType(parameter.Value);
                 subSchema.Title = parameter.Key;
                 schemas.Add(parameter.Key, subSchema);
             }
 
-            var combinedSchema = new JSchema
+            var combinedSchema = new NJsonSchema.JsonSchema()
             {
-                Type = JSchemaType.Object,
+                Type = JsonObjectType.Object,
                 Title = method.Name,
                 AllowAdditionalItems = false,
                 AllowAdditionalProperties = false,
-                AllowUnevaluatedProperties = false,
-                AllowAdditionalItemsSpecified = false,
-                AllowAdditionalPropertiesSpecified = false,
-                AllowUnevaluatedItems = false,
 
             };
 
             foreach (var jSchema in schemas)
             {
-                combinedSchema.Properties.Add(jSchema.Key, jSchema.Value);
+                combinedSchema.Properties[jSchema.Key] = new JsonSchemaProperty
+                {
+                    Type = JsonObjectType.Object,
+                    Reference = jSchema.Value,
+                    Title = jSchema.Key
+                };
+
+                combinedSchema.Definitions[jSchema.Key] = jSchema.Value;
+                combinedSchema.Definitions[jSchema.Key].Title = jSchema.Key;
             }
 
-            var shemaString = combinedSchema.ToString();
+            var shemaString = combinedSchema.ToJson();
 
             return shemaString;
         }

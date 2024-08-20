@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Hangfire.Annotations;
 using Hangfire;
 using Hangfire.Dashboard;
-using Newtonsoft.Json;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers;

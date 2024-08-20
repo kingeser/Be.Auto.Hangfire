@@ -17,7 +17,7 @@ public static class DictionaryExtensions
 
         if (dictionary.Count == 0) return obj;
 
-        foreach (var property in type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public).Where(t => t.CanWrite))
+        foreach (var property in type.GetProperties().Where(t => t.CanWrite))
         {
             if (!dictionary.TryGetValue(property.Name, out var value)) continue;
 

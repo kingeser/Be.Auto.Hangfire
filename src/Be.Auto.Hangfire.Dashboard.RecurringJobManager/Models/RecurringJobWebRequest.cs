@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
+﻿using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 

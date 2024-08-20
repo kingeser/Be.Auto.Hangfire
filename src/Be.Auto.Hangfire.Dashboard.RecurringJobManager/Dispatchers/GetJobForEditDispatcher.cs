@@ -2,13 +2,9 @@
 using Hangfire.Dashboard;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
-using Hangfire.Storage;
-using Newtonsoft.Json;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
-using Hangfire;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {

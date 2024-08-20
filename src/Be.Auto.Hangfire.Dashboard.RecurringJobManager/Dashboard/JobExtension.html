@@ -1,5 +1,6 @@
 ﻿<link rel="stylesheet" type="text/css" href="recurring-job-manager/css/jobExtension" />
 <link rel="stylesheet" type="text/css" href="recurring-job-manager/css/cron-expression-input" />
+<link rel="stylesheet" type="text/css" href="recurring-job-manager/css/fontawesome" />
 
 
 <script src="recurring-job-manager/js/vue"></script>
@@ -51,6 +52,7 @@
 </script>
 
 <div id="app">
+
     <modal v-if="showModal" @close="closeModal">
         <template v-slot:header>
             <h3>{{ title }}</h3>
@@ -85,8 +87,8 @@
 
                 <div class="form-group">
                     <label for="Cron">Cron</label>
-                    <input type="text" id="Cron" name="Cron" v-model="job.Cron" />
-                    <cron-expression-input :value="job.Cron" v-on:input="job.Cron = $event.detail.value" color="d58512" />
+                    <input type="hidden" id="Cron" name="Cron" v-model="job.Cron" />
+                    <cron-expression-input :value="job.Cron" v-on:input="onCronChange" color="d58512" />
                 </div>
 
                 <div class="form-group" v-if="job.JobType === 'MethodCall'">
@@ -145,7 +147,7 @@
 
                 <div class="form-group table-group" v-if="job.JobType === 'WebRequest' && (job.BodyParameterType ==='Xml' || job.BodyParameterType ==='PlainText' )">
                     <label for="bodyParameterXmlOrText">Body Parameters</label>
-                    <textarea class="form-control" rows="10" type="hidden" id="bodyParameterXmlOrText" name="bodyParameterXmlOrText" v-model="bodyParameterXmlOrText"></textarea>
+                    <textarea @change="bodyParameterXmlOrTextOnChange" class="form-control" rows="10" type="hidden" id="bodyParameterXmlOrText" name="bodyParameterXmlOrText" v-model="bodyParameterXmlOrText"></textarea>
                 </div>
 
                 <div class="form-group" v-if="errors.length > 0">
@@ -160,6 +162,8 @@
             <button class="btn btn-success" @click="addJob">Save</button>
         </template>
     </modal>
+
+
     <div class="row">
         <div class="col-md-12" style="margin:0px;padding:0px;">
             <h1 class="page-header">Recurring Jobs <span class="badge badge-warning">{{getItems.length}}</span></h1>
@@ -332,69 +336,150 @@
             const headerCount = ref(0);
 
             const initBodyParametersJsonEditor = () => {
-                const element = document.getElementById('bodyParametersJsonEditor');
+                Vue.nextTick(() => {
+                    const element = document.getElementById('bodyParametersJsonEditor');
 
-                if (bodyParametersJsonEditor.value)
-                    bodyParametersJsonEditor.value.destroy();
+                    if (bodyParametersJsonEditor.value)
+                        bodyParametersJsonEditor.value.destroy();
 
-                bodyParametersJsonEditor.value = new JSONEditor(element, {
-                    schema: {
-                        "type": "object",
-                        "title": "Body Parameters"
+                    switch (job.value.BodyParameterType) {
 
-                    },
-                    iconlib: 'Bootstrap',
-                    object_layout: 'grid',
-                    show_errors: 'interaction',
-                    theme: 'bootstrap5',
-                    remove_button_labels: true,
-                    no_additional_properties: false,
-                    enable_array_copy: false,
-                    disable_properties: false,
-                    array_controls_top: true,
-                    disable_array_reorder: true,
-                    disable_collapse: true,
-                    disable_edit_json: false
+                        case "Json":
+
+                            bodyParametersJsonEditor.value = new JSONEditor(element, {
+                                schema: {
+                                    "type": "object",
+                                    "title": "Body Parameters"
+
+                                },
+                                iconlib: 'fontawesome5',
+                                object_layout: 'grid',
+                                show_errors: 'interaction',
+                                theme: 'bootstrap5',
+                                remove_button_labels: true,
+                                no_additional_properties: false,
+                                enable_array_copy: false,
+                                disable_properties: false,
+                                array_controls_top: true,
+                                disable_array_reorder: true,
+                                disable_collapse: true,
+                                disable_edit_json: false
+                            });
+                            break;
+                        case "FormUrlEncoded":
+
+                            bodyParametersJsonEditor.value = new JSONEditor(element, {
+                                schema: {
+                                    "type": "array",
+                                    "title": "Body Parameters",
+                                    "items": {
+                                        "type": "object",
+                                        "title": "Parameter",
+                                        "properties": {
+                                            "Name": {
+                                                "title": "Key",
+                                                "type": "string",
+                                            },
+                                            "Value": {
+                                                "title": "value",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": ["Name", "Value"]
+                                    }
+                                },
+                                iconlib: 'fontawesome5',
+                                object_layout: 'grid',
+                                show_errors: 'interaction',
+                                theme: 'bootstrap5',
+                                remove_button_labels: true,
+                                no_additional_properties: false,
+                                enable_array_copy: false,
+                                disable_properties: false,
+                                array_controls_top: true,
+                                disable_array_reorder: true,
+                                disable_collapse: true,
+                                disable_edit_json: false
+                            });
+
+
+                            break;
+                    }
+
+                    bodyParametersJsonEditor.value.on('change', () => {
+
+                        job.value.BodyParameters = JSON.stringify(bodyParametersJsonEditor.value.getValue());
+                    });
+
+                    bodyParametersJsonEditor.value.on('ready', () => {
+
+
+                        bodyParametersJsonEditor.value.setValue(JSON.parse(JSON.parse(job.value.BodyParameters)));
+
+
+                    });
+
                 });
             };
 
             const initHeaderParametersJsonEditor = () => {
-                const element = document.getElementById('headerParametersJsonEditor');
-                headerParametersJsonEditor.value = new JSONEditor(element, {
-                    schema: {
-                        "type": "array",
-                        "title": "Header Parameters",
-                        "items": {
-                            "type": "object",
-                            "title": "Parameter",
-                            "properties": {
-                                "Name": {
-                                    "title": "Key",
-                                    "type": "string",
+                Vue.nextTick(() => {
+                    const element = document.getElementById('headerParametersJsonEditor');
+
+
+
+                    if (headerParametersJsonEditor.value)
+                        headerParametersJsonEditor.value.destroy();
+
+                    headerParametersJsonEditor.value = new JSONEditor(element, {
+                        schema: {
+                            "type": "array",
+                            "title": "Header Parameters",
+                            "items": {
+                                "type": "object",
+                                "title": "Parameter",
+                                "properties": {
+                                    "Name": {
+                                        "title": "Key",
+                                        "type": "string",
+                                    },
+                                    "Value": {
+                                        "title": "value",
+                                        "type": "string"
+                                    }
                                 },
-                                "Value": {
-                                    "title": "value",
-                                    "type": "string"
-                                }
-                            },
-                            "required": ["Name", "Value"]
-                        }
-                    },
-                    iconlib: 'Bootstrap',
-                    object_layout: 'grid',
-                    show_errors: 'interaction',
-                    theme: 'bootstrap5',
-                    remove_button_labels: true,
-                    no_additional_properties: true,
-                    enable_array_copy: false,
-                    disable_properties: true,
-                    array_controls_top: true,
-                    disable_array_reorder: true,
-                    disable_collapse: true,
-                    disable_edit_json: false
+                                "required": ["Name", "Value"]
+                            }
+                        },
+                        iconlib: 'fontawesome5',
+                        object_layout: 'grid',
+                        show_errors: 'interaction',
+                        theme: 'bootstrap5',
+                        remove_button_labels: true,
+                        no_additional_properties: true,
+                        enable_array_copy: false,
+                        disable_properties: true,
+                        array_controls_top: true,
+                        disable_array_reorder: true,
+                        disable_collapse: true,
+                        disable_edit_json: false
+                    });
+
+                    headerParametersJsonEditor.value.on('change', () => {
+
+                        job.value.HeaderParameters = JSON.stringify(headerParametersJsonEditor.value.getValue());
+                    });
+
+                    headerParametersJsonEditor.value.on('ready', () => {
+
+                        headerParametersJsonEditor.value.setValue(JSON.parse(JSON.parse(job.value.HeaderParameters)));
+
+                    });
+
+
                 });
 
-                headerParametersJsonEditor.value.setValue(job.HeaderParameters);
+
             };
 
             const onJobTypeChange = (e) => {
@@ -411,59 +496,14 @@
 
                 job.value.BodyParameterType = e.target.value;
 
-                switch (job.value.BodyParameterType) {
-
-                    case "Json":
-                        initBodyParametersJsonEditor();
-                        break;
-                    case "FormUrlEncoded":
-
-                        const element = document.getElementById('bodyParametersJsonEditor');
-
-                        if (bodyParametersJsonEditor.value)
-                            bodyParametersJsonEditor.value.destroy();
-
-                        bodyParametersJsonEditor.value = new JSONEditor(element, {
-                            schema: {
-                                "type": "array",
-                                "title": "Body Parameters",
-                                "items": {
-                                    "type": "object",
-                                    "title": "Parameter",
-                                    "properties": {
-                                        "Name": {
-                                            "title": "Key",
-                                            "type": "string",
-                                        },
-                                        "Value": {
-                                            "title": "value",
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": ["Name", "Value"]
-                                }
-                            },
-                            iconlib: 'Bootstrap',
-                            object_layout: 'grid',
-                            show_errors: 'interaction',
-                            theme: 'bootstrap5',
-                            remove_button_labels: true,
-                            no_additional_properties: false,
-                            enable_array_copy: false,
-                            disable_properties: true,
-                            array_controls_top: true,
-                            disable_array_reorder: true,
-                            disable_collapse: true,
-                            disable_edit_json: false
-                        });
-
-                        bodyParametersJsonEditor.value.setValue(job.BodyParameters);
-                        break;
-                }
-
-
+                initBodyParametersJsonEditor();
             };
 
+            const bodyParameterXmlOrTextOnChange = (e) => {
+
+
+                console.info("bodyParameterXmlOrTextOnChange", e);
+            };
 
             const onClassChange = (e) => {
                 job.value.Class = e.target.value;
@@ -512,8 +552,22 @@
                                 break;
                         }
 
+                        switch (job.value.JobType) {
 
-                        getAssemblyTypeMethods();
+                            case "MethodCall":
+                                getAssemblyTypeMethods();
+                                break;
+
+                            case "WebRequest":
+
+                                initHeaderParametersJsonEditor();
+                                initBodyParametersJsonEditor();
+                                break;
+                        }
+
+
+                        console.info("JOB", job.value);
+
                     }
                 }).catch(e => {
                     console.log(e);
@@ -598,30 +652,47 @@
                 });
             };
 
+            const onCronChange = (cronExp) => {
+
+                job.value.Cron = cronExp.detail.value;
+
+            };
+
             const getAssemblyTypeMethodJsonSchema = () => {
                 axios.get('recurring-job-manager/get-current-assembly-type-method-json-schema?Class=' + job.value.Class + '&Method=' + job.value.Method).then(response => {
+                    Vue.nextTick(() => {
+                        if (methodParametersJsonEditor.value)
+                            methodParametersJsonEditor.value.destroy();
 
-                    if (methodParametersJsonEditor.value)
-                        methodParametersJsonEditor.value.destroy();
+                        methodParametersJsonEditor.value = new JSONEditor(document.getElementById('methodParametersJsonEditor'), {
 
-                    methodParametersJsonEditor.value = new JSONEditor(document.getElementById('methodParametersJsonEditor'), {
+                            schema: JSON.parse(response.data.Schema),
+                            iconlib: 'fontawesome5',
+                            object_layout: 'normal',
+                            show_errors: 'interaction',
+                            theme: 'bootstrap5',
+                            remove_button_labels: true,
+                            no_additional_properties: true,
+                            enable_array_copy: false,
+                            disable_properties: false,
+                            array_controls_top: true,
+                            disable_array_reorder: true,
+                            disable_collapse: false,
+                            disable_edit_json: false
+                        });
+                        methodParametersJsonEditor.value.on('change', () => {
 
-                        schema: JSON.parse(response.data.Schema),
-                        iconlib: 'Bootstrap',
-                        object_layout: 'grid',
-                        show_errors: 'interaction',
-                        theme: 'bootstrap5',
-                        remove_button_labels: true,
-                        no_additional_properties: true,
-                        enable_array_copy: false,
-                        disable_properties: false,
-                        array_controls_top: true,
-                        disable_array_reorder: true,
-                        disable_collapse: true,
-                        disable_edit_json: false
+
+                            job.value.MethodParameters = JSON.stringify(methodParametersJsonEditor.value.getValue());
+                        });
+
+                        methodParametersJsonEditor.value.on('ready', () => {
+
+                            methodParametersJsonEditor.value.setValue(JSON.parse(JSON.parse(job.value.MethodParameters)));
+
+                        });
                     });
 
-                    methodParametersJsonEditor.value.setValue(job.MethodParameters);
 
                 }).catch(e => {
                     console.log(e);
@@ -802,6 +873,7 @@
                 initHeaderParametersJsonEditor,
                 onJobTypeChange,
                 onBodyParameterTypeChange,
+                onCronChange,
                 onClassChange,
                 addJob,
                 generateUUID,
