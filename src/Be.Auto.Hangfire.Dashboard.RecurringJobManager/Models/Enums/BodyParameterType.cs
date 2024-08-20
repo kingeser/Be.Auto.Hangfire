@@ -21,6 +21,11 @@
         /// This format is typically used for form submissions.
         /// </summary>
         FormUrlEncoded,
+        /// <summary>
+        /// The body content is in multipart/form-data format.
+        /// This format is commonly used for form submissions that include file uploads.
+        /// </summary>
+        FormData,
 
         /// <summary>
         /// The body content is in plain text format.

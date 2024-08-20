@@ -1,167 +1,192 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Text;
-using Newtonsoft.Json;
+using System;
+using System.Linq;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {
-    public class RecurringJobWebClient : WebClient
+    public class RecurringJobWebClient
     {
-        public string CallRequest(RecurringJobWebRequest job)
+        public string CallRequest(WebRequestJob job)
         {
             var baseUri = new Uri(job.HostName.TrimEnd('/'));
+
             var url = new Uri(baseUri, job.UrlPath.TrimStart('/')).ToString();
 
-           
-            if (!string.IsNullOrEmpty(job.HeaderParameters))
+            if (IsSimpleRequest(job.HttpMethod))
             {
-                var headers = JsonConvert.DeserializeObject<Dictionary<string, string>>(job.HeaderParameters);
-
-                foreach (var header in headers)
-                {
-                    this.Headers[header.Key] = header.Value;
-                }
+                return HandleSimpleRequest(job, url);
             }
 
-            try
-            {
-                switch (job.HttpMethod)
-                {
-                    case HttpMethodType.GET:
-                    case HttpMethodType.DELETE:
-                    case HttpMethodType.HEAD:
-                    case HttpMethodType.OPTIONS:
-                    case HttpMethodType.TRACE:
-                      
-                        url = AppendQueryString(url, job.BodyParameters);
-                       
-                        return ExecuteWebRequest(url, job.HttpMethod.ToString(), null);
-
-                    case HttpMethodType.POST:
-                    case HttpMethodType.PUT:
-                    case HttpMethodType.PATCH:
-                        var bodyContent = PrepareRequestBody(job);
-                        return ExecuteWebRequest(url, job.HttpMethod.ToString(), bodyContent);
-
-                    default:
-                        throw new NotSupportedException($"HTTP method {job.HttpMethod} is not supported.");
-                }
-            }
-            catch (WebException ex)
-            {
-                return HandleWebException(ex);
-            }
+            return IsComplexRequest(job.HttpMethod) ? HandleComplexRequest(job, url) : string.Empty;
         }
 
-        private string PrepareRequestBody(RecurringJobWebRequest job)
+        private static bool IsSimpleRequest(HttpMethodType method) => method is HttpMethodType.GET or HttpMethodType.DELETE or HttpMethodType.HEAD or HttpMethodType.OPTIONS or HttpMethodType.TRACE;
+
+        private static string HandleSimpleRequest(WebRequestJob job, string url)
         {
-            if (string.IsNullOrEmpty(job.BodyParameters))
-            {
-                return null;
-            }
+            var queryString = BuildQueryStringParameters(job);
 
-            switch (job.BodyParameterType)
-            {
-                case BodyParameterType.Json:
-                    this.Headers[HttpRequestHeader.ContentType] = "application/json";
-                    return job.BodyParameters;
+            if (!url.EndsWith("?"))
+                url += "?";
 
-                case BodyParameterType.Xml:
-                    this.Headers[HttpRequestHeader.ContentType] = "application/xml";
-                    return job.BodyParameters;
+            url += queryString;
 
-                case BodyParameterType.FormUrlEncoded:
-                    this.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                    var formData = JsonConvert.DeserializeObject<Dictionary<string, string>>(job.BodyParameters);
-                    var formEncodedContent = new StringBuilder();
-                    foreach (var kvp in formData)
-                    {
-                        if (formEncodedContent.Length > 0)
-                        {
-                            formEncodedContent.Append("&");
-                        }
-                        formEncodedContent.Append($"{WebUtility.UrlEncode(kvp.Key)}={WebUtility.UrlEncode(kvp.Value)}");
-                    }
-                    return formEncodedContent.ToString();
-
-                case BodyParameterType.PlainText:
-                    this.Headers[HttpRequestHeader.ContentType] = "text/plain";
-                    return job.BodyParameters;
-
-                default:
-                    throw new NotSupportedException($"Body parameter type {job.BodyParameterType} is not supported.");
-            }
-        }
-
-        private string AppendQueryString(string url, string bodyParameters)
-        {
-            if (string.IsNullOrEmpty(bodyParameters))
-            {
-                return url;
-            }
-
-            var queryData = JsonConvert.DeserializeObject<Dictionary<string, string>>(bodyParameters);
-
-            var queryString = new StringBuilder();
-
-            foreach (var kvp in queryData)
-            {
-                if (queryString.Length > 0)
-                {
-                    queryString.Append("&");
-                }
-                queryString.Append($"{WebUtility.UrlEncode(kvp.Key)}={WebUtility.UrlEncode(kvp.Value)}");
-            }
-
-            var separator = url.Contains("?") ? "&" : "?";
-
-            return $"{url}{separator}{queryString}";
-        }
-
-        private string ExecuteWebRequest(string url, string method, string bodyContent)
-        {
-            var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
-
-            httpWebRequest.Method = method;
-
-            foreach (var headerKey in this.Headers.AllKeys)
-            {
-                httpWebRequest.Headers[headerKey] = this.Headers[headerKey];
-            }
-
-            if (!string.IsNullOrEmpty(bodyContent) && (method == "PATCH" || method == "POST" || method == "PUT"))
-            {
-                var requestData = Encoding.UTF8.GetBytes(bodyContent);
-                httpWebRequest.ContentLength = requestData.Length;
-
-                using var requestStream = httpWebRequest.GetRequestStream();
-                requestStream.Write(requestData, 0, requestData.Length);
-            }
+            var httpWebRequest = CreateWebRequest(job, url);
 
             using var response = (HttpWebResponse)httpWebRequest.GetResponse();
-            using var stream = response.GetResponseStream();
-
-            if (stream == null)
-            {
-                return "Stream not found!";
-            }
-
-            using var reader = new System.IO.StreamReader(stream);
-            string responseData = reader.ReadToEnd();
-
-            return responseData;
+            using var reader = new StreamReader(response.GetResponseStream() ?? Stream.Null);
+            return reader.ReadToEnd();
         }
 
-        private string HandleWebException(WebException ex)
-        {
-            var responseStream = ex.Response?.GetResponseStream();
-            if (responseStream == null) return ex.Message;
+        private static bool IsComplexRequest(HttpMethodType method) => method is HttpMethodType.POST or HttpMethodType.PUT or HttpMethodType.PATCH;
 
-            using var reader = new System.IO.StreamReader(responseStream);
-            return reader.ReadToEnd();
+        private static string HandleComplexRequest(WebRequestJob job, string url)
+        {
+            var httpWebRequest = CreateWebRequest(job, url);
+
+            return job.BodyParameterType switch
+            {
+                BodyParameterType.None => SendRequestWithEmptyBody(httpWebRequest),
+                BodyParameterType.Json => SendRequestWithBody(httpWebRequest, job.BodyParameters, "application/json"),
+                BodyParameterType.Xml => SendRequestWithBody(httpWebRequest, job.BodyParameters, "application/xml"),
+                BodyParameterType.FormUrlEncoded => SendFormUrlEncodedRequest(httpWebRequest, job.BodyParameters),
+                BodyParameterType.FormData => SendMultipartFormDataRequest(httpWebRequest, job.BodyParameters),
+                BodyParameterType.PlainText => SendRequestWithBody(httpWebRequest, job.BodyParameters, "text/plain"),
+                _ => string.Empty
+            };
+        }
+
+        private static string SendRequestWithEmptyBody(HttpWebRequest httpWebRequest)
+        {
+            httpWebRequest.ContentLength = 0;
+            using var response = (HttpWebResponse)httpWebRequest.GetResponse();
+            using var responseStream = new StreamReader(response.GetResponseStream() ?? Stream.Null);
+            return responseStream.ReadToEnd();
+        }
+
+        private static string SendRequestWithBody(HttpWebRequest httpWebRequest, string body, string contentType)
+        {
+            httpWebRequest.ContentType = contentType;
+            using (var requestStream = new StreamWriter(httpWebRequest.GetRequestStream()))
+            {
+                if (!string.IsNullOrEmpty(body))
+                {
+                    requestStream.Write(body);
+                }
+            }
+            return GetResponseText(httpWebRequest);
+        }
+
+        private static string SendFormUrlEncodedRequest(HttpWebRequest httpWebRequest, string bodyParameters)
+        {
+            httpWebRequest.ContentType = "application/x-www-form-urlencoded";
+            var parameters = bodyParameters.DeserializeObjectFromJson<List<HttpFormUrlEncodedParameter>>();
+            var formData = new StringBuilder();
+
+            foreach (var parameter in parameters)
+            {
+                if (formData.Length > 0)
+                {
+                    formData.Append("&");
+                }
+                formData.Append($"{WebUtility.UrlEncode(parameter.Name)}={WebUtility.UrlEncode(parameter.Value)}");
+            }
+
+            using (var requestStream = new StreamWriter(httpWebRequest.GetRequestStream()))
+            {
+                requestStream.Write(formData.ToString());
+            }
+
+            return GetResponseText(httpWebRequest);
+        }
+
+        private static string SendMultipartFormDataRequest(HttpWebRequest httpWebRequest, string bodyParameters)
+        {
+            var boundary = "------------------------" + DateTime.Now.Ticks.ToString("x");
+            httpWebRequest.ContentType = "multipart/form-data; boundary=" + boundary;
+
+            var parameters = bodyParameters.DeserializeObjectFromJson<List<HttpFormDataParameter>>();
+
+            using var requestStream = httpWebRequest.GetRequestStream();
+
+            foreach (var param in parameters)
+            {
+                var header = $"--{boundary}\r\nContent-Disposition: form-data; name=\"{param.Name}\"\r\n" +
+                             $"Content-Type: {param.ContentType}\r\n\r\n";
+                var headerBytes = Encoding.UTF8.GetBytes(header);
+
+                requestStream.Write(headerBytes, 0, headerBytes.Length);
+
+                if (!string.IsNullOrEmpty(param.Value))
+                {
+                    var dataBytes = IsBase64String(param.Value)
+                        ? Convert.FromBase64String(param.Value)
+                        : Encoding.UTF8.GetBytes(param.Value);
+                    requestStream.Write(dataBytes, 0, dataBytes.Length);
+                }
+
+                var newlineBytes = "\r\n"u8.ToArray();
+                requestStream.Write(newlineBytes, 0, newlineBytes.Length);
+            }
+
+            return GetResponseText(httpWebRequest);
+        }
+
+        private static string GetResponseText(HttpWebRequest httpWebRequest)
+        {
+            using var response = (HttpWebResponse)httpWebRequest.GetResponse();
+            using var responseStream = new StreamReader(response.GetResponseStream() ?? Stream.Null);
+            return responseStream.ReadToEnd();
+        }
+
+        private static HttpWebRequest CreateWebRequest(WebRequestJob job, string url)
+        {
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+            httpWebRequest.Method = job.HttpMethod.ToString();
+
+            if (job.HeaderParameters == null || !job.HeaderParameters.Any()) return httpWebRequest;
+
+            foreach (var header in job.HeaderParameters)
+            {
+                httpWebRequest.Headers[header.Name] = header.Value;
+            }
+
+            return httpWebRequest;
+        }
+
+        private static string BuildQueryStringParameters(WebRequestJob job)
+        {
+            if (job.BodyParameterType != BodyParameterType.FormUrlEncoded)
+            {
+                return string.Empty;
+            }
+
+            var parameters = job.BodyParameters.DeserializeObjectFromJson<List<HttpFormUrlEncodedParameter>>();
+            var queryStringBuilder = new StringBuilder();
+
+            foreach (var parameter in parameters)
+            {
+                if (queryStringBuilder.Length > 0)
+                {
+                    queryStringBuilder.Append("&");
+                }
+                queryStringBuilder.Append($"{WebUtility.UrlEncode(parameter.Name)}={WebUtility.UrlEncode(parameter.Value)}");
+            }
+
+            return queryStringBuilder.ToString();
+        }
+
+        private static bool IsBase64String(string value)
+        {
+            value = value.Trim();
+            return (value.Length % 4 == 0) &&
+                   Regex.IsMatch(value, @"^[a-zA-Z0-9\+/]*={0,3}$", RegexOptions.None);
         }
     }
 }
