@@ -7,6 +7,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums
     /// </summary>
     public enum BodyParameterType
     {
+        None,
         /// <summary>
         /// The body content is in JSON format.
         /// </summary>

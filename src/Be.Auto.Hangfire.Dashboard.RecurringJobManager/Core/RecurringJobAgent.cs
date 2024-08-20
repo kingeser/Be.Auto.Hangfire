@@ -142,7 +142,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
                         var invocationData = InvocationData.DeserializePayload(payload);
                         var job = invocationData.DeserializeJob();
                         methodCallJob.Method = job.Method.Name;
-                        methodCallJob.Class = job.Type.Name;
+                        methodCallJob.Class = job.Type.FullName;
                     }
 
 

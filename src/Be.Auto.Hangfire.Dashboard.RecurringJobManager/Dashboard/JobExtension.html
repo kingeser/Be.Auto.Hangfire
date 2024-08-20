@@ -82,15 +82,23 @@
                         <option v-for="(item, index) in timeZones" :key="index" :value="item.Item1">{{ item.Item2 }}</option>
                     </select>
                 </div>
+
+                <div class="form-group">
+                    <label for="Cron">Cron</label>
+                    <input type="text" id="Cron" name="Cron" v-model="job.Cron" />
+                    <cron-expression-input :value="job.Cron" v-on:input="job.Cron = $event.detail.value" color="d58512" />
+                </div>
+
                 <div class="form-group" v-if="job.JobType === 'MethodCall'">
-                    <label for="class">Class</label>
+                    <label for="Class">Class</label>
                     <select id="Class" name="Class" class="form-control" v-model="job.Class" @change="onClassChange">
-                        <option value="">Please select</option>
+
                         <option v-for="(item, index) in assemblyTypes" :key="index" :value="item">{{ item }}</option>
+
                     </select>
                 </div>
                 <div class="form-group" v-if="job.JobType === 'MethodCall'">
-                    <label for="method">Method</label>
+                    <label for="Method">Method</label>
                     <select id="Method" name="Method" class="form-control" v-model="job.Method" @change="getAssemblyTypeMethodJsonSchema">
                         <option value="">Please select</option>
                         <option v-for="(item, index) in assemblyTypeMethods" :key="index" :value="item">{{ item }}</option>
@@ -99,7 +107,7 @@
                 <div class="form-group" v-if="job.JobType === 'MethodCall'">
                     <label for="methodParametersJsonEditor">Method Parameters</label>
                     <input type="hidden" id="MethodParameters" name="MethodParameters" v-model="job.MethodParameters">
-                    <div id="methodParametersJsonEditor" ></div>
+                    <div id="methodParametersJsonEditor"></div>
                 </div>
                 <div class="form-group" v-if="job.JobType === 'WebRequest'">
                     <label for="HostName">HostName</label>
@@ -117,22 +125,29 @@
                     </select>
                 </div>
                 <div class="form-group table-group" v-if="job.JobType === 'WebRequest'">
-                    <label for="headerParametersJsonEditor">Header Parameters</label>
+
                     <input type="hidden" id="HeaderParameters" name="HeaderParameters" v-model="job.HeaderParameters">
-                    <div id="headerParametersJsonEditor" ></div>
+                    <div id="headerParametersJsonEditor"></div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" v-if="job.JobType === 'WebRequest'">
                     <label for="BodyParameterType">Body Type</label>
-                    <select id="BodyParameterType" name="BodyParameterType" class="form-control" v-model="job.BodyParameterType">
+                    <select id="BodyParameterType" name="BodyParameterType" @change="onBodyParameterTypeChange" class="form-control" v-model="job.BodyParameterType">
                         <option value="">Please select</option>
                         <option v-for="(item, index) in bodyParameterTypes" :key="index" :value="item.Value">{{ item.Text }}</option>
                     </select>
                 </div>
-                <div class="form-group table-group" v-if="job.JobType === 'WebRequest'">
-                    <label for="bodyParametersJsonEditor">Body Parameters</label>
+
+                <div class="form-group table-group" v-if="job.JobType === 'WebRequest' && (job.BodyParameterType ==='Json' || job.BodyParameterType ==='FormUrlEncoded' )">
                     <input type="hidden" id="BodyParameters" name="BodyParameters" v-model="job.BodyParameters">
                     <div id="bodyParametersJsonEditor"></div>
                 </div>
+
+
+                <div class="form-group table-group" v-if="job.JobType === 'WebRequest' && (job.BodyParameterType ==='Xml' || job.BodyParameterType ==='PlainText' )">
+                    <label for="bodyParameterXmlOrText">Body Parameters</label>
+                    <textarea class="form-control" rows="10" type="hidden" id="bodyParameterXmlOrText" name="bodyParameterXmlOrText" v-model="bodyParameterXmlOrText"></textarea>
+                </div>
+
                 <div class="form-group" v-if="errors.length > 0">
                     <b style="color:red">Please correct the following error(s):</b>
                     <ul>
@@ -234,7 +249,7 @@
             </div>
 
 
-            <!--<div style="float: right;">
+            <div style="float: right;">
                 <paginate :page-count="getPageCount"
                           :page-range="3"
                           :margin-pages="2"
@@ -244,7 +259,7 @@
                           :container-class="'pagination'"
                           :page-class="'page-item'">
                 </paginate>
-            </div>-->
+            </div>
         </div>
     </div>
 
@@ -252,7 +267,7 @@
 
 <script>
 
-   
+
 
     const { ref, computed, createApp, nextTick } = Vue;
 
@@ -272,6 +287,7 @@
         setup() {
             const title = ref('Add New Job');
             const jobs = ref(null);
+            const bodyParameterXmlOrText = ref('');
             const showModal = ref(false);
             const errors = ref([]);
             const timeZones = ref([]);
@@ -317,12 +333,28 @@
 
             const initBodyParametersJsonEditor = () => {
                 const element = document.getElementById('bodyParametersJsonEditor');
+
+                if (bodyParametersJsonEditor.value)
+                    bodyParametersJsonEditor.value.destroy();
+
                 bodyParametersJsonEditor.value = new JSONEditor(element, {
                     schema: {
-                        
-                        "type": "object"
-                        
-                    }
+                        "type": "object",
+                        "title": "Body Parameters"
+
+                    },
+                    iconlib: 'Bootstrap',
+                    object_layout: 'grid',
+                    show_errors: 'interaction',
+                    theme: 'bootstrap5',
+                    remove_button_labels: true,
+                    no_additional_properties: false,
+                    enable_array_copy: false,
+                    disable_properties: false,
+                    array_controls_top: true,
+                    disable_array_reorder: true,
+                    disable_collapse: true,
+                    disable_edit_json: false
                 });
             };
 
@@ -336,19 +368,33 @@
                             "type": "object",
                             "title": "Parameter",
                             "properties": {
-                                "name": {
+                                "Name": {
                                     "title": "Key",
                                     "type": "string",
                                 },
-                                "value": {
+                                "Value": {
                                     "title": "value",
                                     "type": "string"
                                 }
                             },
-                            "required": ["name", "value"]
+                            "required": ["Name", "Value"]
                         }
-                    }
+                    },
+                    iconlib: 'Bootstrap',
+                    object_layout: 'grid',
+                    show_errors: 'interaction',
+                    theme: 'bootstrap5',
+                    remove_button_labels: true,
+                    no_additional_properties: true,
+                    enable_array_copy: false,
+                    disable_properties: true,
+                    array_controls_top: true,
+                    disable_array_reorder: true,
+                    disable_collapse: true,
+                    disable_edit_json: false
                 });
+
+                headerParametersJsonEditor.value.setValue(job.HeaderParameters);
             };
 
             const onJobTypeChange = (e) => {
@@ -357,9 +403,67 @@
                 if (job.value.JobType == "WebRequest") {
 
                     initHeaderParametersJsonEditor();
-                    initBodyParametersJsonEditor();
+
                 }
             };
+
+            const onBodyParameterTypeChange = (e) => {
+
+                job.value.BodyParameterType = e.target.value;
+
+                switch (job.value.BodyParameterType) {
+
+                    case "Json":
+                        initBodyParametersJsonEditor();
+                        break;
+                    case "FormUrlEncoded":
+
+                        const element = document.getElementById('bodyParametersJsonEditor');
+
+                        if (bodyParametersJsonEditor.value)
+                            bodyParametersJsonEditor.value.destroy();
+
+                        bodyParametersJsonEditor.value = new JSONEditor(element, {
+                            schema: {
+                                "type": "array",
+                                "title": "Body Parameters",
+                                "items": {
+                                    "type": "object",
+                                    "title": "Parameter",
+                                    "properties": {
+                                        "Name": {
+                                            "title": "Key",
+                                            "type": "string",
+                                        },
+                                        "Value": {
+                                            "title": "value",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": ["Name", "Value"]
+                                }
+                            },
+                            iconlib: 'Bootstrap',
+                            object_layout: 'grid',
+                            show_errors: 'interaction',
+                            theme: 'bootstrap5',
+                            remove_button_labels: true,
+                            no_additional_properties: false,
+                            enable_array_copy: false,
+                            disable_properties: true,
+                            array_controls_top: true,
+                            disable_array_reorder: true,
+                            disable_collapse: true,
+                            disable_edit_json: false
+                        });
+
+                        bodyParametersJsonEditor.value.setValue(job.BodyParameters);
+                        break;
+                }
+
+
+            };
+
 
             const onClassChange = (e) => {
                 job.value.Class = e.target.value;
@@ -400,6 +504,16 @@
                         showModal.value = true;
                         const jobData = response.data.Object;
                         job.value = { ...job.value, ...jobData };
+
+                        switch (job.value.BodyParameterType) {
+                            case "Xml":
+                            case "PlainText":
+                                bodyParameterXmlOrText.value = job.value.BodyParameters;
+                                break;
+                        }
+
+
+                        getAssemblyTypeMethods();
                     }
                 }).catch(e => {
                     console.log(e);
@@ -487,11 +601,27 @@
             const getAssemblyTypeMethodJsonSchema = () => {
                 axios.get('recurring-job-manager/get-current-assembly-type-method-json-schema?Class=' + job.value.Class + '&Method=' + job.value.Method).then(response => {
 
-                
+                    if (methodParametersJsonEditor.value)
+                        methodParametersJsonEditor.value.destroy();
+
                     methodParametersJsonEditor.value = new JSONEditor(document.getElementById('methodParametersJsonEditor'), {
 
-                        schema: JSON.parse(response.data.Schema)
+                        schema: JSON.parse(response.data.Schema),
+                        iconlib: 'Bootstrap',
+                        object_layout: 'grid',
+                        show_errors: 'interaction',
+                        theme: 'bootstrap5',
+                        remove_button_labels: true,
+                        no_additional_properties: true,
+                        enable_array_copy: false,
+                        disable_properties: false,
+                        array_controls_top: true,
+                        disable_array_reorder: true,
+                        disable_collapse: true,
+                        disable_edit_json: false
                     });
+
+                    methodParametersJsonEditor.value.setValue(job.MethodParameters);
 
                 }).catch(e => {
                     console.log(e);
@@ -541,6 +671,10 @@
             const getAssemblyTypeMethods = () => {
                 axios.get('recurring-job-manager/get-current-assembly-type-methods?Class=' + job.value.Class).then(response => {
                     assemblyTypeMethods.value = response.data;
+
+
+                    getAssemblyTypeMethodJsonSchema();
+
                 }).catch(e => {
                     console.log(e);
                 });
@@ -667,6 +801,7 @@
                 initBodyParametersJsonEditor,
                 initHeaderParametersJsonEditor,
                 onJobTypeChange,
+                onBodyParameterTypeChange,
                 onClassChange,
                 addJob,
                 generateUUID,
@@ -694,8 +829,7 @@
         },
         mounted() {
 
-            JSONEditor.defaults.options.theme = 'html';
-           
+
             this.getMisfireHandlingModes();
             this.gethttpMethods();
             this.getAssemblyTypes();

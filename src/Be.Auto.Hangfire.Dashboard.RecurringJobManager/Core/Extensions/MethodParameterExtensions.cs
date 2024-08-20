@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
+using Newtonsoft.Json.Serialization;
+using System.Data.Common;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {
@@ -104,12 +106,17 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
         public static string GetJsonSchema(this MethodInfo method)
         {
+
+            if (method == null) return null;
+
             var parameterTypes = new Dictionary<string, Type>();
 
-            foreach (var param in method?.GetParameters() ?? [])
+            foreach (var param in method.GetParameters())
             {
                 parameterTypes[param.Name] = param.ParameterType;
             }
+
+            if (parameterTypes.Count == 0) return null;
 
             var generator = new JSchemaGenerator()
             {
@@ -119,14 +126,33 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                 SchemaLocationHandling = SchemaLocationHandling.Inline,
                 SchemaPropertyOrderHandling = SchemaPropertyOrderHandling.Alphabetical,
                 SchemaReferenceHandling = SchemaReferenceHandling.All,
+                GenerationProviders =
+                {
+                    new StringEnumGenerationProvider(new CamelCaseNamingStrategy()),
+                },
 
             };
 
-            var schemas = parameterTypes.ToDictionary(parameter => parameter.Key, parameter => generator.Generate(parameter.Value));
+            var schemas = new Dictionary<string, JSchema>();
+
+
+            foreach (var parameter in parameterTypes)
+            {
+                var subSchema = generator.Generate(parameter.Value);
+                subSchema.Title = parameter.Key;
+                schemas.Add(parameter.Key, subSchema);
+            }
 
             var combinedSchema = new JSchema
             {
                 Type = JSchemaType.Object,
+                Title = method.Name,
+                AllowAdditionalItems = false,
+                AllowAdditionalProperties = false,
+                AllowUnevaluatedProperties = false,
+                AllowAdditionalItemsSpecified = false,
+                AllowAdditionalPropertiesSpecified = false,
+                AllowUnevaluatedItems = false,
 
             };
 
