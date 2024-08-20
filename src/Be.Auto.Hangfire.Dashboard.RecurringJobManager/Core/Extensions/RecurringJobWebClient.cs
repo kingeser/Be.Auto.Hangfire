@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 
@@ -12,7 +13,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {
     public class RecurringJobWebClient
     {
-        public string CallRequest(WebRequestJob job)
+        public async Task<object> CallRequestAsync(WebRequestJob job)
         {
             var baseUri = new Uri(job.HostName.TrimEnd('/'));
 
@@ -20,15 +21,38 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
             if (IsSimpleRequest(job.HttpMethod))
             {
-                return HandleSimpleRequest(job, url);
+                var simpleResponse= await HandleSimpleRequestAsync(job, url);
+
+                return new
+                {
+                    Response = simpleResponse,
+                    ResponseString = await ReadResponseStreamAsync(simpleResponse)
+                };
             }
 
-            return IsComplexRequest(job.HttpMethod) ? HandleComplexRequest(job, url) : string.Empty;
+            var response = IsComplexRequest(job.HttpMethod) ? await HandleComplexRequestAsync(job, url) : null;
+
+            if (response == null) return null;
+
+            return new
+            {
+                Response = response,
+                ResponseString = await ReadResponseStreamAsync(response)
+            };
+
+        }
+
+        private static async Task<string> ReadResponseStreamAsync(HttpWebResponse response)
+        {
+            using var responseStream = new StreamReader(response.GetResponseStream() ?? Stream.Null);
+
+            var responseString= await responseStream.ReadToEndAsync();
+            return responseString;
         }
 
         private static bool IsSimpleRequest(HttpMethodType method) => method is HttpMethodType.GET or HttpMethodType.DELETE or HttpMethodType.HEAD or HttpMethodType.OPTIONS or HttpMethodType.TRACE;
 
-        private static string HandleSimpleRequest(WebRequestJob job, string url)
+        private static async Task<HttpWebResponse> HandleSimpleRequestAsync(WebRequestJob job, string url)
         {
             var queryString = BuildQueryStringParameters(job);
 
@@ -39,51 +63,47 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
             var httpWebRequest = CreateWebRequest(job, url);
 
-            using var response = (HttpWebResponse)httpWebRequest.GetResponse();
-            using var reader = new StreamReader(response.GetResponseStream() ?? Stream.Null);
-            return reader.ReadToEnd();
+            return await GetResponseAsync(httpWebRequest);
         }
 
         private static bool IsComplexRequest(HttpMethodType method) => method is HttpMethodType.POST or HttpMethodType.PUT or HttpMethodType.PATCH;
 
-        private static string HandleComplexRequest(WebRequestJob job, string url)
+        private static async Task<HttpWebResponse> HandleComplexRequestAsync(WebRequestJob job, string url)
         {
             var httpWebRequest = CreateWebRequest(job, url);
 
             return job.BodyParameterType switch
             {
-                BodyParameterType.None => SendRequestWithEmptyBody(httpWebRequest),
-                BodyParameterType.Json => SendRequestWithBody(httpWebRequest, job.BodyParameters, "application/json"),
-                BodyParameterType.Xml => SendRequestWithBody(httpWebRequest, job.BodyParameters, "application/xml"),
-                BodyParameterType.FormUrlEncoded => SendFormUrlEncodedRequest(httpWebRequest, job.BodyParameters),
-                BodyParameterType.FormData => SendMultipartFormDataRequest(httpWebRequest, job.BodyParameters),
-                BodyParameterType.PlainText => SendRequestWithBody(httpWebRequest, job.BodyParameters, "text/plain"),
-                _ => string.Empty
+                BodyParameterType.None => await SendRequestWithEmptyBodyAsync(httpWebRequest),
+                BodyParameterType.Json => await SendRequestWithBodyAsync(httpWebRequest, job.BodyParameters, "application/json"),
+                BodyParameterType.Xml => await SendRequestWithBodyAsync(httpWebRequest, job.BodyParameters, "application/xml"),
+                BodyParameterType.FormUrlEncoded => await SendFormUrlEncodedRequestAsync(httpWebRequest, job.BodyParameters),
+                BodyParameterType.FormData => await SendMultipartFormDataRequestAsync(httpWebRequest, job.BodyParameters),
+                BodyParameterType.PlainText => await SendRequestWithBodyAsync(httpWebRequest, job.BodyParameters, "text/plain"),
+                _ => null
             };
         }
 
-        private static string SendRequestWithEmptyBody(HttpWebRequest httpWebRequest)
+        private static async Task<HttpWebResponse> SendRequestWithEmptyBodyAsync(HttpWebRequest httpWebRequest)
         {
             httpWebRequest.ContentLength = 0;
-            using var response = (HttpWebResponse)httpWebRequest.GetResponse();
-            using var responseStream = new StreamReader(response.GetResponseStream() ?? Stream.Null);
-            return responseStream.ReadToEnd();
+            return await GetResponseAsync(httpWebRequest);
         }
 
-        private static string SendRequestWithBody(HttpWebRequest httpWebRequest, string body, string contentType)
+        private static async Task<HttpWebResponse> SendRequestWithBodyAsync(HttpWebRequest httpWebRequest, string body, string contentType)
         {
             httpWebRequest.ContentType = contentType;
-            using (var requestStream = new StreamWriter(httpWebRequest.GetRequestStream()))
+            using (var requestStream = new StreamWriter(await httpWebRequest.GetRequestStreamAsync()))
             {
                 if (!string.IsNullOrEmpty(body))
                 {
-                    requestStream.Write(body);
+                    await requestStream.WriteAsync(body);
                 }
             }
-            return GetResponseText(httpWebRequest);
+            return await GetResponseAsync(httpWebRequest);
         }
 
-        private static string SendFormUrlEncodedRequest(HttpWebRequest httpWebRequest, string bodyParameters)
+        private static async Task<HttpWebResponse> SendFormUrlEncodedRequestAsync(HttpWebRequest httpWebRequest, string bodyParameters)
         {
             httpWebRequest.ContentType = "application/x-www-form-urlencoded";
             var parameters = bodyParameters.DeserializeObjectFromJson<List<HttpFormUrlEncodedParameter>>();
@@ -98,22 +118,22 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                 formData.Append($"{WebUtility.UrlEncode(parameter.Name)}={WebUtility.UrlEncode(parameter.Value)}");
             }
 
-            using (var requestStream = new StreamWriter(httpWebRequest.GetRequestStream()))
+            using (var requestStream = new StreamWriter(await httpWebRequest.GetRequestStreamAsync()))
             {
-                requestStream.Write(formData.ToString());
+                await requestStream.WriteAsync(formData.ToString());
             }
 
-            return GetResponseText(httpWebRequest);
+            return await GetResponseAsync(httpWebRequest);
         }
 
-        private static string SendMultipartFormDataRequest(HttpWebRequest httpWebRequest, string bodyParameters)
+        private static async Task<HttpWebResponse> SendMultipartFormDataRequestAsync(HttpWebRequest httpWebRequest, string bodyParameters)
         {
             var boundary = "------------------------" + DateTime.Now.Ticks.ToString("x");
             httpWebRequest.ContentType = "multipart/form-data; boundary=" + boundary;
 
             var parameters = bodyParameters.DeserializeObjectFromJson<List<HttpFormDataParameter>>();
 
-            using var requestStream = httpWebRequest.GetRequestStream();
+            using var requestStream = await httpWebRequest.GetRequestStreamAsync();
 
             foreach (var param in parameters)
             {
@@ -121,28 +141,26 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                              $"Content-Type: {param.ContentType}\r\n\r\n";
                 var headerBytes = Encoding.UTF8.GetBytes(header);
 
-                requestStream.Write(headerBytes, 0, headerBytes.Length);
+                await requestStream.WriteAsync(headerBytes, 0, headerBytes.Length);
 
                 if (!string.IsNullOrEmpty(param.Value))
                 {
                     var dataBytes = IsBase64String(param.Value)
                         ? Convert.FromBase64String(param.Value)
                         : Encoding.UTF8.GetBytes(param.Value);
-                    requestStream.Write(dataBytes, 0, dataBytes.Length);
+                    await requestStream.WriteAsync(dataBytes, 0, dataBytes.Length);
                 }
 
                 var newlineBytes = "\r\n"u8.ToArray();
-                requestStream.Write(newlineBytes, 0, newlineBytes.Length);
+                await requestStream.WriteAsync(newlineBytes, 0, newlineBytes.Length);
             }
 
-            return GetResponseText(httpWebRequest);
+            return await GetResponseAsync(httpWebRequest);
         }
 
-        private static string GetResponseText(HttpWebRequest httpWebRequest)
+        private static async Task<HttpWebResponse> GetResponseAsync(HttpWebRequest httpWebRequest)
         {
-            using var response = (HttpWebResponse)httpWebRequest.GetResponse();
-            using var responseStream = new StreamReader(response.GetResponseStream() ?? Stream.Null);
-            return responseStream.ReadToEnd();
+            return (HttpWebResponse)await httpWebRequest.GetResponseAsync();
         }
 
         private static HttpWebRequest CreateWebRequest(WebRequestJob job, string url)
@@ -151,7 +169,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             httpWebRequest.Method = job.HttpMethod.ToString();
 
             if (job.HeaderParameters == null || !job.HeaderParameters.Any()) return httpWebRequest;
-
             foreach (var header in job.HeaderParameters)
             {
                 httpWebRequest.Headers[header.Name] = header.Value;

@@ -98,7 +98,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             return instance;
         }
 
-        public static string GetJsonSchema(this MethodInfo method)
+        public static JsonSchema GetJsonSchema(this MethodInfo method)
         {
             if (method == null) return null;
 
@@ -142,9 +142,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                 combinedSchema.Definitions[jSchema.Key].Title = jSchema.Key;
             }
 
-            var shemaString = combinedSchema.ToJson();
-
-            return shemaString;
+           
+            return combinedSchema;
         }
     }
 

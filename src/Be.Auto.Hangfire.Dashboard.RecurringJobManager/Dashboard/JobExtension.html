@@ -225,8 +225,8 @@
                                 </span>
                             </td>
                             <td>{{ job.JobType }}</td>
-                            <td>{{ job.Class }}</td>
-                            <td>{{ job.Method }}</td>
+                            <td>{{ job.JobType === 'WebRequest' ? job.HostName : job.Class }}</td>
+                            <td>{{ job.JobType === 'WebRequest' ? job.UrlPath : job.Method  }}</td>
                             <td>{{ job.TimeZoneId }}</td>
                             <td>
                                 <button type="button" class="btn btn-primary">
@@ -661,6 +661,8 @@
             const getAssemblyTypeMethodJsonSchema = () => {
                 axios.get('recurring-job-manager/get-current-assembly-type-method-json-schema?Class=' + job.value.Class + '&Method=' + job.value.Method).then(response => {
                     Vue.nextTick(() => {
+
+                      
                         if (methodParametersJsonEditor.value)
                             methodParametersJsonEditor.value.destroy();
 

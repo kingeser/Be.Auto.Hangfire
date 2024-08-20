@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Collections.Generic;
 using Hangfire.Common;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Hangfire;
@@ -45,7 +45,16 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                         try
                         {
 
-                            new global::Hangfire.RecurringJobManager(JobStorage.Current).AddOrUpdate(job.Id, new Job(typeof(RecurringJobWebClient), typeof(RecurringJobWebClient).GetMethod(nameof(RecurringJobWebClient.CallRequest)), job), job.Cron, new RecurringJobOptions()
+                            new global::Hangfire.RecurringJobManager(JobStorage.Current).AddOrUpdate(job.Id, new Job(typeof(RecurringJobWebClient), typeof(RecurringJobWebClient).GetMethod(nameof(RecurringJobWebClient.CallRequestAsync)), new WebRequestJob()
+                            {
+                                BodyParameters = webRequestJob.BodyParameters,
+                                BodyParameterType = webRequestJob.BodyParameterType,
+                                UrlPath = webRequestJob.UrlPath,
+                                HeaderParameters = webRequestJob.HeaderParameters.DeserializeObjectFromJson<List<HttpHeaderParameter>>(),
+                                HostName = webRequestJob.HostName,
+                                HttpMethod = webRequestJob.HttpMethod,
+                                
+                            }), job.Cron, new RecurringJobOptions()
                             {
                                 TimeZone = job.TimeZone,
                                 MisfireHandling = job.MisfireHandlingMode,

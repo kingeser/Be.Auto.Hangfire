@@ -13,11 +13,12 @@ internal sealed class GetCurrentAssemblyTypeMethodJsonSchemaDispatcher : IDashbo
     {
         var type = context.Request.GetQuery(nameof(RecurringJobMethodCall.Class));
         var method = context.Request.GetQuery(nameof(RecurringJobMethodCall.Method));
-        var shemaString = AssemblyInfoStorage.GetMethod(type, method).GetJsonSchema();
+        var schema = AssemblyInfoStorage.GetMethod(type, method).GetJsonSchema();
 
         await context.Response.WriteAsync(new
         {
-            Schema = shemaString
+            Json= schema.ToSampleJson(),
+            Schema = schema.ToJson()
         }.SerializeObjectToJson());
     }
 }
