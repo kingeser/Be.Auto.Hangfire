@@ -2,7 +2,11 @@
 
 namespace Hangfire.Sample.Library
 {
-    public class ProductService : IProductService
+    public interface IService
+    {
+        void GetTest();
+    }
+    public class ProductService : IService, IProductService
     {
         private readonly string _serviceUrl;
 
@@ -52,6 +56,11 @@ namespace Hangfire.Sample.Library
             {
                 _productList.Remove(product);
             }
+        }
+
+        public void GetTest()
+        {
+            
         }
     }
 }
