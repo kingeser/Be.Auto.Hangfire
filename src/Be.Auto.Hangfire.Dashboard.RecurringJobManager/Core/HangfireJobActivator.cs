@@ -30,6 +30,11 @@ public class HangfireJobActivator(IServiceProvider serviceProvider) : JobActivat
 
     private static object CreateInstance(Type type)
     {
+        if (type.IsAbstract && type.IsSealed)
+        {
+            return type;
+        }
+
         var constructor = type.GetConstructor(Type.EmptyTypes);
 
         if (constructor != null)
