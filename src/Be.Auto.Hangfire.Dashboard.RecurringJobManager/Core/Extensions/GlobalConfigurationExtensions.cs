@@ -20,8 +20,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             }
 
             StoreAssemblies(assemblies);
-            RegisterJobs();
-            InitializeDashboard();
+           InitializeDashboard();
 
             return config;
         }
@@ -29,11 +28,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
         private static void StoreAssemblies(Assembly[] assemblies)
         {
             AssemblyInfoStorage.Store(assemblies);
-        }
-
-        private static void RegisterJobs()
-        {
-            RecurringJobRegistrar.Register();
         }
 
         private static void InitializeDashboard()
