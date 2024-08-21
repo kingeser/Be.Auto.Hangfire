@@ -122,7 +122,7 @@
                 </div>
                 <div class="form-group" v-if="job.JobType === 'WebRequest'">
                     <label for="HttpMethod">Http Method</label>
-                    <select id="HttpMethod" name="HttpMethod" class="form-control" v-model="job.HttpMethod">
+                    <select id="HttpMethod" name="HttpMethod" class="form-control" v-model="job.HttpMethod" @change="getBodyParameterTypes">
                         <option value="">Please select</option>
                         <option v-for="(item, index) in httpMethods" :key="index" :value="item">{{ item }}</option>
                     </select>
@@ -132,7 +132,7 @@
                     <input type="hidden" id="HeaderParameters" name="HeaderParameters" v-model="job.HeaderParameters">
                     <div id="headerParametersJsonEditor"></div>
                 </div>
-                <div class="form-group" v-if="job.JobType === 'WebRequest'">
+                <div class="form-group" v-if="job.JobType === 'WebRequest' && job.HttpMethod!=''">
                     <label for="BodyParameterType">Body Parameters Type</label>
                     <select id="BodyParameterType" name="BodyParameterType" @change="onBodyParameterTypeChange" class="form-control" v-model="job.BodyParameterType">
                         <option value="">Please select</option>
@@ -140,7 +140,7 @@
                     </select>
                 </div>
 
-                <div class="form-group table-group" v-if="job.JobType === 'WebRequest' && (job.BodyParameterType ==='Json' || job.BodyParameterType ==='FormUrlEncoded' )">
+                <div class="form-group table-group" v-if="job.JobType === 'WebRequest' && (job.BodyParameterType ==='Json' || job.BodyParameterType ==='FormUrlEncoded'  || job.BodyParameterType ==='FormData')">
                     <input type="hidden" id="BodyParameters" name="BodyParameters" v-model="job.BodyParameters">
                     <div id="bodyParametersJsonEditor"></div>
                 </div>
@@ -343,6 +343,9 @@
                     if (bodyParametersJsonEditor.value)
                         bodyParametersJsonEditor.value.destroy();
 
+
+
+
                     switch (job.value.BodyParameterType) {
 
                         case "Json":
@@ -374,7 +377,7 @@
                             bodyParametersJsonEditor.value = new JSONEditor(element, {
                                 schema: {
                                     "type": "array",
-                                    "title": "Body Parameters",
+                                    "title": "Query Parameters",
                                     "items": {
                                         "type": "object",
                                         "title": "Parameter",
@@ -780,8 +783,8 @@
                 });
             };
 
-            const getBodyParameterTypes = () => {
-                axios.get('recurring-job-manager/get-body-parameter-types').then(response => {
+            const getBodyParameterTypes = (e) => {
+                axios.get('recurring-job-manager/get-body-parameter-types?HttpMethod=' + e.target.value).then(response => {
                     bodyParameterTypes.value = response.data;
                 }).catch(e => {
                     console.log(e);
@@ -970,7 +973,6 @@
             this.getMisfireHandlingModes();
             this.gethttpMethods();
             this.getAssemblyTypes();
-            this.getBodyParameterTypes();
             this.getTimeZones();
             this.getJobTypes();
             this.GetJobs();

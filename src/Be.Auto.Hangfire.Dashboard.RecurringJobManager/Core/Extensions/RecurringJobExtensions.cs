@@ -13,9 +13,7 @@ using Newtonsoft.Json;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {
-    using Newtonsoft.Json;
-    using System;
-    using System.Linq;
+  
 
     public static class RecurringJobExtensions
     {
@@ -60,7 +58,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                                     if (webRequestJob.BodyParameters.IsValidJson())
                                         throw new RecurringJobException("Job registration failed: The 'BodyParameters' field contains invalid JSON and cannot be processed.");
 
-
                                 }
 
                                 break;
@@ -69,12 +66,10 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                                     if (webRequestJob.BodyParameters.IsValidXml())
                                         throw new RecurringJobException("Job registration failed: The 'BodyParameters' field contains invalid XML and cannot be processed.");
 
-
                                 }
                                 break;
                             case BodyParameterType.FormUrlEncoded:
                                 {
-
                                     if (!webRequestJob.BodyParameters.TryDeserializeObjectFromJson<List<HttpFormUrlEncodedParameter>>(out _))
 
                                     {

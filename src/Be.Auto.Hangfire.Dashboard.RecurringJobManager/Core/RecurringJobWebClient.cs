@@ -15,6 +15,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
     {
         public async Task<object> CallRequestAsync(WebRequestJob job)
         {
+
             var baseUri = new Uri(job.HostName.TrimEnd('/'));
 
             var url = new Uri(baseUri, job.UrlPath.TrimStart('/')).ToString();

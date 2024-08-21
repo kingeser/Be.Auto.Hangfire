@@ -12,7 +12,28 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
     {
         public async Task Dispatch([NotNull] DashboardContext context)
         {
-            await context.Response.WriteAsync((from a in Enum.GetValues(typeof(BodyParameterType)).Cast<BodyParameterType>()
+            Enum.TryParse<HttpMethodType>(context.Request.GetQuery("HttpMethod"), out var httpMethodType);
+
+            var bodyParameters = Enum.GetValues(typeof(BodyParameterType)).Cast<BodyParameterType>();
+
+            switch (httpMethodType)
+            {
+                case HttpMethodType.GET:
+                case HttpMethodType.DELETE:
+                case HttpMethodType.HEAD:
+                case HttpMethodType.OPTIONS:
+                case HttpMethodType.TRACE:
+                    bodyParameters = new[] { BodyParameterType.None, BodyParameterType.FormUrlEncoded };
+                    break;
+                case HttpMethodType.POST:
+                case HttpMethodType.PUT:
+                case HttpMethodType.PATCH:
+                    bodyParameters = bodyParameters.Where(t => t != BodyParameterType.FormUrlEncoded);
+                    break;
+
+            }
+
+            await context.Response.WriteAsync((from a in bodyParameters
                                                select new
                                                {
                                                    Text = a.GetDescription(),
