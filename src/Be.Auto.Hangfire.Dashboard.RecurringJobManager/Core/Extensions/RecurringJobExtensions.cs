@@ -9,11 +9,12 @@ using Cronos;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Linq.Expressions;
 
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {
-  
+
 
     public static class RecurringJobExtensions
     {
@@ -150,14 +151,17 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                                 throw new RecurringJobException($"Job registration failed: The specified method '{methodCallJob.Method}' could not be found in type '{methodCallJob.Class}'. Please ensure the method name is correct and exists.");
                             }
 
-                            var defaultParameters = method.GetDefaultParameters(methodCallJob);
 
                             try
                             {
-                                new global::Hangfire.RecurringJobManager(JobStorage.Current).AddOrUpdate(job.Id, new Job(type, method, defaultParameters), job.Cron, new RecurringJobOptions()
+
+                                var defaultParameters = method.GetDefaultParameters(methodCallJob);
+
+                                new global::Hangfire.RecurringJobManager(JobStorage.Current).AddOrUpdate(job.Id, new Job(method.DeclaringType,method, defaultParameters), job.Cron, new RecurringJobOptions()
                                 {
                                     TimeZone = job.TimeZone,
                                     MisfireHandling = job.MisfireHandlingMode,
+                                    
                                 });
 
                                 RecurringJobAgent.SaveJobDetails(job);

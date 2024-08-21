@@ -30,8 +30,12 @@ namespace Hangfire.JobExtensions
 
             services.AddHangfire(config => config
                                                  .UseSqlServerStorage(Configuration.GetConnectionString("HangfireConnection"))
-                                                 .UseDashboardRecurringJobManager(typeof(Startup).Assembly, typeof(AppointmentSmsNotificationJob).Assembly));
+                                                 .UseDashboardRecurringJobManager(services.BuildServiceProvider(), typeof(AppointmentSmsNotificationService).Assembly));
             services.AddHangfireServer();
+
+
+            services.AddScoped<IProductService, ProductService>(t => new ProductService("https://domain.com"));
+            services.AddScoped<IAppointmentSmsNotificationService, AppointmentSmsNotificationService>(t => new AppointmentSmsNotificationService("https://domain.com"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,7 +52,7 @@ namespace Hangfire.JobExtensions
                 app.UseHsts();
             }
 
-            app.UseHangfireDashboard("/hangfire",new DashboardOptions()
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions()
             {
                 DarkModeEnabled = false
             });

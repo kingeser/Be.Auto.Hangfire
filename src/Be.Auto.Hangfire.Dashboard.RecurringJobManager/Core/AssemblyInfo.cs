@@ -22,13 +22,13 @@ public class AssemblyInfo(Assembly assembly)
 
         var result = assembly
             .GetTypes()
-            .Where(type => !type.IsAbstract
-                                                      && !type.IsInterface)
+            .Where(type => !type.IsAbstract                && !type.IsInterface)
+                                      
             .Select(type => new
             {
                 Type = type,
                 Methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-
+                    .Where(t=>!t.IsSpecialName)
                   .ToList()
             })
             .Where(typeWithMethods => typeWithMethods.Methods.Any())
