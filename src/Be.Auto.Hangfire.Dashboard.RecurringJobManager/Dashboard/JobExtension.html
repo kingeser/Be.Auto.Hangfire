@@ -59,6 +59,7 @@
         </template>
         <template v-slot:body>
             <form id="formJob">
+                <input type="hidden" name="JobIdBefore" id="JobIdBefore" />
                 <div class="form-group">
                     <label for="JobType">Job Type</label>
                     <select id="JobType" name="JobType" class="form-control" v-model="job.JobType" @change="onJobTypeChange">
@@ -94,19 +95,19 @@
                 <div class="form-group" v-if="job.JobType === 'MethodCall'">
                     <label for="Class">Class</label>
                     <select id="Class" name="Class" class="form-control" v-model="job.Class" @change="onClassChange">
-
+                        <option value="">Please select</option>
                         <option v-for="(item, index) in assemblyTypes" :key="index" :value="item">{{ item }}</option>
 
                     </select>
                 </div>
-                <div class="form-group" v-if="job.JobType === 'MethodCall'">
+                <div class="form-group" v-if="job.JobType === 'MethodCall' &&  job.Class!=''">
                     <label for="Method">Method</label>
                     <select id="Method" name="Method" class="form-control" v-model="job.Method" @change="getAssemblyTypeMethodJsonSchema">
                         <option value="">Please select</option>
                         <option v-for="(item, index) in assemblyTypeMethods" :key="index" :value="item">{{ item }}</option>
                     </select>
                 </div>
-                <div class="form-group" v-if="job.JobType === 'MethodCall'">
+                <div class="form-group" v-if="job.JobType === 'MethodCall' && job.Method!=''">
                     <label for="methodParametersJsonEditor">Method Parameters</label>
                     <input type="hidden" id="MethodParameters" name="MethodParameters" v-model="job.MethodParameters">
                     <div id="methodParametersJsonEditor"></div>
@@ -132,10 +133,10 @@
                     <div id="headerParametersJsonEditor"></div>
                 </div>
                 <div class="form-group" v-if="job.JobType === 'WebRequest'">
-                    <label for="BodyParameterType">Body Type</label>
+                    <label for="BodyParameterType">Body Parameters Type</label>
                     <select id="BodyParameterType" name="BodyParameterType" @change="onBodyParameterTypeChange" class="form-control" v-model="job.BodyParameterType">
                         <option value="">Please select</option>
-                        <option v-for="(item, index) in bodyParameterTypes" :key="index" :value="item.Value">{{ item.Text }}</option>
+                        <option :disabled="job.HttpMethodGet && item.Value === 'Json'" v-for="(item, index) in bodyParameterTypes" :key="index" :value="item.Value">{{ item.Text }}</option>
                     </select>
                 </div>
 
@@ -365,6 +366,8 @@
                                 disable_collapse: true,
                                 disable_edit_json: false
                             });
+
+
                             break;
                         case "FormUrlEncoded":
 
@@ -404,6 +407,49 @@
 
 
                             break;
+
+                        case "FormData":
+
+                            bodyParametersJsonEditor.value = new JSONEditor(element, {
+                                schema: {
+                                    "type": "array",
+                                    "title": "Body Parameters",
+                                    "items": {
+                                        "type": "object",
+                                        "title": "Parameter",
+                                        "properties": {
+                                            "Name": {
+                                                "title": "Key",
+                                                "type": "string",
+                                            },
+                                            "Value": {
+                                                "title": "Value",
+                                                "type": "string"
+                                            },
+                                            "ContentType": {
+                                                "title": "Content Type",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": ["Name", "Value", "ContentType"]
+                                    }
+                                },
+                                iconlib: 'fontawesome5',
+                                object_layout: 'grid',
+                                show_errors: 'interaction',
+                                theme: 'bootstrap5',
+                                remove_button_labels: true,
+                                no_additional_properties: false,
+                                enable_array_copy: false,
+                                disable_properties: false,
+                                array_controls_top: true,
+                                disable_array_reorder: true,
+                                disable_collapse: true,
+                                disable_edit_json: false
+                            });
+
+
+                            break;
                     }
 
                     bodyParametersJsonEditor.value.on('change', () => {
@@ -413,9 +459,10 @@
 
                     bodyParametersJsonEditor.value.on('ready', () => {
 
+                        if (job.value.BodyParameters == null || job.value.BodyParameters === undefined || job.value.BodyParameters == '') {
 
-                        bodyParametersJsonEditor.value.setValue(JSON.parse(JSON.parse(job.value.BodyParameters)));
-
+                            bodyParametersJsonEditor.value.setValue(JSON.parse(JSON.parse(job.value.BodyParameters)));
+                        }
 
                     });
 
@@ -545,6 +592,14 @@
                         const jobData = response.data.Object;
                         job.value = { ...job.value, ...jobData };
 
+
+                        Vue.nextTick(() => {
+
+                            document.getElementById("JobIdBefore").value = job.value.Id;
+
+                        });
+
+
                         switch (job.value.BodyParameterType) {
                             case "Xml":
                             case "PlainText":
@@ -618,11 +673,14 @@
 
             const UpdateJob = (job) => {
                 if (checkForm()) {
+
                     const formData = new FormData(document.getElementById('formJob'));
                     const params = new URLSearchParams();
+
                     for (const [key, value] of formData.entries()) {
                         params.append(key, value);
                     }
+
                     axios.get('recurring-job-manager/update-jobs?' + params.toString()).then(response => {
                         if (!response.data.Status) {
                             showModal.value = false;
@@ -659,46 +717,51 @@
             };
 
             const getAssemblyTypeMethodJsonSchema = () => {
-                axios.get('recurring-job-manager/get-current-assembly-type-method-json-schema?Class=' + job.value.Class + '&Method=' + job.value.Method).then(response => {
-                    Vue.nextTick(() => {
 
-                      
-                        if (methodParametersJsonEditor.value)
-                            methodParametersJsonEditor.value.destroy();
+                if (job.value.Class != '' && job.value.Method != '') {
 
-                        methodParametersJsonEditor.value = new JSONEditor(document.getElementById('methodParametersJsonEditor'), {
+                    axios.get('recurring-job-manager/get-current-assembly-type-method-json-schema?Class=' + job.value.Class + '&Method=' + job.value.Method).then(response => {
+                        Vue.nextTick(() => {
 
-                            schema: JSON.parse(response.data.Schema),
-                            iconlib: 'fontawesome5',
-                            object_layout: 'normal',
-                            show_errors: 'interaction',
-                            theme: 'bootstrap5',
-                            remove_button_labels: true,
-                            no_additional_properties: true,
-                            enable_array_copy: false,
-                            disable_properties: false,
-                            array_controls_top: true,
-                            disable_array_reorder: true,
-                            disable_collapse: false,
-                            disable_edit_json: false
+
+                            if (methodParametersJsonEditor.value)
+                                methodParametersJsonEditor.value.destroy();
+
+                            methodParametersJsonEditor.value = new JSONEditor(document.getElementById('methodParametersJsonEditor'), {
+
+                                schema: JSON.parse(response.data.Schema),
+                                iconlib: 'fontawesome5',
+                                object_layout: 'normal',
+                                show_errors: 'interaction',
+                                theme: 'bootstrap5',
+                                remove_button_labels: true,
+                                no_additional_properties: true,
+                                enable_array_copy: false,
+                                disable_properties: false,
+                                array_controls_top: true,
+                                disable_array_reorder: true,
+                                disable_collapse: false,
+                                disable_edit_json: false
+                            });
+                            methodParametersJsonEditor.value.on('change', () => {
+
+
+                                job.value.MethodParameters = JSON.stringify(methodParametersJsonEditor.value.getValue());
+                            });
+
+                            methodParametersJsonEditor.value.on('ready', () => {
+
+                                methodParametersJsonEditor.value.setValue(JSON.parse(JSON.parse(job.value.MethodParameters)));
+
+                            });
                         });
-                        methodParametersJsonEditor.value.on('change', () => {
 
 
-                            job.value.MethodParameters = JSON.stringify(methodParametersJsonEditor.value.getValue());
-                        });
-
-                        methodParametersJsonEditor.value.on('ready', () => {
-
-                            methodParametersJsonEditor.value.setValue(JSON.parse(JSON.parse(job.value.MethodParameters)));
-
-                        });
+                    }).catch(e => {
+                        console.log(e);
                     });
+                }
 
-
-                }).catch(e => {
-                    console.log(e);
-                });
             };
 
             const getMisfireHandlingModes = () => {

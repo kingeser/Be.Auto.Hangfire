@@ -32,18 +32,7 @@ public class MethodParameterConverter(MethodInfo methodInfo) : JsonConverter
             }
             else
             {
-                if (parameter.HasDefaultValue)
-                {
-                    parameterValues[i] = parameter.DefaultValue;
-                }
-                else if (parameter.ParameterType.IsValueType)
-                {
-                    parameterValues[i] = Activator.CreateInstance(parameter.ParameterType);
-                }
-                else
-                {
-                    parameterValues[i] = null;
-                }
+                parameterValues[i] = parameter.ParameterType.CreateInstanceWithDefaults();
             }
         }
 

@@ -32,6 +32,14 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             transaction.AddToSet($"{TagStopJob}", jobId);
             transaction.Commit();
         }
+
+        public static void DeleteJobDetails(string jobId)
+        {
+            using var connection = JobStorage.Current.GetConnection();
+            using var transaction = connection.CreateWriteTransaction();
+            transaction.RemoveHash($"{TagRecurringJobBase}:{jobId}");
+            transaction.Commit();
+        }
         public static void SaveJobDetails(RecurringJobBase job)
         {
             using var connection = JobStorage.Current.GetConnection();
@@ -112,7 +120,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             {
                 jobType = (JobType)Enum.Parse(typeof(JobType), jobTypeValue);
             }
-          
+
 
             RecurringJobBase dto = null;
 

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 using Hangfire;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
@@ -20,9 +21,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
             try
             {
                 var job = CreateRecurringJob(context);
-
                 job.Register();
-
+                RemovePreviousJobDetailsIfJobIdChanged(context, job);
                 context.Response.StatusCode = (int)HttpStatusCode.OK;
 
             }
@@ -35,6 +35,16 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
             finally
             {
                 await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
+            }
+        }
+
+        private static void RemovePreviousJobDetailsIfJobIdChanged(DashboardContext context, RecurringJobBase job)
+        {
+            var jobIdBefore = context.Request.GetQuery("JobIdBefore");
+
+            if (!string.IsNullOrEmpty(jobIdBefore) && jobIdBefore != job.Id)
+            {
+                RecurringJobAgent.DeleteJobDetails(jobIdBefore);
             }
         }
 
