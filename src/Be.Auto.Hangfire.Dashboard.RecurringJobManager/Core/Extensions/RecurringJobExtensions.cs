@@ -1,14 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Hangfire.Common;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Hangfire;
 using Cronos;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {
+    using Newtonsoft.Json;
+    using System;
+    using System.Linq;
+
     public static class RecurringJobExtensions
     {
         public static void Register(this RecurringJobBase job)
@@ -42,6 +50,59 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                         if (string.IsNullOrEmpty(webRequestJob.UrlPath))
                             throw new RecurringJobException("Job registration failed: 'UrlPath' field cannot be null or empty.");
 
+
+                        switch (webRequestJob.BodyParameterType)
+                        {
+                            case BodyParameterType.None:
+                                break;
+                            case BodyParameterType.Json:
+                                {
+                                    if (webRequestJob.BodyParameters.IsValidJson())
+                                        throw new RecurringJobException("Job registration failed: The 'BodyParameters' field contains invalid JSON and cannot be processed.");
+
+
+                                }
+
+                                break;
+                            case BodyParameterType.Xml:
+                                {
+                                    if (webRequestJob.BodyParameters.IsValidXml())
+                                        throw new RecurringJobException("Job registration failed: The 'BodyParameters' field contains invalid XML and cannot be processed.");
+
+
+                                }
+                                break;
+                            case BodyParameterType.FormUrlEncoded:
+                                {
+
+                                    if (!webRequestJob.BodyParameters.TryDeserializeObjectFromJson<List<HttpFormUrlEncodedParameter>>(out _))
+
+                                    {
+                                        throw new RecurringJobException("Job registration failed: The 'BodyParameters' field could not be deserialized into a valid list of 'HttpFormUrlEncodedParameter'.");
+                                    }
+                                }
+                                break;
+                            case BodyParameterType.FormData:
+                                {
+
+                                    if (!webRequestJob.BodyParameters.TryDeserializeObjectFromJson<List<HttpFormDataParameter>>(out _))
+
+                                    {
+                                        throw new RecurringJobException("Job registration failed: The 'BodyParameters' field could not be deserialized into a valid list of 'HttpFormDataParameter'.");
+                                    }
+                                }
+                                break;
+                            case BodyParameterType.PlainText:
+                                {
+                                    if (string.IsNullOrEmpty(webRequestJob.BodyParameters))
+                                    {
+                                        throw new RecurringJobException("Job registration failed: The 'BodyParameters' field cannot be null or empty.");
+                                    }
+                                }
+                                break;
+                        }
+
+
                         try
                         {
 
@@ -53,7 +114,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                                 HeaderParameters = webRequestJob.HeaderParameters.DeserializeObjectFromJson<List<HttpHeaderParameter>>(),
                                 HostName = webRequestJob.HostName,
                                 HttpMethod = webRequestJob.HttpMethod,
-                                
+
                             }), job.Cron, new RecurringJobOptions()
                             {
                                 TimeZone = job.TimeZone,
@@ -94,7 +155,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                                 throw new RecurringJobException($"Job registration failed: The specified method '{methodCallJob.Method}' could not be found in type '{methodCallJob.Class}'. Please ensure the method name is correct and exists.");
                             }
 
-                            var defaultParameters = method.GetDefaultParameters();
+                            var defaultParameters = method.GetDefaultParameters(methodCallJob);
 
                             try
                             {

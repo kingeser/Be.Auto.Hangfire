@@ -3,17 +3,32 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
+using Newtonsoft.Json;
 using NJsonSchema;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {
     public static class MethodParameterExtensions
     {
+        public static object[] GetDefaultParameters(this MethodInfo @this, RecurringJobMethodCall job)
+        {
+            var parameters = (object[])JsonConvert.DeserializeObject(
+                job.MethodParameters,
+                typeof(object[]),
+                new MethodParameterConverter(@this)
+            );
+
+            return parameters;
+        }
         public static object[] GetDefaultParameters(this MethodInfo method)
         {
             return (method?.GetParameters() ?? []).Select(p => CreateInstanceWithDefaults(p.ParameterType)).ToArray();
         }
-
+        public static Type[] GetDefaultParameterTypes(this MethodInfo method)
+        {
+            return (method?.GetParameters() ?? []).Select(p => p.ParameterType).ToArray();
+        }
         private static object CreateInstanceWithDefaults(Type type)
         {
 
@@ -142,7 +157,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                 combinedSchema.Definitions[jSchema.Key].Title = jSchema.Key;
             }
 
-           
+
             return combinedSchema;
         }
     }
