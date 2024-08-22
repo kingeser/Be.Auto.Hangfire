@@ -8,17 +8,17 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 {
-    internal static class AssemblyInfoStorage
+    public static class AssemblyInfoStorage
     {
-        internal static readonly List<AssemblyInfo> Assemblies = [];
-        internal static void Store(params Assembly[] assemblies)
+        public static readonly List<AssemblyInfo> Assemblies = [];
+        public static void Store(params Assembly[] assemblies)
         {
             Assemblies.AddRange(assemblies.Select(t => new AssemblyInfo(t)));
         }
 
         public static Type? GetType(RecurringJobMethodCall job)
         {
-            return Assemblies.SelectMany(t => t.TypeMethods).Where(t => t.Key.FullName == job.Class).Select(t => t.Key).FirstOrDefault();
+            return Assemblies.SelectMany(t => t.TypeMethods).Where(t => t.Key.FullName == job.Type).Select(t => t.Key).FirstOrDefault();
         }
         public static Type? GetType(string type)
         {
@@ -34,7 +34,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
         }
         public static MethodInfo? GetMethod(RecurringJobMethodCall job)
         {
-            return Assemblies.SelectMany(t => t.TypeMethods).Where(t => t.Key.FullName == job.Class).SelectMany(t => t.Value).FirstOrDefault(t => t.GenerateFullName() == job.Method);
+            return Assemblies.SelectMany(t => t.TypeMethods).Where(t => t.Key.FullName == job.Type).SelectMany(t => t.Value).FirstOrDefault(t => t.GenerateFullName() == job.Method);
         }
         public static MethodInfo? GetMethod(string type, string method)
         {

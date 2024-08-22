@@ -7,11 +7,11 @@ using Hangfire.Dashboard;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
-    internal sealed class GetCurrentAssemblyTypeMethodsDispatcher : IDashboardDispatcher
+    public sealed class GetCurrentAssemblyTypeMethodsDispatcher : IDashboardDispatcher
     {
         public async Task Dispatch([NotNull] DashboardContext context)
         {
-            var methods = AssemblyInfoStorage.GetMethodsByType(context.Request.GetQuery("Class")).Select(t =>t.GenerateFullName());
+            var methods = AssemblyInfoStorage.GetMethodsByType(context.Request.GetQuery("Type")).Select(t =>t.GenerateFullName());
             await context.Response.WriteAsync(methods.SerializeObjectToJson());
         }
     }

@@ -23,16 +23,17 @@ public static class ExceptionExtensions
 
     private static void GetAllMessagesRecursive(Exception exception, StringBuilder sb)
     {
-        if (exception == null) return;
-
-        // Append the current exception message
-        sb.AppendLine(exception.Message);
-
-        // Recurse through the inner exceptions, if any
-        if (exception.InnerException != null)
+        while (true)
         {
+            if (exception == null) return;
+
+            // Append the current exception message
+            sb.AppendLine(exception.Message);
+
+            // Recurse through the inner exceptions, if any
+            if (exception.InnerException == null) return;
             sb.AppendLine("Inner Exception:");
-            GetAllMessagesRecursive(exception.InnerException, sb);
+            exception = exception.InnerException;
         }
     }
 }

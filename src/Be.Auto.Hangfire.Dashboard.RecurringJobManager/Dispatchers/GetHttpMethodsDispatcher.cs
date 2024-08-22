@@ -7,7 +7,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
-    internal sealed class GetHttpMethodsDispatcher : IDashboardDispatcher
+    public sealed class GetHttpMethodsDispatcher : IDashboardDispatcher
     {
         public async Task Dispatch([NotNull] DashboardContext context)
         {

@@ -114,18 +114,18 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                         if (string.IsNullOrEmpty(methodCallJob.Method))
                             throw new RecurringJobException("Job registration failed: The 'Method' field cannot be null or empty.");
 
-                        if (string.IsNullOrEmpty(methodCallJob.Class))
-                            throw new RecurringJobException("Job registration failed: The 'Class' field cannot be null or empty.");
+                        if (string.IsNullOrEmpty(methodCallJob.Type))
+                            throw new RecurringJobException("Job registration failed: The 'Type' field cannot be null or empty.");
 
                         var type = AssemblyInfoStorage.GetType(methodCallJob);
 
                         if (type == null)
-                            throw new RecurringJobException($"Job registration failed: The specified job type '{methodCallJob.Class}' could not be found. Please verify the type name is correct and available.");
+                            throw new RecurringJobException($"Job registration failed: The specified job type '{methodCallJob.Type}' could not be found. Please verify the type name is correct and available.");
 
                         var method = AssemblyInfoStorage.GetMethod(methodCallJob);
 
                         if (method == null)
-                            throw new RecurringJobException($"Job registration failed: The specified method '{methodCallJob.Method}' could not be found in type '{methodCallJob.Class}'. Please ensure the method name is correct and exists.");
+                            throw new RecurringJobException($"Job registration failed: The specified method '{methodCallJob.Method}' could not be found in type '{methodCallJob.Type}'. Please ensure the method name is correct and exists.");
 
                         try
                         {

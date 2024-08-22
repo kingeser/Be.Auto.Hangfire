@@ -8,9 +8,9 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
-    internal sealed class GetJobForEdit : IDashboardDispatcher
+    public sealed class GetJobForEdit : IDashboardDispatcher
     {
-      
+
         public async Task Dispatch([NotNull] DashboardContext conterecurringJobt)
         {
             var response = new Response() { Status = true };

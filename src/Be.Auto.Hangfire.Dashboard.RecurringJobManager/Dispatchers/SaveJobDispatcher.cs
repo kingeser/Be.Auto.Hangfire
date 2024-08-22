@@ -12,7 +12,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
-    internal sealed class SaveJobDispatcher : IDashboardDispatcher
+    public sealed class SaveJobDispatcher : IDashboardDispatcher
     {
         public async Task Dispatch([NotNull] DashboardContext context)
         {
@@ -58,7 +58,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                 {
                     Id = context.Request.GetQuery(nameof(RecurringJobBase.Id)),
                     Cron = context.Request.GetQuery(nameof(RecurringJobBase.Cron)),
-                    Class = context.Request.GetQuery(nameof(RecurringJobMethodCall.Class)),
+                    Type = context.Request.GetQuery(nameof(RecurringJobMethodCall.Type)),
                     Method = context.Request.GetQuery(nameof(RecurringJobMethodCall.Method)),
                     TimeZoneId = context.Request.GetQuery(nameof(RecurringJobBase.TimeZoneId)),
                     MisfireHandlingMode =

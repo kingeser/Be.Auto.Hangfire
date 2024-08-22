@@ -8,7 +8,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
     {
         public string Id { get; set; }
         public string Cron { get; set; }
-
         public abstract JobType JobType { get; }
         public MisfireHandlingMode MisfireHandlingMode { get; set; }
         public string JobState { get; set; }

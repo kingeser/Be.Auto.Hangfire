@@ -7,9 +7,9 @@ using Hangfire.Dashboard;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
-    internal sealed class GetJobsStoppedDispatcher : IDashboardDispatcher
+    public sealed class GetJobsStoppedDispatcher : IDashboardDispatcher
     {
-      
+
         public async Task Dispatch([NotNull] DashboardContext context)
         {
             if (!"GET".Equals(context.Request.Method, StringComparison.InvariantCultureIgnoreCase))

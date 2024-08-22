@@ -93,14 +93,14 @@
                 </div>
 
                 <div class="form-group" v-show="job.JobType === 'MethodCall'">
-                    <label for="Class">Class</label>
-                    <select id="Class" name="Class" class="form-control" v-model="job.Class" @change="onClassChange">
+                    <label for="Type">Type</label>
+                    <select id="Type" name="Type" class="form-control" v-model="job.Type" @change="onClassChange">
                         <option value="">Please select</option>
                         <option v-for="(item, index) in assemblyTypes" :key="index" :value="item">{{ item }}</option>
 
                     </select>
                 </div>
-                <div class="form-group" v-show="job.JobType === 'MethodCall' &&  job.Class!=''">
+                <div class="form-group" v-show="job.JobType === 'MethodCall' &&  job.Type!=''">
                     <label for="Method">Method</label>
                     <select id="Method" name="Method" class="form-control" v-model="job.Method" @change="getAssemblyTypeMethodJsonSchema">
                         <option value="">Please select</option>
@@ -193,7 +193,7 @@
                                 <th>Misfire Handling Mode</th>
                                 <th>State</th>
                                 <th>JobType</th>
-                                <th>Class / HostName</th>
+                                <th>Type / HostName</th>
                                 <th>Method / Path</th>
                                 <th>TimeZone</th>
                                 <th>Last Execution</th>
@@ -244,7 +244,7 @@
                                     </span>
                                 </td>
                                 <td class="word-break ">{{ job.JobType }}</td>
-                                <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.HostName : job.Class }}</td>
+                                <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.HostName : job.Type }}</td>
                                 <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.UrlPath : job.Method }}</td>
                                 <td class="word-break ">{{ job.TimeZoneId }}</td>
                                 <td class="word-break ">
@@ -331,7 +331,7 @@
                 Id: '',
                 Cron: '',
                 JobType: '',
-                Class: '',
+                Type: '',
                 Method: '',
                 HttpMethod: '',
                 BodyParameterType: '',
@@ -487,6 +487,8 @@
                             if (job.value.BodyParameters && job.value.BodyParameters !== '') {
 
                                 bodyParametersJsonEditor.value.setValue(JSON.parse(job.value.BodyParameters));
+
+                                checkJsonEditorProperties('bodyParametersJsonEditor');
                             }
 
 
@@ -533,7 +535,7 @@
                         remove_button_labels: true,
                         no_additional_properties: true,
                         enable_array_copy: false,
-                        disable_properties: true,
+                        disable_properties: false,
                         array_controls_top: true,
                         disable_array_reorder: true,
                         disable_collapse: true,
@@ -550,6 +552,7 @@
                         if (job.value.HeaderParameters && job.value.HeaderParameters != '') {
                             headerParametersJsonEditor.value.setValue(JSON.parse(job.value.HeaderParameters));
 
+                            checkJsonEditorProperties('headerParametersJsonEditor');
                         }
                       
                     });
@@ -584,7 +587,7 @@
             };
 
             const onClassChange = (e) => {
-                job.value.Class = e.target.value;
+                job.value.Type = e.target.value;
                 assemblyTypeMethods.value = [];
                 getAssemblyTypeMethods();
             };
@@ -749,9 +752,9 @@
 
             const getAssemblyTypeMethodJsonSchema = () => {
 
-                if (job.value.Class != '' && job.value.Method != '') {
+                if (job.value.Type != '' && job.value.Method != '') {
 
-                    axios.get('recurring-job-manager/get-current-assembly-type-method-json-schema?Class=' + job.value.Class + '&Method=' + job.value.Method).then(response => {
+                    axios.get('recurring-job-manager/get-current-assembly-type-method-json-schema?Type=' + job.value.Type + '&Method=' + job.value.Method).then(response => {
                         Vue.nextTick(() => {
 
                             methodParametersIsExist.value = response !== null && response.data !== null && response.data.Schema != null && response.data.Schema!='';
@@ -790,6 +793,8 @@
                                 if (job.value.MethodParameters && job.value.MethodParameters!='') {
 
                                     methodParametersJsonEditor.value.setValue(JSON.parse(job.value.MethodParameters));
+
+                                    checkJsonEditorProperties('methodParametersJsonEditor');
                                 }
 
                             });
@@ -846,7 +851,7 @@
             };
 
             const getAssemblyTypeMethods = () => {
-                axios.get('recurring-job-manager/get-current-assembly-type-methods?Class=' + job.value.Class).then(response => {
+                axios.get('recurring-job-manager/get-current-assembly-type-methods?Type=' + job.value.Type).then(response => {
                     assemblyTypeMethods.value = response.data;
 
 
@@ -862,7 +867,7 @@
                     Id: '',
                     Cron: '',
                     JobType: '',
-                    Class: '',
+                    Type: '',
                     Method: '',
                     HttpMethod: '',
                     BodyParameterType: '',
@@ -924,8 +929,8 @@
                         break;
 
                     case "MethodCall":
-                        if (!job.value.Class) {
-                            errors.value.push("Class is required for Method Call jobs. Please select a class.");
+                        if (!job.value.Type) {
+                            errors.value.push("Type is required for Method Call jobs. Please select a class.");
                         }
                         if (!job.value.Method) {
                             errors.value.push("Method is required for Method Call jobs. Please select a method.");
@@ -944,6 +949,16 @@
                 return dayjs().from(dayjs(date));
             };
 
+            const checkJsonEditorProperties = (id) => {
+
+                const checkboxes = document.querySelectorAll('#' + id + ' input[type="checkbox"].form-check-input');
+
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                    checkbox.dispatchEvent(new Event('change'));
+                });
+
+            };
             const getItems = computed(() => {
                 if (!jobs.value) return [];
                 let current = pagination.value.currentPage * pagination.value.parPage;
@@ -972,6 +987,7 @@
                 headerParametersJsonEditor,
                 bodyParametersJsonEditor,
                 job,
+                checkJsonEditorProperties,
                 pagination,
                 selectedJobType,
                 headerCount,

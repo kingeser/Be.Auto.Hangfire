@@ -6,7 +6,7 @@ using Hangfire.Dashboard;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
-    internal sealed class GetTimeZonesDispatcher : IDashboardDispatcher
+    public sealed class GetTimeZonesDispatcher : IDashboardDispatcher
     {
         public async Task Dispatch([NotNull] DashboardContext context)
         {

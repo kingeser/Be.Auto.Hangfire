@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 
-internal static class TimeZones
+public static class TimeZones
 {
       
     public static DateTime ChangeTimeZone(this DateTime dateTime, string timeZoneId) => TimeZoneInfo.ConvertTimeBySystemTimeZoneId(dateTime, timeZoneId);

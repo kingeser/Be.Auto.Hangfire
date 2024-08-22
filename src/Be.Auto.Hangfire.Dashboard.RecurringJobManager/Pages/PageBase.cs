@@ -2,7 +2,7 @@
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Pages
 {
-    internal abstract class PageBase : RazorPage
+    public abstract  class PageBase : RazorPage
     {
         public override void Execute() { }
 

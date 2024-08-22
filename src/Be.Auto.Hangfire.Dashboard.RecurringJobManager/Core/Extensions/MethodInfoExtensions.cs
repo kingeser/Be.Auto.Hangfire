@@ -9,7 +9,7 @@ using NJsonSchema;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {
-    internal static class MethodInfoExtensions
+    public static class MethodInfoExtensions
     {
         public static string GenerateFullName(this MethodInfo @this)
         {
@@ -35,7 +35,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
         {
             return (method?.GetParameters() ?? []).Select(p => p.ParameterType).ToArray();
         }
-        internal static object CreateInstanceWithDefaults(this Type type)
+        public static object CreateInstanceWithDefaults(this Type type)
         {
 
             if (type.IsAbstract || type.IsInterface || type.IsGenericTypeDefinition)

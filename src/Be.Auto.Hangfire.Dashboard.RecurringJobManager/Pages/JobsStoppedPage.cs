@@ -3,7 +3,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Pages
 {
-    internal sealed class JobsStoppedPage : PageBase
+    public sealed class JobsStoppedPage : PageBase
     {
         public const string Title = "Stopped Jobs";
         public const string PageRoute = "/jobs/stopped";

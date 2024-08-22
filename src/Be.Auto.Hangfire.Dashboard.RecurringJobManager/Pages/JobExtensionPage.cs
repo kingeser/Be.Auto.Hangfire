@@ -3,7 +3,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Pages
 {
-    internal sealed class JobExtensionPage : PageBase
+    public sealed class JobExtensionPage : PageBase
     {
         public const string Title = "Recurring Job Manager";
         public const string PageRoute = "/recurring-job-manager";

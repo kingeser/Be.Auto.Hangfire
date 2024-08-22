@@ -8,7 +8,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
-    internal sealed class GetBodyTypesDispatcher : IDashboardDispatcher
+    public sealed  class GetBodyTypesDispatcher : IDashboardDispatcher
     {
         public async Task Dispatch([NotNull] DashboardContext context)
         {

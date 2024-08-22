@@ -85,6 +85,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/webfonts/fa-solid-900.ttf", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.fonts.fa-solid-900.ttf");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/webfonts/fa-solid-900.woff2", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.fonts.fa-solid-900.woff2");
 
+          
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/css/fontawesome", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.css.fontawesome.css");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/css/jobExtension", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.css.JobExtension.css");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/css/cron-expression-input", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.css.cron-expression-input.css");
@@ -96,6 +97,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/js/sweetalert", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.sweetalert.js");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/js/cron-expression-input", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.cron-expression-input.js");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/js/jsoneditor", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.jsoneditor.min.js");
+
         }
 
         private static void AddDashboardRouteToEmbeddedResource(string route, string contentType, string resourceName)

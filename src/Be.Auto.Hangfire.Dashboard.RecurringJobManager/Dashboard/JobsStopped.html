@@ -17,7 +17,7 @@
                         <tr>
                             <th>Id</th>
                             <th>Queue</th>
-                            <th>Class</th>
+                            <th>Type</th>
                             <th>Method</th>
                             <th>TimeZone</th>
                         </tr>
@@ -26,7 +26,7 @@
                         <tr v-for="job in getItems" :key="job.Id">
                             <td>{{ job.Id }}</td>
                             <td>{{ job.Queue }}</td>
-                            <td>{{ job.Class }}</td>
+                            <td>{{ job.Type }}</td>
                             <td>{{ job.Method }}</td>
                             <td>{{ job.TimeZoneId }}</td>
                         </tr>
