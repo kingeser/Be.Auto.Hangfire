@@ -53,8 +53,8 @@
 
 <div id="app">
 
-    <modal v-show="showModal" @close="closeModal">
-        <template v-slot:header>
+<modal v-show="showModal" @close="closeModal">
+    <template v-slot:header>
             <h3>{{ title }}</h3>
         </template>
         <template v-slot:body>
@@ -166,91 +166,112 @@
 
 
     <div class="row">
-        <div class="col-md-12" style="margin:0px;padding:0px;">
-            <h1 class="page-header">Recurring Jobs <span class="badge badge-warning">{{getItems.length}}</span></h1>
-            <button type="button" class="btn btn-primary" @click="OpenModal">Add new Job</button>
+        <div class="col-md-12">
 
-            <div class="table-responsive">
-                <table id="joblist" class="table">
+            <h1 id="page-title" class="page-header">Recurring Jobs Manager <span class="badge badge-warning">{{getItems.length}}</span></h1>
+           
+            <div class="js-jobs-list">
 
-                    <thead>
-                        <tr>
-                            <th>Actions</th>
-                            <th>Id</th>
-                            <th>Cron</th>
-                            <th>Misfire Handling Mode</th>
-                            <th>State</th>
-                            <th>JobType</th>
-                            <th>Class / HostName</th>
-                            <th>Method / Path</th>
-                            <th>TimeZone</th>
-                            <th>Last Execution</th>
-                            <th>Next Execution</th>
+                <div class="btn-toolbar btn-toolbar-top">
+                    <button type="button" class="btn btn-sm btn-primary" @click="OpenModal">
+                        <span class="glyphicon glyphicon-plus"></span>
+                        Add New Job
+                    </button>
 
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="job in getItems" :key="job.Id">
-                            <td>
-                                <table>
-                                    <tr>
-                                        <td>
-                                            <button type="button" class="btn btn-warning" style="padding-top: 10px; margin-right: 5px;">
-                                                <svg width="18px" height="18px" viewBox="0 0 16 16" class="bi bi-pencil-square" fill="currentColor" @click="GetJob(job.Id)">
-                                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
-                                                </svg>
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button v-show="job.JobState == 'Stopped'" type="button" class="btn btn-success" style="padding: 4px 10px;" @click="StartJob(job.Id)">
-                                                <svg width="24px" height="25px" viewBox="-1 -1.5 16 16" class="bi bi-play" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M10.804 8L5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
-                                                </svg>
-                                            </button>
-                                            <button v-show="job.JobState == 'Running'" type="button" class="btn btn-danger" style="padding: 4px 10px;" @click="StopJob(job.Id)">
-                                                <svg width="24px" height="25px" viewBox="-0.5 -1.5 16 16" class="bi bi-stop" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M3.5 5A1.5 1.5 0 0 1 5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5zM5 4.5a.5.5 0 0 0-.5.5v6a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5H5z" />
-                                                </svg>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                            <td>{{ job.Id }}</td>
-                            <td>{{ job.Cron }}</td>
-                            <td>{{ job.MisfireHandlingMode }}</td>
-                            <td>
-                                <span :class="{'label label-success': job.JobState == 'Running', 'label label-danger': job.JobState == 'Stopped'}">
-                                    {{ job.JobState }}
-                                </span>
-                            </td>
-                            <td>{{ job.JobType }}</td>
-                            <td>{{ job.JobType === 'WebRequest' ? job.HostName : job.Class }}</td>
-                            <td>{{ job.JobType === 'WebRequest' ? job.UrlPath : job.Method  }}</td>
-                            <td>{{ job.TimeZoneId }}</td>
-                            <td>
-                                <button type="button" class="btn btn-primary">
-                                    {{ getTimeFromNow(job.LastExecution) }}&nbsp;&nbsp;
-                                    <span class="badge" style="width: 124px;">
-                                        {{ capitalizeString(getTimeFromNow(job.LastExecution)) }}
+                </div>
+                
+                <div class="table-responsive">
+
+                    <table id="joblist" class="table">
+
+                        <thead>
+                            <tr>
+                               
+                                <th>Actions</th>
+                                <th>Id</th>
+                                <th>Cron</th>
+                                <th>Misfire Handling Mode</th>
+                                <th>State</th>
+                                <th>JobType</th>
+                                <th>Class / HostName</th>
+                                <th>Method / Path</th>
+                                <th>TimeZone</th>
+                                <th>Last Execution</th>
+                                <th>Next Execution</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="js-jobs-list-row" v-for="job in getItems" :key="job.Id">
+                               
+                                <td>
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <button type="button" class="btn btn-warning" style="width:32px;height:32px; padding-top: 10px; margin-right: 5px;">
+                                                    <svg width="24px" height="24px" viewBox="0 0 24 24" class="bi bi-pencil-square" fill="currentColor" @click="GetJob(job.Id)">
+                                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                                                    </svg>
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <button v-show="job.JobState == 'Stopped'" type="button" class="btn btn-success" style="width:32px;height:32px; padding: 4px 10px;" @click="StartJob(job.Id)">
+                                                    <svg width="24px" height="24px" viewBox="-1 -1.5 16 16" class="bi bi-play" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M10.804 8L5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
+                                                    </svg>
+                                                </button>
+                                                <button v-show="job.JobState == 'Running'" type="button" class="btn btn-danger" style="width: 32px; height: 32px; padding: 4px 10px;" @click="StopJob(job.Id)">
+                                                    <svg width="24px" height="24px" viewBox="-0.5 -1.5 16 16" class="bi bi-stop" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M3.5 5A1.5 1.5 0 0 1 5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5zM5 4.5a.5.5 0 0 0-.5.5v6a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5H5z" />
+                                                    </svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td class="word-break ">{{ job.Id }}</td>
+                                <td class="min-width min-width-125p ">
+                                    <code class="cron-badge">
+                                        {{ job.Cron }}
+                                    </code>
+
+                                </td>
+                                <td class="word-break ">{{ job.MisfireHandlingMode }}</td>
+                                <td class="word-break ">
+                                    <span :class="{'label label-success': job.JobState == 'Running', 'label label-danger': job.JobState == 'Stopped'}">
+                                        {{ job.JobState }}
                                     </span>
-                                </button>
-                            </td>
-                            <td>
-                                <button type="button" class="btn btn-primary">
-                                    {{ getTimeFromNow(job.NextExecution) }}&nbsp;&nbsp;
-                                    <span class="badge" style="width: 124px;">
-                                        {{ capitalizeString(getTimeFromNow(job.NextExecution)) }}
-                                    </span>
-                                </button>
-                            </td>
-                        </tr>
+                                </td>
+                                <td class="word-break ">{{ job.JobType }}</td>
+                                <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.HostName : job.Class }}</td>
+                                <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.UrlPath : job.Method }}</td>
+                                <td class="word-break ">{{ job.TimeZoneId }}</td>
+                                <td class="word-break ">
+                                    <button type="button" class="btn btn-primary">
+                                        {{ getTimeFromNow(job.LastExecution) }}&nbsp;&nbsp;
+                                        <span class="badge" style="width: 124px;">
+                                            {{ capitalizeString(getTimeFromNow(job.LastExecution)) }}
+                                        </span>
+                                    </button>
+                                </td>
+                                <td class="word-break ">
+                                    <button type="button" class="btn btn-primary">
+                                        {{ getTimeFromNow(job.NextExecution) }}&nbsp;&nbsp;
+                                        <span class="badge" style="width: 124px;">
+                                            {{ capitalizeString(getTimeFromNow(job.NextExecution)) }}
+                                        </span>
+                                    </button>
+                                </td>
+                            </tr>
 
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
 
 
+
+                </div>
+              
             </div>
 
 

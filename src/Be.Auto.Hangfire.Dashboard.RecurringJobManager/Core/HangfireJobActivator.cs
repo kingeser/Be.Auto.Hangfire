@@ -23,9 +23,7 @@ public class HangfireJobActivator(IServiceProvider serviceProvider) : JobActivat
                 break;
             }
         }
-
         return instance ?? CreateInstance(type);
-
     }
 
     private static object CreateInstance(Type type)

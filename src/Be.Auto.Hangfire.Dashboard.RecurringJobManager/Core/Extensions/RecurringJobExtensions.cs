@@ -71,20 +71,40 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                                 break;
                             case BodyParameterType.FormUrlEncoded:
                                 {
-                                    if (!webRequestJob.BodyParameters.TryDeserializeObjectFromJson<List<HttpFormUrlEncodedParameter>>(out _))
+                                    if (!webRequestJob.BodyParameters.TryDeserializeObjectFromJson<List<HttpFormUrlEncodedParameter>>(out var formUrlEncodedParameters))
 
                                     {
                                         throw new RecurringJobException("Job registration failed: The 'BodyParameters' field could not be deserialized into a valid list of 'HttpFormUrlEncodedParameter'.");
+                                    }
+
+                                    if (!formUrlEncodedParameters.Any())
+                                    {
+                                        throw new RecurringJobException("Job registration failed: ");
+                                    }
+
+                                    if (formUrlEncodedParameters.Exists(t => string.IsNullOrEmpty(t.Name) || string.IsNullOrEmpty(t.Value)))
+                                    {
+                                        throw new RecurringJobException("Job registration failed: ");
                                     }
                                 }
                                 break;
                             case BodyParameterType.FormData:
                                 {
 
-                                    if (!webRequestJob.BodyParameters.TryDeserializeObjectFromJson<List<HttpFormDataParameter>>(out _))
+                                    if (!webRequestJob.BodyParameters.TryDeserializeObjectFromJson<List<HttpFormDataParameter>>(out var formDataParameters))
 
                                     {
                                         throw new RecurringJobException("Job registration failed: The 'BodyParameters' field could not be deserialized into a valid list of 'HttpFormDataParameter'.");
+                                    }
+
+                                    if (!formDataParameters.Any())
+                                    {
+                                        throw new RecurringJobException("Job registration failed: ");
+                                    }
+
+                                    if (formDataParameters.Exists(t => string.IsNullOrEmpty(t.Name) || string.IsNullOrEmpty(t.Value) || string.IsNullOrEmpty(t.ContentType)))
+                                    {
+                                        throw new RecurringJobException("Job registration failed: ");
                                     }
                                 }
                                 break;
@@ -154,17 +174,34 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
                             try
                             {
+                                object[] parametersFromJob;
+                                try
+                                {
+                                    parametersFromJob = method.GetDefaultParameters(methodCallJob);
+                                }
+                                catch
+                                {
 
-                                var defaultParameters = method.GetDefaultParameters(methodCallJob);
+                                    throw new RecurringJobException("Job registration failed: ");
+                                }
 
-                                new global::Hangfire.RecurringJobManager(JobStorage.Current).AddOrUpdate(job.Id, new Job(method.DeclaringType,method, defaultParameters), job.Cron, new RecurringJobOptions()
+                                var defaultParameters = method.GetDefaultParameters();
+
+
+                                if (parametersFromJob.Length != defaultParameters.Length)
+                                {
+                                    throw new RecurringJobException("Job registration failed: ");
+                                }
+
+                                new global::Hangfire.RecurringJobManager(JobStorage.Current).AddOrUpdate(job.Id, new Job(method.DeclaringType, method, parametersFromJob), job.Cron, new RecurringJobOptions()
                                 {
                                     TimeZone = job.TimeZone,
                                     MisfireHandling = job.MisfireHandlingMode,
-                                    
+
                                 });
 
                                 RecurringJobAgent.SaveJobDetails(job);
+
                             }
                             catch (Exception e)
                             {
