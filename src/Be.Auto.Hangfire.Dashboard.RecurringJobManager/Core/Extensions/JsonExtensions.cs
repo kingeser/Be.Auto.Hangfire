@@ -1,5 +1,4 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;

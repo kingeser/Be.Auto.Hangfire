@@ -30,7 +30,7 @@ namespace Hangfire.JobExtensions
 
             services.AddHangfire(config => config
                                                  .UseSqlServerStorage(Configuration.GetConnectionString("HangfireConnection"))
-                                                 .UseDashboardRecurringJobManager(services.BuildServiceProvider(), typeof(AppointmentSmsNotificationService).Assembly));
+                                                 .UseDashboardRecurringJobManager( typeof(AppointmentSmsNotificationService).Assembly));
             services.AddHangfireServer();
 
 

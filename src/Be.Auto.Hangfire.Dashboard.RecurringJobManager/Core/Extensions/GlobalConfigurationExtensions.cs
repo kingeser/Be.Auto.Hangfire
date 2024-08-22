@@ -12,17 +12,11 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
     {
 
         [PublicAPI]
-        public static IGlobalConfiguration UseDashboardRecurringJobManager(this IGlobalConfiguration config,IServiceProvider serviceProvider,[NotNull] params Assembly[] assemblies)
+        public static IGlobalConfiguration UseDashboardRecurringJobManager(this IGlobalConfiguration config, [NotNull] params Assembly[] assemblies)
         {
-            if (assemblies == null || assemblies.Length == 0)
-            {
-                throw new RecurringJobException("The assemblies parameter is either null or an empty array. Please provide at least one assembly to continue.");
-            }
-
-            config.UseActivator(new HangfireJobActivator(serviceProvider));
-        
+          
             StoreAssemblies(assemblies);
-           InitializeDashboard();
+            InitializeDashboard();
 
             return config;
         }
