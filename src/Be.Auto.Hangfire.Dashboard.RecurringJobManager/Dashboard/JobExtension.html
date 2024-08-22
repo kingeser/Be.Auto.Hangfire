@@ -53,7 +53,7 @@
 
 <div id="app">
 
-    <modal v-if="showModal" @close="closeModal">
+    <modal v-show="showModal" @close="closeModal">
         <template v-slot:header>
             <h3>{{ title }}</h3>
         </template>
@@ -92,7 +92,7 @@
                     <cron-expression-input :value="job.Cron" v-on:input="onCronChange" color="d58512" />
                 </div>
 
-                <div class="form-group" v-if="job.JobType === 'MethodCall'">
+                <div class="form-group" v-show="job.JobType === 'MethodCall'">
                     <label for="Class">Class</label>
                     <select id="Class" name="Class" class="form-control" v-model="job.Class" @change="onClassChange">
                         <option value="">Please select</option>
@@ -100,39 +100,39 @@
 
                     </select>
                 </div>
-                <div class="form-group" v-if="job.JobType === 'MethodCall' &&  job.Class!=''">
+                <div class="form-group" v-show="job.JobType === 'MethodCall' &&  job.Class!=''">
                     <label for="Method">Method</label>
                     <select id="Method" name="Method" class="form-control" v-model="job.Method" @change="getAssemblyTypeMethodJsonSchema">
                         <option value="">Please select</option>
                         <option v-for="(item, index) in assemblyTypeMethods" :key="index" :value="item">{{ item }}</option>
                     </select>
                 </div>
-                <div class="form-group" v-if="job.JobType === 'MethodCall' && job.Method!=''">
+                <div class="form-group" v-show="job.JobType === 'MethodCall' && job.Method !='' && methodParametersIsExist">
                     <label for="methodParametersJsonEditor">Method Parameters</label>
                     <input type="hidden" id="MethodParameters" name="MethodParameters" v-model="job.MethodParameters">
                     <div id="methodParametersJsonEditor"></div>
                 </div>
-                <div class="form-group" v-if="job.JobType === 'WebRequest'">
+                <div class="form-group" v-show="job.JobType === 'WebRequest'">
                     <label for="HostName">HostName</label>
                     <input type="text" class="form-control" v-model="job.HostName" id="HostName" name="HostName" placeholder="Example: http://HostName.com">
                 </div>
-                <div class="form-group" v-if="job.JobType === 'WebRequest'">
+                <div class="form-group" v-show="job.JobType === 'WebRequest'">
                     <label for="UrlPath">Path</label>
                     <input type="text" class="form-control" v-model="job.UrlPath" id="UrlPath" name="UrlPath" placeholder="Example: /api/get-products">
                 </div>
-                <div class="form-group" v-if="job.JobType === 'WebRequest'">
+                <div class="form-group" v-show="job.JobType === 'WebRequest'">
                     <label for="HttpMethod">Http Method</label>
                     <select id="HttpMethod" name="HttpMethod" class="form-control" v-model="job.HttpMethod" @change="getBodyParameterTypes">
                         <option value="">Please select</option>
                         <option v-for="(item, index) in httpMethods" :key="index" :value="item">{{ item }}</option>
                     </select>
                 </div>
-                <div class="form-group table-group" v-if="job.JobType === 'WebRequest'">
+                <div class="form-group table-group" v-show="job.JobType === 'WebRequest'">
 
                     <input type="hidden" id="HeaderParameters" name="HeaderParameters" v-model="job.HeaderParameters">
                     <div id="headerParametersJsonEditor"></div>
                 </div>
-                <div class="form-group" v-if="job.JobType === 'WebRequest' && job.HttpMethod!=''">
+                <div class="form-group" v-show="job.JobType === 'WebRequest' && job.HttpMethod!=''">
                     <label for="BodyParameterType">Body Parameters Type</label>
                     <select id="BodyParameterType" name="BodyParameterType" @change="onBodyParameterTypeChange" class="form-control" v-model="job.BodyParameterType">
                         <option value="">Please select</option>
@@ -140,18 +140,18 @@
                     </select>
                 </div>
 
-                <div class="form-group table-group" v-if="job.JobType === 'WebRequest' && (job.BodyParameterType ==='Json' || job.BodyParameterType ==='FormUrlEncoded'  || job.BodyParameterType ==='FormData')">
+                <div class="form-group table-group" v-show="job.JobType === 'WebRequest' && (job.BodyParameterType ==='Json' || job.BodyParameterType ==='FormUrlEncoded'  || job.BodyParameterType ==='FormData')">
                     <input type="hidden" id="BodyParameters" name="BodyParameters" v-model="job.BodyParameters">
                     <div id="bodyParametersJsonEditor"></div>
                 </div>
 
 
-                <div class="form-group table-group" v-if="job.JobType === 'WebRequest' && (job.BodyParameterType ==='Xml' || job.BodyParameterType ==='PlainText' )">
+                <div class="form-group table-group" v-show="job.JobType === 'WebRequest' && (job.BodyParameterType ==='Xml' || job.BodyParameterType ==='PlainText' )">
                     <label for="bodyParameterXmlOrText">Body Parameters</label>
                     <textarea @change="bodyParameterXmlOrTextOnChange" class="form-control" rows="10" type="hidden" id="bodyParameterXmlOrText" name="bodyParameterXmlOrText" v-model="bodyParameterXmlOrText"></textarea>
                 </div>
 
-                <div class="form-group" v-if="errors.length > 0">
+                <div class="form-group" v-show="errors.length > 0">
                     <b style="color:red">Please correct the following error(s):</b>
                     <ul>
                         <li v-for="error in errors" :key="error" style="color:red">{{ error }}</li>
@@ -203,12 +203,12 @@
                                             </button>
                                         </td>
                                         <td>
-                                            <button v-if="job.JobState == 'Stopped'" type="button" class="btn btn-success" style="padding: 4px 10px;" @click="StartJob(job.Id)">
+                                            <button v-show="job.JobState == 'Stopped'" type="button" class="btn btn-success" style="padding: 4px 10px;" @click="StartJob(job.Id)">
                                                 <svg width="24px" height="25px" viewBox="-1 -1.5 16 16" class="bi bi-play" fill="currentColor">
                                                     <path fill-rule="evenodd" d="M10.804 8L5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
                                                 </svg>
                                             </button>
-                                            <button v-if="job.JobState == 'Running'" type="button" class="btn btn-danger" style="padding: 4px 10px;" @click="StopJob(job.Id)">
+                                            <button v-show="job.JobState == 'Running'" type="button" class="btn btn-danger" style="padding: 4px 10px;" @click="StopJob(job.Id)">
                                                 <svg width="24px" height="25px" viewBox="-0.5 -1.5 16 16" class="bi bi-stop" fill="currentColor">
                                                     <path fill-rule="evenodd" d="M3.5 5A1.5 1.5 0 0 1 5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5zM5 4.5a.5.5 0 0 0-.5.5v6a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5H5z" />
                                                 </svg>
@@ -305,6 +305,7 @@
             const methodParametersJsonEditor = ref(null);
             const headerParametersJsonEditor = ref(null);
             const bodyParametersJsonEditor = ref(null);
+            const methodParametersIsExist = ref(false);
             const job = ref({
                 Id: '',
                 Cron: '',
@@ -342,8 +343,6 @@
 
                     if (bodyParametersJsonEditor.value)
                         bodyParametersJsonEditor.value.destroy();
-
-
 
 
                     switch (job.value.BodyParameterType) {
@@ -454,20 +453,25 @@
 
                             break;
                     }
+                    if (bodyParametersJsonEditor.value) {
 
-                    bodyParametersJsonEditor.value.on('change', () => {
+                        bodyParametersJsonEditor.value.on('change', () => {
 
-                        job.value.BodyParameters = JSON.stringify(bodyParametersJsonEditor.value.getValue());
-                    });
+                            job.value.BodyParameters = JSON.stringify(bodyParametersJsonEditor.value.getValue());
+                        });
 
-                    bodyParametersJsonEditor.value.on('ready', () => {
+                        bodyParametersJsonEditor.value.on('ready', () => {
 
-                        if (job.value.BodyParameters == null || job.value.BodyParameters === undefined || job.value.BodyParameters == '') {
 
-                            bodyParametersJsonEditor.value.setValue(JSON.parse(JSON.parse(job.value.BodyParameters)));
-                        }
+                            if (job.value.BodyParameters && job.value.BodyParameters !== '') {
 
-                    });
+                                bodyParametersJsonEditor.value.setValue(JSON.parse(job.value.BodyParameters));
+                            }
+
+
+                        });
+                    }
+
 
                 });
             };
@@ -522,8 +526,11 @@
 
                     headerParametersJsonEditor.value.on('ready', () => {
 
-                        headerParametersJsonEditor.value.setValue(JSON.parse(JSON.parse(job.value.HeaderParameters)));
+                        if (job.value.HeaderParameters && job.value.HeaderParameters != '') {
+                            headerParametersJsonEditor.value.setValue(JSON.parse(job.value.HeaderParameters));
 
+                        }
+                      
                     });
 
 
@@ -726,6 +733,12 @@
                     axios.get('recurring-job-manager/get-current-assembly-type-method-json-schema?Class=' + job.value.Class + '&Method=' + job.value.Method).then(response => {
                         Vue.nextTick(() => {
 
+                            methodParametersIsExist.value = response !== null && response.data !== null && response.data.Schema != null && response.data.Schema!='';
+
+                            if (!methodParametersIsExist.value) {
+
+                                return;
+                            }
 
                             if (methodParametersJsonEditor.value)
                                 methodParametersJsonEditor.value.destroy();
@@ -748,19 +761,23 @@
                             });
                             methodParametersJsonEditor.value.on('change', () => {
 
-
                                 job.value.MethodParameters = JSON.stringify(methodParametersJsonEditor.value.getValue());
                             });
 
                             methodParametersJsonEditor.value.on('ready', () => {
 
-                                methodParametersJsonEditor.value.setValue(JSON.parse(JSON.parse(job.value.MethodParameters)));
+                                if (job.value.MethodParameters && job.value.MethodParameters!='') {
+
+                                    methodParametersJsonEditor.value.setValue(JSON.parse(job.value.MethodParameters));
+                                }
 
                             });
                         });
 
 
                     }).catch(e => {
+
+                        methodParametersIsExist.value = false;
                         console.log(e);
                     });
                 }
@@ -954,6 +971,7 @@
                 getAssemblyTypeMethodJsonSchema,
                 getMisfireHandlingModes,
                 gethttpMethods,
+                methodParametersIsExist,
                 getBodyParameterTypes,
                 getJobTypes,
                 getAssemblyTypes,

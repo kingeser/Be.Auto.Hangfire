@@ -11,8 +11,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
     {
         public async Task Dispatch([NotNull] DashboardContext context)
         {
-
-            await context.Response.WriteAsync(AssemblyInfoStorage.GetMethodsByType(context.Request.GetQuery("Class")).Select(t => t.Name).SerializeObjectToJson());
+            var methods = AssemblyInfoStorage.GetMethodsByType(context.Request.GetQuery("Class")).Select(t =>t.GenerateFullName());
+            await context.Response.WriteAsync(methods.SerializeObjectToJson());
         }
     }
 }

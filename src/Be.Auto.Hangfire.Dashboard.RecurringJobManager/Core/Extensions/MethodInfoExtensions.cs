@@ -9,8 +9,14 @@ using NJsonSchema;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {
-    internal static class MethodParameterExtensions
+    internal static class MethodInfoExtensions
     {
+        public static string GenerateFullName(this MethodInfo @this)
+        {
+            return $"{@this.Name}({string.Join(",", @this.GetParameters().Select(x => $"{x.ParameterType.Name} {x.Name}"))})";
+
+        }
+     
         public static object[] GetDefaultParameters(this MethodInfo @this, RecurringJobMethodCall job)
         {
             var parameters = (object[])JsonConvert.DeserializeObject(

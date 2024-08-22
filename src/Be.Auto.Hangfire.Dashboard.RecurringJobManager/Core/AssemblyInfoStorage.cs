@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
@@ -33,11 +34,11 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
         }
         public static MethodInfo? GetMethod(RecurringJobMethodCall job)
         {
-            return Assemblies.SelectMany(t => t.TypeMethods).Where(t => t.Key.FullName == job.Class).SelectMany(t => t.Value).FirstOrDefault(t => t.Name == job.Method);
+            return Assemblies.SelectMany(t => t.TypeMethods).Where(t => t.Key.FullName == job.Class).SelectMany(t => t.Value).FirstOrDefault(t => t.GenerateFullName() == job.Method);
         }
         public static MethodInfo? GetMethod(string type, string method)
         {
-            return Assemblies.SelectMany(t => t.TypeMethods).Where(t => t.Key.FullName == type).SelectMany(t => t.Value).FirstOrDefault(t => t.Name == method);
+            return Assemblies.SelectMany(t => t.TypeMethods).Where(t => t.Key.FullName == type).SelectMany(t => t.Value).FirstOrDefault(t => t.GenerateFullName() == method);
         }
         public static bool IsValidMethod(string type, string method)
         {
