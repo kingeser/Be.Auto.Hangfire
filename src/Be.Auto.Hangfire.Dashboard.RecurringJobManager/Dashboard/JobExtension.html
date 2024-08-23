@@ -178,11 +178,11 @@
                         <span class="glyphicon glyphicon-plus"></span>
                         Add New Job
                     </button>
-                    <button type="button" class="btn btn-sm btn-success" @click="startSelectedJobs"  >
+                    <button type="button" class="btn btn-sm btn-success" @click="startSelectedJobs"  :disabled="selectedJobIds.length === 0" >
                         <span class="glyphicon glyphicon-play"></span>
                         Start Selected Jobs
                     </button>
-                    <button type="button" class="btn btn-sm btn-danger" @click="stopSelectedJobs">
+                    <button type="button" class="btn btn-sm btn-danger" @click="stopSelectedJobs" :disabled="selectedJobIds.length === 0">
                         <span class="glyphicon glyphicon-stop"></span>
                         Stop Selected Jobs
                     </button>
