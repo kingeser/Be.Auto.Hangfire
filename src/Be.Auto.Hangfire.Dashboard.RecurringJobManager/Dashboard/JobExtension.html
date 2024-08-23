@@ -12,6 +12,7 @@
 <script>dayjs.extend(dayjs_plugin_relativeTime);</script>
 <script src="recurring-job-manager/js/cron-expression-input"></script>
 <script src="recurring-job-manager/js/jsoneditor"></script>
+<script src="recurring-job-manager/js/vue-paginate"></script>
 
 <script type="text/x-template" id="modal-template">
     <transition name="modal">
@@ -177,7 +178,14 @@
                         <span class="glyphicon glyphicon-plus"></span>
                         Add New Job
                     </button>
-
+                    <button type="button" class="btn btn-sm btn-success" @click="startSelectedJobs"  >
+                        <span class="glyphicon glyphicon-play"></span>
+                        Start Selected Jobs
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger" @click="stopSelectedJobs">
+                        <span class="glyphicon glyphicon-stop"></span>
+                        Stop Selected Jobs
+                    </button>
                 </div>
                 
                 <div class="table-responsive">
@@ -186,7 +194,9 @@
 
                         <thead>
                             <tr>
-
+                                <th class="min-width">
+                                    <input type="checkbox"  :checked="selectedJobIds.length > 0" @change="toggleSelectAll">
+                                </th>
                                 <th>Actions</th>
                                 <th>Id</th>
                                 <th>JobType</th>
@@ -201,32 +211,24 @@
                         </thead>
                         <tbody>
                             <tr class="js-jobs-list-row" v-for="job in getItems" :key="job.Id">
+                                <td rowspan="1">
 
+                                    <input type="checkbox"
+                                           :value="job.Id"
+                                           :checked="selectedJobIds.length == jobs.lentgh"
+                                           v-model="selectedJobIds">
+
+                                    
+                                    {{selectedJobs}}
+
+                                </td>
                                 <td>
-                                    <table>
-                                        <tr>
-                                            <td>
-                                                <button type="button" class="btn btn-warning" style="width:32px;height:32px; padding-top: 10px; margin-right: 5px;" @click="GetJob(job.Id)">
-                                                    <svg width="24px" height="24px" viewBox="0 0 24 24" class="bi bi-pencil-square" fill="currentColor">
-                                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
-                                                    </svg>
-                                                </button>
-                                            </td>
-                                            <td>
-                                                <button v-show="job.JobState == 'Stopped'" type="button" class="btn btn-success" style="width:32px;height:32px; padding: 4px 10px;" @click="StartJob(job.Id)">
-                                                    <svg width="24px" height="24px" viewBox="-1 -1.5 16 16" class="bi bi-play" fill="currentColor">
-                                                        <path fill-rule="evenodd" d="M10.804 8L5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
-                                                    </svg>
-                                                </button>
-                                                <button v-show="job.JobState == 'Running'" type="button" class="btn btn-danger" style="width: 32px; height: 32px; padding: 4px 10px;" @click="StopJob(job.Id)">
-                                                    <svg width="24px" height="24px" viewBox="-0.5 -1.5 16 16" class="bi bi-stop" fill="currentColor">
-                                                        <path fill-rule="evenodd" d="M3.5 5A1.5 1.5 0 0 1 5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5zM5 4.5a.5.5 0 0 0-.5.5v6a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5H5z" />
-                                                    </svg>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </table>
+                                    <button type="button" class="btn btn-warning" style="width:32px;height:32px; padding-top: 10px; margin-right: 5px;" @click="GetJob(job.Id)">
+                                        <svg width="24px" height="24px" viewBox="5 5 24 24" class="bi bi-pencil-square" fill="currentColor">
+                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456l-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                                        </svg>
+                                    </button>
                                 </td>
                                 <td class="word-break ">{{ job.Id }}</td>
                                 <td class="word-break ">{{ job.JobType }}</td>
@@ -280,7 +282,10 @@
 
 
 
-    const { ref, computed, createApp, nextTick } = Vue;
+    const { ref, computed, createApp, nextTick,use } = Vue;
+
+
+
 
     const ModalComponent = {
         template: '#modal-template',
@@ -296,6 +301,7 @@
             'modal': ModalComponent,
         },
         setup() {
+            const selectedJobIds = ref([]);
             const title = ref('Add New Job');
             const jobs = ref(null);
             const bodyParameterXmlOrText = ref('');
@@ -648,47 +654,8 @@
                 });
             };
 
-            const StartJob = (_jobId) => {
-                axios.get('recurring-job-manager/job-agent?Id=' + _jobId + "&Action=Start").then(response => {
-                    if (!response.data.Status) {
-                        showModal.value = false;
-                        Swal.fire({
-                            title: 'Error!',
-                            text: response.data.Message,
-                            type: 'error',
-                            confirmButtonText: 'Okay'
-                        }).then(() => {
-                            closeModal();
-                        });
-                    } else {
-                        closeModal();
-                        GetJobs();
-                    }
-                }).catch(e => {
-                    console.log(e);
-                });
-            };
-
-            const StopJob = (_jobId) => {
-                axios.get('recurring-job-manager/job-agent?Id=' + _jobId + "&Action=Stop").then(response => {
-                    if (!response.data.Status) {
-                        showModal.value = false;
-                        Swal.fire({
-                            title: 'Error!',
-                            text: response.data.Message,
-                            type: 'error',
-                            confirmButtonText: 'Okay'
-                        }).then(() => {
-                            closeModal();
-                        });
-                    } else {
-                        closeModal();
-                        GetJobs();
-                    }
-                }).catch(e => {
-                    console.log(e);
-                });
-            };
+         
+           
 
             const UpdateJob = (job) => {
                 if (checkForm()) {
@@ -810,7 +777,48 @@
                     console.log(e);
                 });
             };
+            const startSelectedJobs = () => {
 
+         
+                axios.get('recurring-job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Start").then(response => {
+                    if (!response.data.Status) {
+                        showModal.value = false;
+                        Swal.fire({
+                            title: 'Error!',
+                            text: response.data.Message,
+                            type: 'error',
+                            confirmButtonText: 'Okay'
+                        }).then(() => {
+                            closeModal();
+                        });
+                    } else {
+                        closeModal();
+                        GetJobs();
+                    }
+                }).catch(e => {
+                    console.log(e);
+                });
+            };
+            const stopSelectedJobs = () => {
+                axios.get('recurring-job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Stop").then(response => {
+                    if (!response.data.Status) {
+                        showModal.value = false;
+                        Swal.fire({
+                            title: 'Error!',
+                            text: response.data.Message,
+                            type: 'error',
+                            confirmButtonText: 'Okay'
+                        }).then(() => {
+                            closeModal();
+                        });
+                    } else {
+                        closeModal();
+                        GetJobs();
+                    }
+                }).catch(e => {
+                    console.log(e);
+                });
+            };
             const getBodyParameterTypes = (e) => {
                 axios.get('recurring-job-manager/get-body-parameter-types?HttpMethod=' + e.target.value).then(response => {
                     bodyParameterTypes.value = response.data;
@@ -944,13 +952,28 @@
                 });
 
             };
+         
+            const toggleSelectAll = (e) => {
+                console.info("toggleSelectAll", e.target.checked);
+
+                if (!e.target.checked) {
+                    selectedJobIds.value = [];
+                } else {
+                    selectedJobIds.value = jobs.value.map(job => job.Id);
+                }
+
+                console.info("SELECTED", selectedJobIds.value);
+              
+            };
             const getItems = computed(() => {
                 if (!jobs.value) return [];
                 let current = pagination.value.currentPage * pagination.value.parPage;
                 let start = current - pagination.value.parPage;
                 return jobs.value.slice(start, current);
             });
-
+            const clickCallbackPagination = (pageNum) => {
+                pagination.value.currentPage = Number(pageNum);
+            };
             const getPageCount = computed(() => {
                 if (!jobs.value) return 0;
                 return Math.ceil(jobs.value.length / pagination.value.parPage);
@@ -984,10 +1007,10 @@
                 onClassChange,
                 addJob,
                 generateUUID,
+                stopSelectedJobs,
+                startSelectedJobs,
                 GetJobs,
                 GetJob,
-                StartJob,
-                StopJob,
                 UpdateJob,
                 getTimeZones,
                 getAssemblyTypeMethodJsonSchema,
@@ -1004,7 +1027,10 @@
                 capitalizeString,
                 getTimeFromNow,
                 getItems,
-                getPageCount
+                getPageCount,
+                selectedJobIds,
+                toggleSelectAll
+          
             };
         },
         mounted() {
@@ -1018,6 +1044,6 @@
             this.GetJobs();
         }
     });
-
+  
     app.mount('#app');
 </script>

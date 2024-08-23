@@ -97,6 +97,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/js/sweetalert", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.sweetalert.js");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/js/cron-expression-input", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.cron-expression-input.js");
             AddDashboardRouteToEmbeddedResource("/recurring-job-manager/js/jsoneditor", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.jsoneditor.min.js");
+            AddDashboardRouteToEmbeddedResource("/recurring-job-manager/js/vue-paginate", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.vue-paginate.js");
 
         }
 

@@ -16,20 +16,27 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
     {
         public const string TagRecurringJobBase = "recurring-job";
         public const string TagStopJob = "recurring-jobs-stop";
-        public static void StartBackgroundJob(string jobId)
+        public static void StartBackgroundJob(params string[] jobId)
         {
             using var connection = JobStorage.Current.GetConnection();
             using var transaction = connection.CreateWriteTransaction();
-            transaction.RemoveFromSet(TagStopJob, jobId);
-            transaction.AddToSet($"{TagRecurringJobBase}s", jobId);
+            foreach (var id in jobId)
+            {
+                transaction.RemoveFromSet(TagStopJob, id);
+                transaction.AddToSet($"{TagRecurringJobBase}s", id);
+            }
             transaction.Commit();
         }
-        public static void StopBackgroundJob(string jobId)
+        public static void StopBackgroundJob(params string[] jobId)
         {
             using var connection = JobStorage.Current.GetConnection();
             using var transaction = connection.CreateWriteTransaction();
-            transaction.RemoveFromSet($"{TagRecurringJobBase}s", jobId);
-            transaction.AddToSet($"{TagStopJob}", jobId);
+            foreach (var id in jobId)
+            {
+                transaction.RemoveFromSet($"{TagRecurringJobBase}s", id);
+                transaction.AddToSet($"{TagStopJob}", id);
+            }
+             
             transaction.Commit();
         }
 

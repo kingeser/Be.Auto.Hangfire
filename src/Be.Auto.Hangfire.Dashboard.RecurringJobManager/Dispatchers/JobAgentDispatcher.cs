@@ -1,4 +1,5 @@
-﻿using Hangfire.Annotations;
+﻿using System.Linq;
+using Hangfire.Annotations;
 using Hangfire.Dashboard;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
@@ -14,10 +15,10 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
         {
             var response = new Response { Status = true };
 
-            var jobId = context.Request.GetQuery("Id");
+            var selectedJobs = context.Request.GetQuery("SelectedJobs");
             var action = context.Request.GetQuery("Action");
 
-            if (string.IsNullOrWhiteSpace(jobId))
+            if (string.IsNullOrWhiteSpace(selectedJobs))
             {
                 response.Status = false;
                 response.Message = "Job Id is missing or empty.";
@@ -33,10 +34,15 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                 return;
             }
 
-            if (!RecurringJobAgent.IsValidJobId(jobId))
+            var selectedJobsArray = selectedJobs.Split('|').Where(t => !string.IsNullOrEmpty(t)).ToArray();
+
+
+            var notValidJobIds = selectedJobsArray.Where(t => !RecurringJobAgent.IsValidJobId(t)).ToArray();
+
+            if (notValidJobIds.Length > 0)
             {
                 response.Status = false;
-                response.Message = $"The Job Id {jobId} was not found.";
+                response.Message = $"The Job Id {string.Join(",", notValidJobIds)} was not found.";
                 await context.Response.WriteAsync(response.SerializeObjectToJson());
                 return;
             }
@@ -44,10 +50,10 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
             switch (action)
             {
                 case "Stop":
-                    RecurringJobAgent.StopBackgroundJob(jobId);
+                    RecurringJobAgent.StopBackgroundJob(selectedJobsArray);
                     break;
                 case "Start":
-                    RecurringJobAgent.StartBackgroundJob(jobId);
+                    RecurringJobAgent.StartBackgroundJob(selectedJobsArray);
                     break;
                 default:
                     response.Status = false;
