@@ -22,7 +22,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
             {
                 var job = CreateRecurringJob(context);
                 job.Register();
-                RemovePreviousJobDetailsIfJobIdChanged(context, job);
                 context.Response.StatusCode = (int)HttpStatusCode.OK;
 
             }
@@ -35,16 +34,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
             finally
             {
                 await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
-            }
-        }
-
-        private static void RemovePreviousJobDetailsIfJobIdChanged(DashboardContext context, RecurringJobBase job)
-        {
-            var jobIdBefore = context.Request.GetQuery("JobIdBefore");
-
-            if (!string.IsNullOrEmpty(jobIdBefore) && jobIdBefore != job.Id)
-            {
-                RecurringJobAgent.DeleteJobDetails(jobIdBefore);
             }
         }
 
@@ -72,7 +61,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     JobState = string.Empty,
                     Removed = false,
                     LastExecution = string.Empty,
-                    LastJobId = string.Empty
+                    LastJobId = string.Empty,
+                    Guid = context.Request.GetQuery(nameof(RecurringJobBase.Guid)),
                 },
                 JobType.WebRequest => new RecurringJobWebRequest()
                 {
@@ -99,7 +89,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     JobState = string.Empty,
                     Removed = false,
                     LastExecution = string.Empty,
-                    LastJobId = string.Empty
+                    LastJobId = string.Empty,
+                    Guid = context.Request.GetQuery(nameof(RecurringJobBase.Guid)),
                 },
                 _ => default
             };

@@ -13,8 +13,14 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
     {
         public static void Register(this RecurringJobBase job)
         {
+         
             if (string.IsNullOrEmpty(job.Id))
                 throw new RecurringJobException("Job registration failed: The 'Id' field cannot be null or empty.");
+
+            if (RecurringJobAgent.IsJobIdExist(job))
+            {
+                throw new RecurringJobException("Job registration failed: The Job Id already exists. Please provide a unique ID.");
+            }
 
             if (string.IsNullOrEmpty(job.Cron))
                 throw new RecurringJobException("Job registration failed: The 'Cron' expression cannot be null or empty.");
@@ -84,6 +90,12 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
                         try
                         {
+                            if (string.IsNullOrEmpty(job.Guid))
+                            {
+                                job.Guid = Guid.NewGuid().ToString();
+                            }
+
+
                             new global::Hangfire.RecurringJobManager(JobStorage.Current).AddOrUpdate(job.Id, new Job(typeof(RecurringJobWebClient), typeof(RecurringJobWebClient).GetMethod(nameof(RecurringJobWebClient.CallRequestAsync)), new WebRequestJob()
                             {
                                 BodyParameters = webRequestJob.BodyParameters,
@@ -134,6 +146,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
                             if (parametersFromJob.Length != defaultParameters.Length)
                                 throw new RecurringJobException("Job registration failed: The number of parameters provided does not match the expected number of parameters.");
+
+
+
+                            if (string.IsNullOrEmpty(job.Guid))
+                            {
+                                job.Guid = Guid.NewGuid().ToString();
+                            }
 
                             new global::Hangfire.RecurringJobManager(JobStorage.Current).AddOrUpdate(job.Id, new Job(method.DeclaringType, method, parametersFromJob), job.Cron, new RecurringJobOptions()
                             {

@@ -60,7 +60,8 @@
         </template>
         <template v-slot:body>
             <form id="formJob">
-                <input type="hidden" name="JobIdBefore" id="JobIdBefore" />
+               
+                <input type="hidden" id="Guid" name="Guid" v-model="job.Guid" />
                 <div class="form-group">
                     <label for="JobType">Job Type</label>
                     <select id="JobType" name="JobType" class="form-control" v-model="job.JobType" @change="onJobTypeChange">
@@ -195,7 +196,7 @@
                         <thead>
                             <tr>
                                 <th class="min-width">
-                                    <input type="checkbox"  :checked="selectedJobIds.length > 0" @change="toggleSelectAll">
+                                    <input type="checkbox" :checked="selectedJobIds.length > 0" @change="toggleSelectAll">
                                 </th>
                                 <th>Actions</th>
                                 <th>Id</th>
@@ -215,7 +216,7 @@
 
                                     <input type="checkbox"
                                            :value="job.Id"
-                                           :checked="selectedJobIds.length == jobs.lentgh"
+                                           class="js-jobs-list-checkbox"
                                            v-model="selectedJobIds">
 
                                     
@@ -320,6 +321,7 @@
             const methodParametersIsExist = ref(false);
             const job = ref({
                 Id: '',
+                Guid:'',
                 Cron: '',
                 JobType: '',
                 Type: '',
@@ -573,8 +575,7 @@
 
             const bodyParameterXmlOrTextOnChange = (e) => {
 
-
-                console.info("bodyParameterXmlOrTextOnChange", e);
+                job.BodyParameters = e.target.value;
             };
 
             const onClassChange = (e) => {
@@ -587,22 +588,7 @@
                 UpdateJob(job.value);
             };
 
-            const generateUUID = () => {
-                var d = new Date().getTimeFromNow();
-                var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0;
-                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                    var r = Math.random() * 16;
-                    if (d > 0) {
-                        r = (d + r) % 16 | 0;
-                        d = Math.floor(d / 16);
-                    } else {
-                        r = (d2 + r) % 16 | 0;
-                        d2 = Math.floor(d2 / 16);
-                    }
-                    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-                });
-            };
-
+            
             const GetJobs = () => {
                 axios.get('recurring-job-manager/get-jobs')
                     .then(res => (jobs.value = res.data))
@@ -618,12 +604,7 @@
                         job.value = { ...job.value, ...jobData };
 
 
-                        Vue.nextTick(() => {
-
-                            document.getElementById("JobIdBefore").value = job.value.Id;
-
-                        });
-
+                       
 
                         switch (job.value.BodyParameterType) {
                             case "Xml":
@@ -655,7 +636,16 @@
             };
 
          
-           
+            const toggleSelectAll = (e) => {
+               
+                if (!e.target.checked) {
+                    selectedJobIds.value = [];
+                } else {
+                    selectedJobIds.value = jobs.value.map(job => job.Id);
+                }
+
+             
+            };
 
             const UpdateJob = (job) => {
                 if (checkForm()) {
@@ -668,22 +658,27 @@
                     }
 
                     axios.get('recurring-job-manager/update-jobs?' + params.toString()).then(response => {
-                        if (!response.data.Status) {
-                            showModal.value = false;
-                            Swal.fire({
-                                title: 'Error!',
-                                text: response.data.Message,
-                                type: 'error',
-                                confirmButtonText: 'Okay'
-                            }).then(() => {
-                                closeModal();
-                            });
-                        } else {
-                            closeModal();
-                            GetJobs();
-                        }
+
+                        closeModal();
+                        GetJobs();
+                        selectedJobIds.value = [];
+
+
+                       
                     }).catch(e => {
-                        console.log(e);
+
+                        var error = e.response.data;
+                        console.info("ERRORRRRR", error);
+                        showModal.value = false;
+
+                        Swal.fire({
+                            title: 'Error!',
+                            text: error.Message,
+                            type: 'error',
+                            confirmButtonText: 'Okay'
+                        }).then(() => {
+                            closeModal();
+                        });
                     });
                 }
             };
@@ -858,6 +853,7 @@
             const closeModal = () => {
                 job.value = {
                     Id: '',
+                    Guid:'',
                     Cron: '',
                     JobType: '',
                     Type: '',
@@ -953,18 +949,7 @@
 
             };
          
-            const toggleSelectAll = (e) => {
-                console.info("toggleSelectAll", e.target.checked);
-
-                if (!e.target.checked) {
-                    selectedJobIds.value = [];
-                } else {
-                    selectedJobIds.value = jobs.value.map(job => job.Id);
-                }
-
-                console.info("SELECTED", selectedJobIds.value);
-              
-            };
+           
             const getItems = computed(() => {
                 if (!jobs.value) return [];
                 let current = pagination.value.currentPage * pagination.value.parPage;
@@ -1006,7 +991,6 @@
                 onCronChange,
                 onClassChange,
                 addJob,
-                generateUUID,
                 stopSelectedJobs,
                 startSelectedJobs,
                 GetJobs,

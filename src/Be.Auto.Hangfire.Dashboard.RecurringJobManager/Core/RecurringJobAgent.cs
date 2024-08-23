@@ -36,7 +36,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
                 transaction.RemoveFromSet($"{TagRecurringJobBase}s", id);
                 transaction.AddToSet($"{TagStopJob}", id);
             }
-             
+
             transaction.Commit();
         }
 
@@ -55,7 +55,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             var details = new List<KeyValuePair<string, string>>
             {
                 new(nameof(job.JobType), job.JobType.ToString()),
-                new(nameof(job.MisfireHandlingMode), job.MisfireHandlingMode.ToString())
+                new(nameof(job.MisfireHandlingMode), job.MisfireHandlingMode.ToString()),
+                new(nameof(job.Guid), job.Guid),
             };
 
             switch (job.JobType)
@@ -113,7 +114,11 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
                 if (dto == null) return;
                 result.Add(dto);
             });
-            return result;
+
+            return (from a in result
+                    group a by a.Guid
+                into g
+                    select g.FirstOrDefault()).ToList();
         }
 
         private static RecurringJobBase MapPeriodicJob(IStorageConnection connection, string jobId, string status, bool removed)
@@ -230,6 +235,27 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             return result;
         }
 
+        public static bool IsJobIdExist(RecurringJobBase job)
+        {
+            using var connection = JobStorage.Current.GetConnection();
 
+            var entries = connection.GetAllEntriesFromHash($"{TagRecurringJobBase}:{job.Id}");
+
+            if (entries == null)
+                return false;
+
+            entries.TryGetValue(nameof(RecurringJobBase.Guid), out var guidValue);
+
+            if (string.IsNullOrEmpty(guidValue)) return false;
+
+
+            if (job.Guid == guidValue)
+            {
+                return false;
+            }
+
+
+            return true;
+        }
     }
 }

@@ -6,6 +6,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
 {
     public abstract class RecurringJobBase
     {
+        public  string Guid { get; set; }
         public string Id { get; set; }
         public string Cron { get; set; }
         public abstract JobType JobType { get; }
