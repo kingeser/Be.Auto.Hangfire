@@ -6,13 +6,9 @@
 <script src="recurring-job-manager/js/vue"></script>
 <script src="recurring-job-manager/js/axio"></script>
 <script src="recurring-job-manager/js/sweetalert"></script>
-<script defer src="recurring-job-manager/js/page"></script>
-<script src="recurring-job-manager/js/daysjs"></script>
-<script src="recurring-job-manager/js/relativeTime"></script>
-<script>dayjs.extend(dayjs_plugin_relativeTime);</script>
 <script src="recurring-job-manager/js/cron-expression-input"></script>
 <script src="recurring-job-manager/js/jsoneditor"></script>
-<script src="recurring-job-manager/js/vue-paginate"></script>
+
 
 <script type="text/x-template" id="modal-template">
     <transition name="modal">
@@ -54,13 +50,13 @@
 
 <div id="app">
 
-<modal v-show="showModal" @close="closeModal">
-    <template v-slot:header>
+    <modal v-show="showModal" @close="closeModal">
+        <template v-slot:header>
             <h3>{{ title }}</h3>
         </template>
         <template v-slot:body>
             <form id="formJob">
-               
+
                 <input type="hidden" id="Guid" name="Guid" v-model="job.Guid" />
                 <div class="form-group">
                     <label for="JobType">Job Type</label>
@@ -167,11 +163,14 @@
     </modal>
 
 
+
+
+
     <div class="row">
         <div class="col-md-12">
 
             <h1 id="page-title" class="page-header">Recurring Jobs Manager <span class="badge badge-warning">{{getItems.length}}</span></h1>
-           
+
             <div class="js-jobs-list">
 
                 <div class="btn-toolbar btn-toolbar-top">
@@ -179,7 +178,7 @@
                         <span class="glyphicon glyphicon-plus"></span>
                         Add New Job
                     </button>
-                    <button type="button" class="btn btn-sm btn-success" @click="startSelectedJobs"  :disabled="selectedJobIds.length === 0" >
+                    <button type="button" class="btn btn-sm btn-success" @click="startSelectedJobs" :disabled="selectedJobIds.length === 0">
                         <span class="glyphicon glyphicon-play"></span>
                         Start Selected Jobs
                     </button>
@@ -187,10 +186,35 @@
                         <span class="glyphicon glyphicon-stop"></span>
                         Stop Selected Jobs
                     </button>
-                </div>
-                
-                <div class="table-responsive">
+               
+                    <div class="btn-group paginator pull-right hidden-xs" v-if="getPageCount > 1">
+                        <a href="javascript:" :class="{ disabled:  pagination.currentPage === 1 }" @click="clickCallbackPagination(pagination.currentPage - 1)" class="btn btn-default btn-sm ">
+                            Prev
+                        </a>
+                        <a href="javascript:" :class="{ disabled:  pagination.currentPage === getPageCount }" @click="clickCallbackPagination(pagination.currentPage + 1)" class="btn btn-default btn-sm ">
+                            Next
+                        </a>
+                    </div>
 
+
+                    <div class="btn-group pull-right paginator">
+                        <a v-for="(count, index) in paginationOptions"
+                           :key="index"
+                           :class="['btn btn-sm btn-default', { active: pagination.parPage === count}]"
+                           href="javascript:"
+                           @click="updatePagination(count)">
+                            {{ count }}
+                        </a>
+
+                    </div>
+                    <div class="btn-toolbar-spacer pull-right hidden-xs"></div>
+                    <div class="btn-toolbar-label btn-toolbar-label-sm pull-right hidden-xs">
+                        Items per page:
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <input type="text" class="form-control" v-model="searchTerm" placeholder="Search..."/>
                     <table id="joblist" class="table">
 
                         <thead>
@@ -219,7 +243,7 @@
                                            class="js-jobs-list-checkbox"
                                            v-model="selectedJobIds">
 
-                                    
+
                                     {{selectedJobs}}
 
                                 </td>
@@ -259,21 +283,44 @@
 
 
                 </div>
-              
+
+
+
+                <div class="btn-toolbar">
+
+                    <!-- Pagination Controls -->
+                    <div class="btn-group paginator" v-if="getPageCount > 1">
+                        <a href="javascript:"
+                           class="btn btn-default"
+                           :class="{ disabled: pagination.currentPage === 1 }"
+                           @click="clickCallbackPagination(pagination.currentPage - 1)">
+                            Prev
+                        </a>
+                        <a v-for="page in getPageCount"
+                           :key="page"
+                           href="javascript:"
+                           class="btn btn-default"
+                           :class="{ active:  pagination.currentPage === page }"
+                           @click="clickCallbackPagination(page)">
+                            {{ page }}
+                        </a>
+                        <a href="javascript:"
+                           class="btn btn-default"
+                           :class="{ disabled:  pagination.currentPage === getPageCount }"
+                           @click="clickCallbackPagination(pagination.currentPage + 1)">
+                            Next
+                        </a>
+
+                    </div>
+                    <div class="btn-toolbar-spacer"></div>
+                    <div class="btn-toolbar-label">
+                        Total items: {{jobs.length}}
+                    </div>
+                </div>
+
             </div>
 
 
-            <div style="float: right;">
-                <paginate :page-count="getPageCount"
-                          :page-range="3"
-                          :margin-pages="2"
-                          :click-handler="clickCallbackPagination"
-                          :prev-text="'＜'"
-                          :next-text="'＞'"
-                          :container-class="'pagination'"
-                          :page-class="'page-item'">
-                </paginate>
-            </div>
         </div>
     </div>
 
@@ -283,7 +330,7 @@
 
 
 
-    const { ref, computed, createApp, nextTick,use } = Vue;
+    const { ref, computed, createApp, nextTick, use } = Vue;
 
 
 
@@ -319,9 +366,10 @@
             const headerParametersJsonEditor = ref(null);
             const bodyParametersJsonEditor = ref(null);
             const methodParametersIsExist = ref(false);
+            const searchTerm = ref('');
             const job = ref({
                 Id: '',
-                Guid:'',
+                Guid: '',
                 Cron: '',
                 JobType: '',
                 Type: '',
@@ -345,9 +393,10 @@
                 MethodParameters: ''
             });
             const pagination = ref({
-                parPage: 10,
+                parPage: 2,
                 currentPage: 1
             });
+            const paginationOptions = ref([2,10, 20, 50, 100, 500, 1000, 5000]);
             const selectedJobType = ref('');
             const headerCount = ref(0);
 
@@ -547,7 +596,7 @@
 
                             checkJsonEditorProperties('headerParametersJsonEditor');
                         }
-                      
+
                     });
 
 
@@ -588,11 +637,16 @@
                 UpdateJob(job.value);
             };
 
-            
+
             const GetJobs = () => {
                 axios.get('recurring-job-manager/get-jobs')
                     .then(res => (jobs.value = res.data))
                     .catch(error => console.error('Error fetching jobs:', error));
+            };
+
+            const updatePagination = (count) => {
+                pagination.value.parPage = count;
+                pagination.value.currentPage = 1;
             };
 
             const GetJob = (_Id) => {
@@ -604,7 +658,7 @@
                         job.value = { ...job.value, ...jobData };
 
 
-                       
+
 
                         switch (job.value.BodyParameterType) {
                             case "Xml":
@@ -635,16 +689,16 @@
                 });
             };
 
-         
+
             const toggleSelectAll = (e) => {
-               
+
                 if (!e.target.checked) {
                     selectedJobIds.value = [];
                 } else {
                     selectedJobIds.value = jobs.value.map(job => job.Id);
                 }
 
-             
+
             };
 
             const UpdateJob = (job) => {
@@ -664,7 +718,7 @@
                         selectedJobIds.value = [];
 
 
-                       
+
                     }).catch(e => {
 
                         var error = e.response.data;
@@ -704,7 +758,7 @@
                     axios.get('recurring-job-manager/get-current-assembly-type-method-json-schema?Type=' + job.value.Type + '&Method=' + job.value.Method).then(response => {
                         Vue.nextTick(() => {
 
-                            methodParametersIsExist.value = response !== null && response.data !== null && response.data.Schema != null && response.data.Schema!='';
+                            methodParametersIsExist.value = response !== null && response.data !== null && response.data.Schema != null && response.data.Schema != '';
 
                             if (!methodParametersIsExist.value) {
 
@@ -737,7 +791,7 @@
 
                             methodParametersJsonEditor.value.on('ready', () => {
 
-                                if (job.value.MethodParameters && job.value.MethodParameters!='') {
+                                if (job.value.MethodParameters && job.value.MethodParameters != '') {
 
                                     methodParametersJsonEditor.value.setValue(JSON.parse(job.value.MethodParameters));
 
@@ -774,7 +828,7 @@
             };
             const startSelectedJobs = () => {
 
-         
+
                 axios.get('recurring-job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Start").then(response => {
 
                     console.info("startSelectedJobs", response);
@@ -789,7 +843,7 @@
 
 
                     console.log("startSelectedJobs Error !!!", e);
-                   
+
                 });
             };
             const stopSelectedJobs = () => {
@@ -848,7 +902,7 @@
             const closeModal = () => {
                 job.value = {
                     Id: '',
-                    Guid:'',
+                    Guid: '',
                     Cron: '',
                     JobType: '',
                     Type: '',
@@ -943,13 +997,29 @@
                 });
 
             };
-         
-           
+
+
             const getItems = computed(() => {
                 if (!jobs.value) return [];
+
+                var allRecords = jobs.value;
+
+                if (searchTerm.value) {
+
+                    const search = searchTerm.value.toLowerCase();
+
+                    allRecords = jobs.value.filter(item => {
+                        return Object.keys(item).some(key =>
+                            String(item[key]).toLowerCase().includes(search)
+                        );
+                    });
+                }
+               
                 let current = pagination.value.currentPage * pagination.value.parPage;
+
                 let start = current - pagination.value.parPage;
-                return jobs.value.slice(start, current);
+
+                return allRecords.slice(start, current);
             });
             const clickCallbackPagination = (pageNum) => {
                 pagination.value.currentPage = Number(pageNum);
@@ -1008,8 +1078,12 @@
                 getItems,
                 getPageCount,
                 selectedJobIds,
-                toggleSelectAll
-          
+                toggleSelectAll,
+                clickCallbackPagination,
+                paginationOptions,
+                updatePagination,
+                searchTerm
+
             };
         },
         mounted() {
@@ -1023,6 +1097,6 @@
             this.GetJobs();
         }
     });
-  
+
     app.mount('#app');
 </script>

@@ -40,7 +40,6 @@
     <None Remove="Dashboard\Content\js\jsoneditor.min.js" />
     <None Remove="Dashboard\Content\js\relativeTime.min.js" />
     <None Remove="Dashboard\Content\js\sweetalert.js" />
-    <None Remove="Dashboard\Content\js\vue-paginate.js" />
     <None Remove="Dashboard\Content\js\vue.js" />
     <None Remove="Dashboard\JobExtension.html" />
     <None Remove="Dashboard\JobsStopped.html" />
@@ -87,9 +86,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Content\js\sweetalert.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\js\vue-paginate.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Content\js\vue.js">
