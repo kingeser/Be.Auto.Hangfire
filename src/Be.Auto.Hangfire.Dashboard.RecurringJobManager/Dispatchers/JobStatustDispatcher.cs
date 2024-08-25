@@ -9,13 +9,14 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
-    public sealed class JobAgentDispatcher : IDashboardDispatcher
+    public sealed class JobStatustDispatcher : IDashboardDispatcher
     {
         public async Task Dispatch([NotNull] DashboardContext context)
         {
             var response = new Response { Status = true };
 
             var selectedJobs = context.Request.GetQuery("SelectedJobs");
+
             var action = context.Request.GetQuery("Action");
 
             if (string.IsNullOrWhiteSpace(selectedJobs))
@@ -35,7 +36,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
             }
 
             var selectedJobsArray = selectedJobs.Split('|').Where(t => !string.IsNullOrEmpty(t)).ToArray();
-
 
             var notValidJobIds = selectedJobsArray.Where(t => !RecurringJobAgent.IsValidJobId(t)).ToArray();
 
@@ -64,7 +64,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
             }
 
             context.Response.StatusCode = (int)HttpStatusCode.OK;
-
             await context.Response.WriteAsync(response.SerializeObjectToJson());
         }
     }

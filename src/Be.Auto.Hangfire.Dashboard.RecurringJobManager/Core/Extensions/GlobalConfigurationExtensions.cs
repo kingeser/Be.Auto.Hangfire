@@ -47,7 +47,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             DashboardRoutes.Routes.Add("/recurring-job-manager/get-jobs", new GetJobDispatcher());
             DashboardRoutes.Routes.Add("/recurring-job-manager/update-jobs", new SaveJobDispatcher());
             DashboardRoutes.Routes.Add("/recurring-job-manager/get-job", new GetJobForEdit());
-            DashboardRoutes.Routes.Add("/recurring-job-manager/job-agent", new JobAgentDispatcher());
+            DashboardRoutes.Routes.Add("/recurring-job-manager/job-agent", new JobStatustDispatcher());
             DashboardRoutes.Routes.Add("/recurring-job-manager/get-job-types", new GetJobTypesDispatcher());
             DashboardRoutes.Routes.Add("/recurring-job-manager/get-body-parameter-types", new GetBodyTypesDispatcher());
             DashboardRoutes.Routes.Add("/recurring-job-manager/get-current-assembly-types", new GetCurrentAssemblyTypesDispatcher());

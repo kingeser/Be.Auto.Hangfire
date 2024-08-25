@@ -776,42 +776,37 @@
 
          
                 axios.get('recurring-job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Start").then(response => {
-                    if (!response.data.Status) {
-                        showModal.value = false;
-                        Swal.fire({
-                            title: 'Error!',
-                            text: response.data.Message,
-                            type: 'error',
-                            confirmButtonText: 'Okay'
-                        }).then(() => {
-                            closeModal();
-                        });
-                    } else {
-                        closeModal();
-                        GetJobs();
-                    }
+
+                    console.info("startSelectedJobs", response);
+
+                    selectedJobIds.value = [];
+
+                    closeModal();
+
+                    GetJobs();
+
                 }).catch(e => {
-                    console.log(e);
+
+
+                    console.log("startSelectedJobs Error !!!", e);
+                   
                 });
             };
             const stopSelectedJobs = () => {
                 axios.get('recurring-job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Stop").then(response => {
-                    if (!response.data.Status) {
-                        showModal.value = false;
-                        Swal.fire({
-                            title: 'Error!',
-                            text: response.data.Message,
-                            type: 'error',
-                            confirmButtonText: 'Okay'
-                        }).then(() => {
-                            closeModal();
-                        });
-                    } else {
-                        closeModal();
-                        GetJobs();
-                    }
+
+                    console.info("stopSelectedJobs", response);
+
+                    selectedJobIds.value = [];
+
+                    closeModal();
+
+                    GetJobs();
+
+
                 }).catch(e => {
-                    console.log(e);
+
+                    console.log("stopSelectedJobs Error !!!", e);
                 });
             };
             const getBodyParameterTypes = (e) => {
