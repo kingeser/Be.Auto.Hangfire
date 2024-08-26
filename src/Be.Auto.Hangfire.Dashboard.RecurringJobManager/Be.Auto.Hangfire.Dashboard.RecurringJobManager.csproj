@@ -26,6 +26,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Dashboard\CancelledJobs.html" />
     <None Remove="Dashboard\Content\css\cron-expression-input.css" />
     <None Remove="Dashboard\Content\css\fontawesome.css" />
     <None Remove="Dashboard\Content\css\JobExtension.css" />
@@ -83,8 +84,15 @@
     <EmbeddedResource Include="Dashboard\Content\js\vue.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\JobsStopped.html" />
-    <EmbeddedResource Include="Dashboard\JobExtension.html" />
+    <EmbeddedResource Include="Dashboard\CancelledJobs.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dashboard\JobsStopped.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dashboard\JobExtension.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <!--<ItemGroup>

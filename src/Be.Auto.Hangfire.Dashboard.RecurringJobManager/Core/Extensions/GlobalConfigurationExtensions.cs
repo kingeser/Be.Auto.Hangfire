@@ -57,10 +57,12 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
         {
             DashboardRoutes.Routes.AddRazorPage(JobExtensionPage.PageRoute, x => new JobExtensionPage());
             DashboardRoutes.Routes.AddRazorPage(JobsStoppedPage.PageRoute, x => new JobsStoppedPage());
+            DashboardRoutes.Routes.AddRazorPage(JobsCancelledPage.PageRoute, x => new JobsCancelledPage());
         }
 
         private static void AddApiRoutes()
         {
+            DashboardRoutes.Routes.Add("/jobs/get-job-cancelled", new GetJobsCancelledDispatcher());
             DashboardRoutes.Routes.Add("/jobs/get-job-stopped", new GetJobsStoppedDispatcher());
             DashboardRoutes.Routes.Add("/job-manager/get-jobs", new GetJobDispatcher());
             DashboardRoutes.Routes.Add("/job-manager/update-jobs", new SaveJobDispatcher());
@@ -80,6 +82,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
         private static void AddMetrics()
         {
             DashboardMetrics.AddMetric(TagDashboardMetrics.JobsStoppedCount);
+            DashboardMetrics.AddMetric(TagDashboardMetrics.JobsCancelledCount);
         }
 
         private static void AddMenuItems()
@@ -89,6 +92,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                 Active = page.RequestPath.StartsWith("/jobs/stopped"),
                 Metric = TagDashboardMetrics.JobsStoppedCount,
             });
+
+            JobsSidebarMenu.Items.Add(page => new MenuItem("Cancelled", page.Url.To("/jobs/cancelled"))
+            {
+                Active = page.RequestPath.StartsWith("/jobs/cancelled"),
+                Metric = TagDashboardMetrics.JobsCancelledCount,
+            });
+
 
             NavigationMenu.Items.Add(page => new MenuItem(JobExtensionPage.Title, page.Url.To("/job-manager"))
             {

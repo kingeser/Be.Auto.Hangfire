@@ -7,7 +7,7 @@ internal class CancelledStateHandler : IStateHandler
 {
     public void Apply(ApplyStateContext context, IWriteOnlyTransaction transaction)
     {
-        new SucceededState()
+       
         transaction.IncrementCounter("stats:cancelled");
     }
 
@@ -18,3 +18,4 @@ internal class CancelledStateHandler : IStateHandler
 
     public string StateName => "Cancelled";
 }
+

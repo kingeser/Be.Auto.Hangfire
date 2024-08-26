@@ -7,6 +7,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 using Hangfire;
+using Hangfire.Storage.Monitoring;
 using Newtonsoft.Json;
 
 
@@ -51,11 +52,59 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
         {
             foreach (var jobId in jobIds)
             {
-              
+
                 RecurringJob.RemoveIfExists(jobId);
 
             }
         }
+
+        public static List<CancelledJob> GetCancelledJobs()
+        {
+            var result = new List<CancelledJob>();
+
+            var monitor = JobStorage.Current.GetMonitoringApi();
+
+            var allJobs = GetAllJobs();
+
+            foreach (var job in allJobs)
+            {
+                var jobDetails = monitor.JobDetails(job.LastJobId);
+
+                var cancelledState = jobDetails?.History?.Where(state => state.StateName == "Cancelled")?.ToList() ?? new List<StateHistoryDto>();
+
+                foreach (var item in cancelledState.Select(stateHistoryDto => new CancelledJob()
+                {
+                    Id = job.Id,
+                    Type = job.JobType,
+                    CancelledAt = stateHistoryDto.CreatedAt,
+                    Reason = stateHistoryDto.Reason
+                }))
+                {
+                    switch (job.JobType)
+                    {
+                        case JobType.MethodCall:
+                            {
+                                var methodCallJob = (RecurringJobMethodCall)job;
+                                item.Job = $"{methodCallJob.Type}.{methodCallJob.Method}";
+                            }
+                            break;
+                        case JobType.WebRequest:
+                            {
+                                var methodCallJob = (RecurringJobWebRequest)job;
+                                item.Job = $"{methodCallJob.HostName.TrimEnd('/')}/{methodCallJob.UrlPath.TrimStart('/')}";
+                            }
+                            break;
+
+                        default:
+                            continue;
+                    }
+                    result.Add(item);
+                }
+            }
+
+            return result;
+        }
+
         public static void SaveJobDetails(RecurringJobBase job)
         {
             using var connection = JobStorage.Current.GetConnection();
