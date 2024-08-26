@@ -7,14 +7,12 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Pages
     {
         public const string Title = "Recurring Job Manager";
         public const string PageRoute = "/job-manager";
-
         private static readonly string PageHtml;
 
         static JobExtensionPage()
         {
             PageHtml = ManifestResource.ReadStringResource("Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.JobManager.html");
         }
-
         public override void Execute()
         {
             WriteEmptyLine();
