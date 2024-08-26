@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Text.RegularExpressions;
-using System.Text;
-using System;
 using System.Linq;
+using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 
-namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
+namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 {
     public class RecurringJobWebClient
     {
@@ -22,7 +23,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
             if (IsSimpleRequest(job.HttpMethod))
             {
-                var simpleResponse= await HandleSimpleRequestAsync(job, url);
+                var simpleResponse = await HandleSimpleRequestAsync(job, url);
 
                 return new
                 {
@@ -47,7 +48,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
         {
             using var responseStream = new StreamReader(response.GetResponseStream() ?? Stream.Null);
 
-            var responseString= await responseStream.ReadToEndAsync();
+            var responseString = await responseStream.ReadToEndAsync();
             return responseString;
         }
 
@@ -167,9 +168,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
         private static HttpWebRequest CreateWebRequest(WebRequestJob job, string url)
         {
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+
+            httpWebRequest.Timeout = Convert.ToInt32(Options.Instance.WebRequestJob?.TimeOut.TotalMilliseconds ?? TimeSpan.FromSeconds(30).TotalMilliseconds);
+
             httpWebRequest.Method = job.HttpMethod.ToString();
 
             if (job.HeaderParameters == null || !job.HeaderParameters.Any()) return httpWebRequest;
+
             foreach (var header in job.HeaderParameters)
             {
                 httpWebRequest.Headers[header.Name] = header.Value;
@@ -186,6 +191,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             }
 
             var parameters = job.BodyParameters.DeserializeObjectFromJson<List<HttpFormUrlEncodedParameter>>();
+
             var queryStringBuilder = new StringBuilder();
 
             foreach (var parameter in parameters)
@@ -202,9 +208,12 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
         private static bool IsBase64String(string value)
         {
+            if (string.IsNullOrEmpty(value)) return false;
+
             value = value.Trim();
-            return (value.Length % 4 == 0) &&
-                   Regex.IsMatch(value, @"^[a-zA-Z0-9\+/]*={0,3}$", RegexOptions.None);
+
+            return (value.Length % 4 == 0) && Regex.IsMatch(value, @"^[a-zA-Z0-9\+/]*={0,3}$", RegexOptions.None);
+
         }
     }
 }

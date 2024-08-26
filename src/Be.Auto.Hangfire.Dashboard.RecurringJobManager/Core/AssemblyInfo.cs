@@ -20,15 +20,15 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
             var result = assembly
                 .GetTypes()
-                .Where(t=>!t.IsSpecialName)
+                .Where(t => !t.IsSpecialName)
                 .Select(type => new
                 {
                     Type = type,
                     Methods = type.GetMethods()
-                        .Where(m => !m.IsSpecialName && m.DeclaringType==type)
+                        .Where(m => !m.IsSpecialName && m.DeclaringType == type)
                         .ToList()
                 })
-                .Where(typeWithMethods =>  typeWithMethods.Methods.Any() )
+                .Where(typeWithMethods => typeWithMethods.Methods.Any())
                 .ToDictionary(typeWithMethods => typeWithMethods.Type, typeWithMethods => typeWithMethods.Methods);
 
             return result;

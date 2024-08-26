@@ -1,11 +1,16 @@
-﻿namespace Hangfire.Sample.Library
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Hangfire.Sample.Library
 {
     public static class StaticJobTest
     {
 
-        public static string Test(string abc, int count)
+        public static async Task<string> Test(string abc, int count)
         {
-            return $"{abc} > {count}";
+            Thread.Sleep(5000);
+            return await Task.FromResult($"{abc} > {count}");
         }
     }
 }

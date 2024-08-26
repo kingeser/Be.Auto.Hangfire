@@ -1,105 +1,71 @@
 ﻿using System;
 using System.Linq;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 using Hangfire.Common;
 using Hangfire.States;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
+using System.Collections.Generic;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
 {
     //Resharper disable all
     public class DisableConcurrentlyJobExecutionAttribute : JobFilterAttribute, IElectStateFilter
     {
-        private const int DefaultFrom = 0;
-        private const int DefaultCount = 2000;
+
         private const string DefaultReason = "It is not allowed to perform multiple same tasks.";
-        private const JobState DefaultJobState = JobState.DeletedState;
-
-        private string _methodName;
-        private string _reason;
-
-        public DisableConcurrentlyJobExecutionAttribute()
-        {
-            From = DefaultFrom;
-            Count = DefaultCount;
-            JobState = DefaultJobState;
-            _reason = DefaultReason;
-        }
-
-        public DisableConcurrentlyJobExecutionAttribute(string methodName)
-            : this()
-        {
-            MethodName = methodName ?? throw new ArgumentNullException(nameof(methodName));
-        }
-
-        public DisableConcurrentlyJobExecutionAttribute(string methodName, JobState jobState)
-            : this(methodName)
-        {
-            JobState = jobState;
-        }
-
-        public DisableConcurrentlyJobExecutionAttribute(string methodName, int from, int count, JobState jobState = DefaultJobState)
-            : this(methodName, jobState)
-        {
-            From = from;
-            Count = count;
-        }
-
-        public DisableConcurrentlyJobExecutionAttribute(string methodName, int from, int count, string reason, JobState jobState = DefaultJobState)
-            : this(methodName, from, count, jobState)
-        {
-            Reason = reason ?? DefaultReason;
-        }
-
-        public int From { get; } = DefaultFrom;
-        public int Count { get; } = DefaultCount;
-        public JobState JobState { get; }
-        public string MethodName
-        {
-            get => _methodName;
-            private set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentNullException(nameof(MethodName));
-                _methodName = value;
-            }
-        }
-
-        public string Reason
-        {
-            get => _reason;
-            private set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentNullException(nameof(Reason));
-                _reason = value;
-            }
-        }
 
         public void OnStateElection(ElectStateContext context)
         {
-            MethodName ??= context.BackgroundJob.Job.Method.Name;
+            if (context.BackgroundJob.Job == null) return;
 
-            var processingJobs = context.Storage.GetMonitoringApi().ProcessingJobs(From, Count);
+            var processingJobs = context.Storage.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
 
-            if (processingJobs.Any(processingJob => processingJob.Value.Job.Method.Name.Equals(MethodName, StringComparison.InvariantCultureIgnoreCase) && !context.CandidateState.IsFinal))
+
+            if (processingJobs.Count <= 0) return;
+
+
+            var type = context.BackgroundJob.Job.Type.FullName;
+            var methodName = context.BackgroundJob.Job.Method.GenerateFullName();
+            var recurringJobId = context.BackgroundJob.Job.ToString();
+            var args = context.BackgroundJob.Job.Args;
+
+            if (processingJobs.Exists(t =>
+                    t.Value.Job.Method.GenerateFullName().Equals(methodName, StringComparison.InvariantCultureIgnoreCase)
+                    && t.Value.Job.Type.FullName.Equals(type, StringComparison.InvariantCultureIgnoreCase)
+                    && t.Value.Job.ToString() == recurringJobId
+                    && AreArgsEqual(t.Value.Job.Args, args)
+                    && !context.CandidateState.IsFinal))
             {
-                context.CandidateState = context.CandidateState switch
+                context.CandidateState = new DeletedState()
                 {
-                    FailedState failedState => new FailedState(failedState.Exception) { Reason = Reason },
-                    _ => CreateNewState()
+                    Reason = DefaultReason,
+
                 };
             }
         }
 
-        private IState CreateNewState()
+        public bool AreArgsEqual(IReadOnlyList<object> args1, IReadOnlyList<object> args2)
         {
-            return JobState switch
+
+            if (ReferenceEquals(args1, args2))
             {
-                JobState.DeletedState => new DeletedState { Reason = Reason },
-                JobState.FailedState => new FailedState(new Exception(Reason)) { Reason = Reason },
-                JobState.EnqueuedState => new EnqueuedState { Reason = Reason },
-                _ => throw new InvalidOperationException($"Unsupported job state: {JobState}")
-            };
+                return true;
+            }
+
+
+            if (args1 == null || args2 == null)
+            {
+                return true;
+            }
+
+
+            if (args1.Count != args2.Count)
+            {
+                return false;
+            }
+
+            return args1.SequenceEqual(args2);
         }
+
     }
 }

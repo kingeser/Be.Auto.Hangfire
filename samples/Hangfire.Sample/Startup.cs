@@ -1,3 +1,6 @@
+using System;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Hangfire.Sample.Library;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -5,9 +8,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
-namespace Hangfire.JobExtensions
+namespace Hangfire.Sample
 {
     public class Startup(IConfiguration configuration)
     {
@@ -23,14 +25,15 @@ namespace Hangfire.JobExtensions
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
-
-
             services.AddHangfire(config => config
                                                  .UseSqlServerStorage(Configuration.GetConnectionString("HangfireConnection"))
-                                                 .UseDashboardRecurringJobManager( typeof(AppointmentSmsNotificationService).Assembly));
+                                                 .UseDashboardRecurringJobManager(option =>
+                                                 {
+                                                     option.AddAssembly(typeof(StaticJobTest).Assembly);
+                                                     option.ConcurrentJobExecution = ConcurrentJobExecution.Disable;
+                                                     option.WebRequestJob.TimeOut = TimeSpan.FromSeconds(15);
+                                                 })
+            );
             services.AddHangfireServer();
 
 

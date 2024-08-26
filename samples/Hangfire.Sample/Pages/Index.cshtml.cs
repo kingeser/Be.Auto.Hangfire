@@ -1,7 +1,6 @@
-﻿using Hangfire.Sample.Library;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Hangfire.JobExtensions.Pages
+namespace Hangfire.Sample.Pages
 {
     public class IndexModel : PageModel
     {

@@ -11,7 +11,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
     public static class AssemblyInfoStorage
     {
         public static readonly List<AssemblyInfo> Assemblies = [];
-        public static void Store(params Assembly[] assemblies)
+        public static void Store( ICollection<Assembly> assemblies)
         {
             Assemblies.AddRange(assemblies.Select(t => new AssemblyInfo(t)));
         }

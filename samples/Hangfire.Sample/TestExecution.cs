@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Hangfire.JobExtensions.DotNetCore.Test
+namespace Hangfire.Sample
 {
     public class TestExecutionJob
     {
