@@ -5,6 +5,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using System;
 using System.Threading.Tasks;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
+using System.Net;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
@@ -15,30 +16,48 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
         {
             var response = new Response() { Status = true };
 
-            if (!"GET".Equals(conterecurringJobt.Request.Method, StringComparison.InvariantCultureIgnoreCase))
+            try
             {
-                conterecurringJobt.Response.StatusCode = 405;
+                if (!"GET".Equals(conterecurringJobt.Request.Method, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    response.Status = false;
 
-                return;
+                    conterecurringJobt.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                    return;
+                }
+
+                var jobId = conterecurringJobt.Request.GetQuery("Id");
+
+                var recurringJob = RecurringJobAgent.GetJob(jobId);
+
+                if (recurringJob == null)
+                {
+                    response.Status = false;
+
+                    response.Message = "Job not found";
+
+                    conterecurringJobt.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                    return;
+                }
+
+                conterecurringJobt.Response.StatusCode = (int)HttpStatusCode.OK;
+
+                response.Object = recurringJob;
             }
-
-            var jobId = conterecurringJobt.Request.GetQuery("Id");
-
-            var recurringJob = RecurringJobAgent.GetJob(jobId);
-
-            if (recurringJob == null)
+            catch (Exception e)
             {
                 response.Status = false;
-                response.Message = "Job not found";
-
+                response.Message = e.GetAllMessages();
+                conterecurringJobt.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            }
+            finally
+            {
                 await conterecurringJobt.Response.WriteAsync(response.SerializeObjectToJson());
-
-                return;
             }
 
-            response.Object = recurringJob;
 
-            await conterecurringJobt.Response.WriteAsync(response.SerializeObjectToJson());
         }
     }
 }

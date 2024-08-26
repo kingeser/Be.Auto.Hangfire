@@ -21,15 +21,20 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
             try
             {
                 var job = CreateRecurringJob(context);
+
                 job.Register();
-                context.Response.StatusCode = (int)HttpStatusCode.OK;
+
                 response.Status = true;
+
+                context.Response.StatusCode = (int)HttpStatusCode.OK;
             }
             catch (Exception e)
             {
-                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                response.Message = e.GetAllMessages();
                 response.Status = false;
+
+                response.Message = e.GetAllMessages();
+
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
             }
             finally

@@ -25,7 +25,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                 {
                     response.Status = false;
                     response.Message = "Job Id is missing or empty.";
-
+                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     return;
                 }
 
@@ -37,7 +37,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                 {
                     response.Status = false;
                     response.Message = $"The Job Id {string.Join(",", notValidJobIds)} was not found.";
-
+                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     return;
                 }
 
