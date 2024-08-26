@@ -169,7 +169,7 @@
     <div class="row">
         <div class="col-md-12">
 
-            <h1 id="page-title" class="page-header">Recurring Jobs Manager <span class="badge badge-warning">{{getItems.length}}</span></h1>
+            <h1 id="page-title" class="page-header">Recurring Jobs Manager </h1>
 
             <div class="js-jobs-list">
 
@@ -828,40 +828,72 @@
             };
             const startSelectedJobs = () => {
 
-
-                axios.get('recurring-job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Start").then(response => {
-
-                    console.info("startSelectedJobs", response);
-
-                    selectedJobIds.value = [];
-
-                    closeModal();
-
-                    GetJobs();
-
-                }).catch(e => {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Do you want to start the selected tasks?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, start them!',
+                    cancelButtonText: 'No, cancel'
+                }).then((result) => {
+                    if (result.value) {
 
 
-                    console.log("startSelectedJobs Error !!!", e);
+                        axios.get('recurring-job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Start").then(response => {
 
+                            console.info("startSelectedJobs", response);
+
+                            selectedJobIds.value = [];
+
+                            closeModal();
+
+                            GetJobs();
+
+                        }).catch(e => {
+
+
+                            console.log("startSelectedJobs Error !!!", e);
+
+                        });
+
+                    } 
                 });
+
+
+               
             };
             const stopSelectedJobs = () => {
-                axios.get('recurring-job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Stop").then(response => {
-
-                    console.info("stopSelectedJobs", response);
-
-                    selectedJobIds.value = [];
-
-                    closeModal();
-
-                    GetJobs();
 
 
-                }).catch(e => {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Do you want to stop the selected tasks?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, stop them!',
+                    cancelButtonText: 'No, cancel'
+                }).then((result) => {
+                    if (result.value) {
 
-                    console.log("stopSelectedJobs Error !!!", e);
+                        axios.get('recurring-job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Stop").then(response => {
+
+                            console.info("stopSelectedJobs", response);
+
+                            selectedJobIds.value = [];
+
+                            closeModal();
+
+                            GetJobs();
+
+
+                        }).catch(e => {
+
+                            console.log("stopSelectedJobs Error !!!", e);
+                        });
+
+                    }
                 });
+
             };
             const getBodyParameterTypes = (e) => {
                 axios.get('recurring-job-manager/get-body-parameter-types?HttpMethod=' + e.target.value).then(response => {
@@ -1006,6 +1038,8 @@
 
                 if (searchTerm.value) {
 
+                    pagination.value.currentPage = 1;
+                  
                     const search = searchTerm.value.toLowerCase();
 
                     allRecords = jobs.value.filter(item => {
