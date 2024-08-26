@@ -7,9 +7,11 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 using System.Collections.Generic;
 using Hangfire.Dashboard;
 using Hangfire;
+using Hangfire.Server;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
 {
+
     public class DisableConcurrentlyJobExecutionAttribute : JobFilterAttribute, IElectStateFilter
     {
 

@@ -31,8 +31,9 @@ namespace Sample
                                                  .UseDashboardRecurringJobManager(option =>
                                                  {
                                                      option.AddAppDomain(AppDomain.CurrentDomain);
-                                                     option.ConcurrentJobExecution = ConcurrentJobExecution.Disable;
-                                                     option.WebRequestJob.TimeOut = TimeSpan.FromSeconds(15);
+                                                     option.SetConcurrentJobExecution(ConcurrentJobExecution.Disable);
+                                                     option.SetWebRequestJobTimeout(TimeSpan.FromSeconds(15));
+
                                                  })
             );
             services.AddHangfireServer();

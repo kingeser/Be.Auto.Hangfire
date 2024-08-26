@@ -12,36 +12,44 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
     }
     public class JobManagerOption
     {
-        public ICollection<Assembly> Assemblies { get; set; } = new List<Assembly>();
-        public ConcurrentJobExecution ConcurrentJobExecution { get; set; } = ConcurrentJobExecution.Allow;
-        public WebRequestJobOption WebRequestJob { get; set; } = new WebRequestJobOption();
+        internal ICollection<Assembly> Assemblies { get; set; } = new List<Assembly>();
+        internal ConcurrentJobExecution ConcurrentJobExecution { get; set; } = ConcurrentJobExecution.Allow;
+        internal WebRequestJobOption WebRequestJob { get; set; } = new WebRequestJobOption();
 
-        public void AddAssembly(Assembly assembly)
+
+        public JobManagerOption SetWebRequestJobTimeout(TimeSpan timeout)
+        {
+            WebRequestJob.TimeOut = timeout;
+            return this;
+        }
+
+        public JobManagerOption SetConcurrentJobExecution(ConcurrentJobExecution execution)
+        {
+            this.ConcurrentJobExecution = execution;
+            return this;
+        }
+
+        public JobManagerOption AddAssembly(Assembly assembly)
         {
             Assemblies.Add(assembly);
+            return this;
         }
-        public void AddAssembly(params Assembly[] assembly)
+        public JobManagerOption AddAssembly(params Assembly[] assembly)
         {
             foreach (var item in assembly)
             {
                 Assemblies.Add(item);
             }
-
+            return this;
         }
-        public void AddAppDomain(AppDomain domain)
+        public JobManagerOption AddAppDomain(AppDomain domain)
         {
             foreach (var assembly in domain.GetAssemblies())
             {
                 Assemblies.Add(assembly);
             }
-
+            return this;
         }
 
     }
-    public class WebRequestJobOption
-    {
-        public TimeSpan TimeOut { get; set; } = TimeSpan.FromSeconds(30);
-
-    }
-
 }
