@@ -29,7 +29,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libssl1.0.2
+        sudo apt-get install -y libssl1.1
         msbuild /t:Restore src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj
 
     - name: Build
