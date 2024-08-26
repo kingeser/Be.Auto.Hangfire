@@ -142,6 +142,10 @@
             },
             clickCallbackPagination(pageNum) {
                 this.pagination.currentPage = Number(pageNum);
+            },
+            updatePagination (count){
+                this.pagination.parPage = count;
+                this.pagination.currentPage = 1;
             }
         },
         computed: {
