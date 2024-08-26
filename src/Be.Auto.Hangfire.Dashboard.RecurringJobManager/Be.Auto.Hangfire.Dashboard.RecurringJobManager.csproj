@@ -17,12 +17,13 @@
       <Authors>Burak ESER</Authors>
       <Copyright>Copyright © 2024</Copyright>
       <NeutralLanguage>en</NeutralLanguage>
-      <PackageProjectUrl>https://github.com/kingeser/Be.Auto.Hangfire.Dashboard.RecurringJobManager.git</PackageProjectUrl>
-      <RepositoryUrl>https://github.com/kingeser/Be.Auto.Hangfire.Dashboard.RecurringJobManager.git</RepositoryUrl>
+      <PackageProjectUrl>https://github.com/kingeser/Be.Auto.Hangfire</PackageProjectUrl>
+      <RepositoryUrl>https://github.com/kingeser/Be.Auto.Hangfire.git</RepositoryUrl>
       <Version>1.0.0</Version>
       <PackOnBuild>true</PackOnBuild>
       <Description>A dashboard to manage Hangfire's recurring jobs.</Description>
       <LangVersion>12</LangVersion>
+      <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -89,6 +90,13 @@
     <EmbeddedResource Include="Dashboard\JobsStopped.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\..\Desktop\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
   <!--<ItemGroup>

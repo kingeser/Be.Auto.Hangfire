@@ -1,0 +1,41 @@
+name: Build and Publish Hangfire Recurring Job Manager NuGet Package
+
+on:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+    paths:
+      - 'src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 'netstandard2.0'
+
+    - name: Install dependencies
+      run: dotnet restore src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj
+
+    - name: Pack
+      run: dotnet pack --configuration Release --no-build --output ./nupkg src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj
+
+    - name: Publish to NuGet
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      run: dotnet nuget push ./nupkg/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json

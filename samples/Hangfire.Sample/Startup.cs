@@ -36,9 +36,9 @@ namespace Sample
                                                      option.DisableConcurrentlyJobExecution();
                                                      option.WebRequestJobTimeout(TimeSpan.FromSeconds(15));
 
-                                                 })
-                                                );
-                services.AddHangfireServer();
+                                                 }));
+
+            services.AddHangfireServer();
 
 
             services.AddScoped<IProductService, ProductService>(t => new ProductService("https://domain.com"));
