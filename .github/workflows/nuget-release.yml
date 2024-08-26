@@ -24,11 +24,12 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '2.0.x' # .NET Standard 2.0 için gerekli
+        dotnet-version: '2.0.x' # .NET Standard 2.0 iÃ§in gerekli
 
     - name: Install dependencies
       run: |
-        sudo apt-get install -y libssl1.0.0
+        sudo apt-get update
+        sudo apt-get install -y libssl1.0.2
         msbuild /t:Restore src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj
 
     - name: Build
