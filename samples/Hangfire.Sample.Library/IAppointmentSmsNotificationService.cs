@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Hangfire.Sample.Library
+namespace Sample.Library
 {
     public interface IAppointmentSmsNotificationService
     {

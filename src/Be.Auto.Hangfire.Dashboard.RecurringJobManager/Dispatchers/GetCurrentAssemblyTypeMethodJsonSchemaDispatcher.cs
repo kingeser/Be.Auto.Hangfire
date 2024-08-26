@@ -7,18 +7,17 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers;
 
-public sealed  class GetCurrentAssemblyTypeMethodJsonSchemaDispatcher : IDashboardDispatcher
+public sealed class GetCurrentAssemblyTypeMethodJsonSchemaDispatcher : IDashboardDispatcher
 {
     public async Task Dispatch([NotNull] DashboardContext context)
     {
         var type = context.Request.GetQuery(nameof(RecurringJobMethodCall.Type));
         var method = context.Request.GetQuery(nameof(RecurringJobMethodCall.Method));
-        var schema = AssemblyInfoStorage.GetMethod(type, method)?.GetJsonSchema();
+        var methodDetail = AssemblyInfoStorage.GetMethod(type, method);
 
         await context.Response.WriteAsync(new
         {
-            Json= schema?.ToSampleJson(),
-            Schema = schema?.ToJson()
+            Schema = methodDetail?.GetJsonSchema()
         }.SerializeObjectToJson());
     }
 }

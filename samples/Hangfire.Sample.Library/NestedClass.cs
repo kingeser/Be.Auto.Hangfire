@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Hangfire.Sample.Library
+namespace Sample.Library
 {
     public class NestedClass
     {

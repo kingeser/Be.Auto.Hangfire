@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 {
@@ -20,18 +22,20 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
             var result = assembly
                 .GetTypes()
-                .Where(t => !t.IsSpecialName)
+                .Where(t => t.IsPublic && !t.IsSpecialName && (!t.IsAbstract || t.IsInterface) && !t.IsSealed && !$"{t.FullName}".StartsWith("System") && !$"{t.FullName}".StartsWith("Microsoft") && !$"{t.FullName}".StartsWith("Hangfire") && !$"{t.FullName}".StartsWith("Be.Auto"))
                 .Select(type => new
                 {
                     Type = type,
-                    Methods = type.GetMethods()
-                        .Where(m => !m.IsSpecialName && m.DeclaringType == type)
-                        .ToList()
+                    Methods = type.GetMethods().Where(m => !m.IsSpecialName && m.DeclaringType == type).ToList()
+
+
                 })
                 .Where(typeWithMethods => typeWithMethods.Methods.Any())
                 .ToDictionary(typeWithMethods => typeWithMethods.Type, typeWithMethods => typeWithMethods.Methods);
 
             return result;
         }
+
+
     }
 }

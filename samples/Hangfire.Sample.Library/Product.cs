@@ -1,4 +1,4 @@
-﻿namespace Hangfire.Sample.Library
+﻿namespace Sample.Library
 {
     public class Product
     {

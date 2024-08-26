@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Hangfire.Sample.Library
+namespace Sample.Library
 {
     public class AppointmentSmsNotificationService : IAppointmentSmsNotificationService
     {

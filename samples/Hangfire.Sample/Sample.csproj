@@ -21,7 +21,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\Hangfire.Sample.Library\Hangfire.Sample.Library.csproj" />
+    <ProjectReference Include="..\Hangfire.Sample.Library\Sample.Library.csproj" />
     <ProjectReference Include="..\..\src\Be.Auto.Hangfire.Dashboard.RecurringJobManager\Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj" />
   </ItemGroup>
 

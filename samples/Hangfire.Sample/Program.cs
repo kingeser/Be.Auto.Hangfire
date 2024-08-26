@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace Hangfire.Sample
+namespace Sample
 {
     public class Program
     {

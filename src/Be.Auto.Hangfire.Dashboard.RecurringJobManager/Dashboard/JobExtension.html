@@ -1,12 +1,16 @@
-﻿<link rel="stylesheet" type="text/css" href="job-manager/css/jobExtension" />
+﻿
+<link rel="stylesheet" type="text/css" href="job-manager/css/jobExtension" />
 <link rel="stylesheet" type="text/css" href="job-manager/css/cron-expression-input" />
 <link rel="stylesheet" type="text/css" href="job-manager/css/fontawesome" />
+
 
 <script src="job-manager/js/vue"></script>
 <script src="job-manager/js/axio"></script>
 <script src="job-manager/js/sweetalert"></script>
 <script src="job-manager/js/cron-expression-input"></script>
 <script src="job-manager/js/jsoneditor"></script>
+
+
 
 <script type="text/x-template" id="modal-template">
     <transition name="modal">
@@ -58,6 +62,7 @@
 
                 <div class="form-group">
                     <label for="JobType">Job Type</label>
+
                     <select id="JobType" name="JobType" class="form-control" v-model="job.JobType" @change="onJobTypeChange">
                         <option value="">Please select</option>
                         <option v-for="(item, index) in jobTypes" :key="index" :value="item.Value">{{ item.Text }}</option>
@@ -90,7 +95,13 @@
 
                 <div class="form-group" v-show="job.JobType === 'MethodCall'">
                     <label for="Type">Type</label>
-                    <select id="Type" name="Type" class="form-control" v-model="job.Type" @change="onClassChange">
+
+                    <v-select v-model="job.Type"
+                              :options="['Option 1', 'Option 2', 'Option 3', 'Option 4']"
+                              placeholder="Bir seçenek seçin">
+                    </v-select>
+
+                    <select id="Type" name="Type" class="form-control selectpicker" data-live-search="true" v-model="job.Type" @change="onClassChange">
                         <option value="">Please select</option>
                         <option v-for="(item, index) in assemblyTypes" :key="index" :value="item">{{ item }}</option>
 
@@ -344,6 +355,7 @@
     const app = createApp({
         components: {
             'modal': ModalComponent
+
         },
         setup() {
             const selectedJobIds = ref([]);
@@ -1180,7 +1192,7 @@
         },
         mounted() {
 
-
+          
             this.getMisfireHandlingModes();
             this.gethttpMethods();
             this.getAssemblyTypes();

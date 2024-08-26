@@ -1,8 +1,7 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace Hangfire.Sample.Library
+namespace Sample.Library
 {
     public static class StaticJobTest
     {

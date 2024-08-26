@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Hangfire.Sample.Pages
+namespace Sample.Pages
 {
     public class IndexModel : PageModel
     {

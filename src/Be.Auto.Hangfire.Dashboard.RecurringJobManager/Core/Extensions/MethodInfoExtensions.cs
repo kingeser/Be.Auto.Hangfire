@@ -119,52 +119,59 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             return instance;
         }
 
-        public static JsonSchema GetJsonSchema(this MethodInfo method)
+        public static string GetJsonSchema(this MethodInfo method)
         {
-            if (method == null) return null;
-
-            var parameterTypes = new Dictionary<string, Type>();
-
-            foreach (var param in method.GetParameters())
+            try
             {
-                parameterTypes[param.Name] = param.ParameterType;
-            }
+                if (method == null) return null;
 
-            if (parameterTypes.Count == 0) return null;
+                var parameterTypes = new Dictionary<string, Type>();
 
-            var schemas = new Dictionary<string, NJsonSchema.JsonSchema>();
+                foreach (var param in method.GetParameters())
+                {
+                    parameterTypes[param.Name] = param.ParameterType;
+                }
 
-            foreach (var parameter in parameterTypes)
-            {
-                var subSchema = NJsonSchema.JsonSchema.FromType(parameter.Value);
-                subSchema.Title = parameter.Key;
-                schemas.Add(parameter.Key, subSchema);
-            }
+                if (parameterTypes.Count == 0) return null;
 
-            var combinedSchema = new NJsonSchema.JsonSchema()
-            {
-                Type = JsonObjectType.Object,
-                Title = method.Name,
-                AllowAdditionalItems = false,
-                AllowAdditionalProperties = false,
+                var schemas = new Dictionary<string, JsonSchema>();
 
-            };
+                foreach (var parameter in parameterTypes)
+                {
+                    var subSchema = JsonSchema.FromType(parameter.Value);
+                    subSchema.Title = parameter.Key;
+                    schemas.Add(parameter.Key, subSchema);
+                }
 
-            foreach (var jSchema in schemas)
-            {
-                combinedSchema.Properties[jSchema.Key] = new JsonSchemaProperty
+                var combinedSchema = new JsonSchema()
                 {
                     Type = JsonObjectType.Object,
-                    Reference = jSchema.Value,
-                    Title = jSchema.Key
+                    Title = method.Name,
+                    AllowAdditionalItems = false,
+                    AllowAdditionalProperties = false,
+                    
                 };
 
-                combinedSchema.Definitions[jSchema.Key] = jSchema.Value;
-                combinedSchema.Definitions[jSchema.Key].Title = jSchema.Key;
+                foreach (var jSchema in schemas)
+                {
+                    combinedSchema.Properties[jSchema.Key] = new JsonSchemaProperty
+                    {
+                        Type = JsonObjectType.Object,
+                        Reference = jSchema.Value,
+                        Title = jSchema.Key
+                    };
+
+                    combinedSchema.Definitions[jSchema.Key] = jSchema.Value;
+                    combinedSchema.Definitions[jSchema.Key].Title = jSchema.Key;
+                }
+
+
+                return combinedSchema.ToJson(Formatting.None);
             }
-
-
-            return combinedSchema;
+            catch 
+            {
+                return default;
+            }
         }
     }
 

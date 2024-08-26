@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Hangfire.Sample
+namespace Sample
 {
     public class TestExecutionJob
     {

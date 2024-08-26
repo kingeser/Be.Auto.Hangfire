@@ -1,15 +1,16 @@
 using System;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
-using Hangfire.Sample.Library;
+using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Sample.Library;
 
-namespace Hangfire.Sample
+namespace Sample
 {
     public class Startup(IConfiguration configuration)
     {
@@ -29,7 +30,7 @@ namespace Hangfire.Sample
                                                  .UseSqlServerStorage(Configuration.GetConnectionString("HangfireConnection"))
                                                  .UseDashboardRecurringJobManager(option =>
                                                  {
-                                                     option.AddAssembly(typeof(StaticJobTest).Assembly);
+                                                     option.AddAppDomain(AppDomain.CurrentDomain);
                                                      option.ConcurrentJobExecution = ConcurrentJobExecution.Disable;
                                                      option.WebRequestJob.TimeOut = TimeSpan.FromSeconds(15);
                                                  })
