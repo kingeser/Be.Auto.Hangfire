@@ -21,7 +21,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
             options.Invoke(Options.Instance);
 
-
             if (Options.Instance.ConcurrentJobExecution == ConcurrentJobExecution.Disable)
             {
                 config.UseFilter(new DisableConcurrentlyJobExecutionAttribute());

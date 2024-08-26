@@ -5,10 +5,11 @@ using Hangfire.Common;
 using Hangfire.States;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 using System.Collections.Generic;
+using Hangfire.Dashboard;
+using Hangfire;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
 {
-    //Resharper disable all
     public class DisableConcurrentlyJobExecutionAttribute : JobFilterAttribute, IElectStateFilter
     {
 

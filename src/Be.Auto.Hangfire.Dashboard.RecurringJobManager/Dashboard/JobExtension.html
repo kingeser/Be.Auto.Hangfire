@@ -551,9 +551,14 @@
 
                         bodyParametersJsonEditor.value.on('ready', () => {
 
-                            bodyParametersJsonEditor.value.setValue(parseMultipleSerializedJSON(job.value.BodyParameters));
-                            checkJsonEditorProperties("bodyParametersJsonEditor");
+                            var params = parseMultipleSerializedJSON(job.value.BodyParameters);
 
+                            if (params !== null) {
+                                bodyParametersJsonEditor.value.setValue();
+                                checkJsonEditorProperties("bodyParametersJsonEditor");
+
+                            }
+                         
                         });
                     }
 
@@ -570,7 +575,7 @@
 
                     } catch (error) {
 
-                        return {};
+                        return null;
                     }
                 }
 
@@ -627,10 +632,14 @@
 
                     headerParametersJsonEditor.value.on('ready', () => {
 
+                        var params = parseMultipleSerializedJSON(job.value.HeaderParameters);
 
-                        headerParametersJsonEditor.value.setValue(parseMultipleSerializedJSON(job.value.HeaderParameters));
-                        checkJsonEditorProperties("headerParametersJsonEditor");
+                        if (params !== null) {
+                            headerParametersJsonEditor.value.setValue();
+                            checkJsonEditorProperties("headerParametersJsonEditor");
 
+                        }
+                      
                     });
 
 
@@ -839,8 +848,13 @@
 
                             methodParametersJsonEditor.value.on('ready', () => {
 
-                                methodParametersJsonEditor.value.setValue(parseMultipleSerializedJSON(job.value.MethodParameters));
-                                checkJsonEditorProperties("methodParametersJsonEditor");
+                                var params = parseMultipleSerializedJSON(job.value.MethodParameters);
+
+                                if (params !== null) {
+                                    methodParametersJsonEditor.value.setValue(params);
+                                    checkJsonEditorProperties("methodParametersJsonEditor");
+                                }
+                       
 
                             });
                         });
@@ -1115,7 +1129,7 @@
             };
 
             const isValidJson = (str) => {
-                return parseMultipleSerializedJSON(str) != {};
+                return parseMultipleSerializedJSON(str) != null;
             };
 
 
