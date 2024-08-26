@@ -2,7 +2,7 @@
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 
-public class RecurringJobMethodCall : RecurringJobBase
+internal class RecurringJobMethodCall : RecurringJobBase
 {
     public override JobType JobType => JobType.MethodCall;
     public string Type { get; set; }

@@ -4,7 +4,7 @@ using Hangfire;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
 {
-    public abstract class RecurringJobBase
+    internal abstract class RecurringJobBase
     {
         public  string Guid { get; set; }
         public string Id { get; set; }
@@ -16,7 +16,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
         public string LastJobId { get; set; }
         public string LastJobState { get; set; }
         public string LastExecution { get; set; }
-        public DateTime? CreatedAt { get; set; }
+        public string CreatedAt { get; set; }
         public bool Removed { get; set; }
         public string TimeZoneId { get; set; }
 

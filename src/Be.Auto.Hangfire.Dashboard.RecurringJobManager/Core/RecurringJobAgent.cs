@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 {
-    public static class RecurringJobAgent
+    internal static class RecurringJobAgent
     {
         public const string TagRecurringJobBase = "recurring-job";
         public const string TagStopJob = "recurring-jobs-stop";
@@ -41,7 +41,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             transaction.Commit();
         }
 
-      
+
         public static void DeleteJobDetails(string[] jobIds)
         {
             foreach (var jobId in jobIds)
@@ -66,11 +66,11 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
                 var cancelledState = jobDetails?.History?.Where(state => state.StateName == "Cancelled")?.ToList() ?? new List<StateHistoryDto>();
 
-                foreach (var item in cancelledState.Select(stateHistoryDto => new CancelledJob()
+                foreach (var item in cancelledState.OrderByDescending(t => t.CreatedAt).Select(stateHistoryDto => new CancelledJob()
                 {
                     Id = job.Id,
                     Type = job.JobType,
-                    CancelledAt = stateHistoryDto.CreatedAt,
+                    CancelledAt = stateHistoryDto.CreatedAt.ChangeTimeZone(job.TimeZoneId).ToString("G"),
                     Reason = stateHistoryDto.Reason
                 }))
                 {
@@ -96,7 +96,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
                 }
             }
 
-            return result;
+            return result.OrderByDescending(t => t.CancelledAt).ToList();
         }
 
         public static void SaveJobDetails(RecurringJobBase job)
@@ -170,7 +170,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             return (from a in result
                     group a by a.Guid
                 into g
-                    select g.FirstOrDefault()).ToList();
+                    select g.FirstOrDefault()).OrderByDescending(t => DateTime.Parse(t.CreatedAt)).ToList();
         }
 
         private static RecurringJobBase MapPeriodicJob(IStorageConnection connection, string jobId, string status, bool removed)
@@ -262,8 +262,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
             if (dataJob.TryGetValue("CreatedAt", out var value4))
             {
-                dto.CreatedAt = JobHelper.DeserializeNullableDateTime(value4);
-                dto.CreatedAt = dto.CreatedAt?.ChangeTimeZone(dto.TimeZoneId) ?? new DateTime();
+
+                dto.CreatedAt = JobHelper.DeserializeNullableDateTime(value4)?.ChangeTimeZone(dto.TimeZoneId).ToString("G") ?? "N/A";
             }
 
             if (dataJob.TryGetValue("Error", out var error) && !string.IsNullOrEmpty(error))

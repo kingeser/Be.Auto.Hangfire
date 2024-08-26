@@ -12,7 +12,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 {
-    public class RecurringJobWebClient
+    internal class RecurringJobWebClient
     {
         public async Task<object> CallRequestAsync(WebRequestJob job)
         {

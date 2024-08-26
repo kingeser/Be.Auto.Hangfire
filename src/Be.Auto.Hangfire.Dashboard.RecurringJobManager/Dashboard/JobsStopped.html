@@ -59,16 +59,16 @@
                             <th>Type / Host Name</th>
                             <th>Method / Path</th>
                             <th>Time Zone</th>
-
+                            <th>Last Execution</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr class="js-jobs-list-row" v-for="job in getItems" :key="job.Id">
 
 
-                            <td class="word-break ">{{ job.Id }}</td>
-                            <td class="word-break ">{{ job.JobType }}</td>
-                            <td class="word-break ">{{ job.MisfireHandlingMode }}</td>
+                            <td class="word-break">{{ job.Id }}</td>
+                            <td class="word-break">{{ job.JobType }}</td>
+                            <td class="word-break">{{ job.MisfireHandlingMode }}</td>
                             <td class="min-width min-width-125p ">
                                 <code class="cron-badge">
                                     {{ job.Cron }}
@@ -79,7 +79,7 @@
                             <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.HostName : job.Type }}</td>
                             <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.UrlPath : job.Method }}</td>
                             <td class="word-break ">{{ job.TimeZoneId }}</td>
-
+                            <td class="word-break ">{{ job.LastExecution }}</td>
                         </tr>
 
                     </tbody>

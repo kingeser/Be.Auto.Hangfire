@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Net;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 
-public class WebRequestJob
+internal class WebRequestJob
 {
     public required string HostName { get; set; }
     public required string UrlPath { get; set; }

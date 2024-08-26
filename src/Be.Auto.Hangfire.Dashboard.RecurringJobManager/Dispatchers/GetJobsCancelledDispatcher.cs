@@ -7,7 +7,7 @@ using Hangfire.Dashboard;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers;
 
-public sealed class GetJobsCancelledDispatcher : IDashboardDispatcher
+internal sealed class GetJobsCancelledDispatcher : IDashboardDispatcher
 {
 
     public async Task Dispatch([NotNull] DashboardContext context)

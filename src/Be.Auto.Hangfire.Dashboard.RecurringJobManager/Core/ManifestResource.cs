@@ -1,12 +1,10 @@
 ﻿using System.IO;
 using System.Resources;
-using Hangfire;
-using Newtonsoft.Json;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 {
 
-    public static class ManifestResource
+    internal static class ManifestResource
     {
         public static string ReadStringResource(string resourceName)
         {

@@ -1,6 +1,6 @@
 ﻿namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 
-public class HttpFormUrlEncodedParameter
+internal class HttpFormUrlEncodedParameter
 {
     public string Name { get; set; }
     public string Value { get; set; }

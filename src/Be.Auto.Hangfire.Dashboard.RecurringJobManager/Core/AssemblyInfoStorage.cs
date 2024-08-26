@@ -8,7 +8,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 {
-    public static class AssemblyInfoStorage
+    internal static class AssemblyInfoStorage
     {
         public static readonly List<AssemblyInfo> Assemblies = [];
         public static void Store( ICollection<Assembly> assemblies)

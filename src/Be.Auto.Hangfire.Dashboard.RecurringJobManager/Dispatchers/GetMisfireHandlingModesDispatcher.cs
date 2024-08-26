@@ -8,7 +8,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers;
 
-public sealed class GetMisfireHandlingModesDispatcher : IDashboardDispatcher
+internal sealed class GetMisfireHandlingModesDispatcher : IDashboardDispatcher
 {
     public async Task Dispatch([NotNull] DashboardContext context)
     {

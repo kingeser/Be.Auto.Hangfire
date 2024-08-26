@@ -1,13 +1,11 @@
-﻿using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 {
-    public class AssemblyInfo(Assembly assembly)
+    internal class AssemblyInfo(Assembly assembly)
     {
         private Dictionary<Type, List<MethodInfo>> _types;
 

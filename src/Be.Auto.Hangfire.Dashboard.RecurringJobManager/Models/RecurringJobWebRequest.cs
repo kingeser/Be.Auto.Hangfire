@@ -2,7 +2,7 @@
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 
-public class RecurringJobWebRequest : RecurringJobBase
+internal class RecurringJobWebRequest : RecurringJobBase
 {
     public override JobType JobType => JobType.WebRequest;
     public string HostName { get; set; }

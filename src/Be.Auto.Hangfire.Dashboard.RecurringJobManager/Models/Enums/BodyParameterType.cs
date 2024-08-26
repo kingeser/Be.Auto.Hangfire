@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents the different types of body parameters that can be used in HTTP requests.
     /// </summary>
-    public enum BodyParameterType
+    internal enum BodyParameterType
     {
         None,
         /// <summary>

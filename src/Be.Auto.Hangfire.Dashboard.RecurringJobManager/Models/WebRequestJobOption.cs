@@ -2,7 +2,7 @@
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 
-public class WebRequestJobOption
+internal class WebRequestJobOption
 {
     public TimeSpan TimeOut { get; set; } = TimeSpan.FromSeconds(30);
 

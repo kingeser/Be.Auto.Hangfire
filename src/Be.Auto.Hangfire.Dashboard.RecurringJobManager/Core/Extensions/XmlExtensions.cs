@@ -2,7 +2,7 @@
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
-public static class XmlExtensions
+internal static class XmlExtensions
 {
 
     public static bool IsValidXml(this string @this)

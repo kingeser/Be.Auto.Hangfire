@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
-    public sealed class ContentDispatcher(string contentType, string resourceName, TimeSpan expiresIn)
+    internal sealed class ContentDispatcher(string contentType, string resourceName, TimeSpan expiresIn)
         : IDashboardDispatcher
     {
         private static readonly Assembly ThisAssembly = typeof(ContentDispatcher).Assembly;

@@ -7,11 +7,10 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using System.Net;
 using System.Threading.Tasks;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
-using Hangfire;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
-    public sealed class JobDeleteDispatcher : IDashboardDispatcher
+    internal sealed class JobDeleteDispatcher : IDashboardDispatcher
     {
         public async Task Dispatch([NotNull] DashboardContext context)
         {

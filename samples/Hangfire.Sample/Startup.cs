@@ -33,8 +33,8 @@ namespace Sample
                                                  .UseDashboardRecurringJobManager(option =>
                                                  {
                                                      option.AddAppDomain(AppDomain.CurrentDomain);
-                                                     option.SetConcurrentJobExecution(ConcurrentJobExecution.Disable);
-                                                     option.SetWebRequestJobTimeout(TimeSpan.FromSeconds(15));
+                                                     option.DisableConcurrentlyJobExecution();
+                                                     option.WebRequestJobTimeout(TimeSpan.FromSeconds(15));
 
                                                  })
                                                 );

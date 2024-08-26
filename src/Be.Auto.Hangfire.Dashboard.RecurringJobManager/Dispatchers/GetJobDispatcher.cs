@@ -9,7 +9,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
-    public sealed class GetJobDispatcher : IDashboardDispatcher
+    internal sealed class GetJobDispatcher : IDashboardDispatcher
     {
         private readonly IStorageConnection _connection = JobStorage.Current.GetConnection();
 

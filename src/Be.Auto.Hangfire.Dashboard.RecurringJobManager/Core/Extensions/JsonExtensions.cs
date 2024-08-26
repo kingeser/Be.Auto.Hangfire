@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
-public static class JsonExtensions
+internal static class JsonExtensions
 {
     public static string SerializeObjectToJson(this object @this)
     {

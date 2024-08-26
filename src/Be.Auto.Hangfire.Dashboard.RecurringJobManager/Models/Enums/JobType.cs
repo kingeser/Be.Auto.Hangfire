@@ -5,7 +5,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums
     /// <summary>
     /// Represents the types of jobs that can be processed in the system.
     /// </summary>
-    public enum JobType
+    internal enum JobType
     {
         /// <summary>
         /// Represents a job that involves calling a method.

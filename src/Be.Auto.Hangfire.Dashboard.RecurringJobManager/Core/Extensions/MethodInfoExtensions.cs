@@ -9,7 +9,7 @@ using NJsonSchema;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {
-    public static class MethodInfoExtensions
+    internal static class MethodInfoExtensions
     {
         public static string GenerateFullName(this MethodInfo @this)
         {

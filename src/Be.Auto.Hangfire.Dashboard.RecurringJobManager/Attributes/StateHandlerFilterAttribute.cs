@@ -4,7 +4,7 @@ using Hangfire.Storage;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes;
 
-public class StateHandlerFilterAttribute(IStateHandler stateHandler) : JobFilterAttribute, IApplyStateFilter, IElectStateFilter
+internal class StateHandlerFilterAttribute(IStateHandler stateHandler) : JobFilterAttribute, IApplyStateFilter, IElectStateFilter
 {
     public void OnStateApplied(ApplyStateContext context, IWriteOnlyTransaction transaction)
     {

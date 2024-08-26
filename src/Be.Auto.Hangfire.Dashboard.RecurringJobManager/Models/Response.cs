@@ -1,6 +1,6 @@
 ﻿namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
 {
-    public class Response
+    internal class Response
     {
         public bool Status { get; set; }
 

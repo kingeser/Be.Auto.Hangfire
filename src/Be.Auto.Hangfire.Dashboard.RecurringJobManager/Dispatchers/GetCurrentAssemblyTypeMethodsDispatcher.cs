@@ -7,7 +7,7 @@ using Hangfire.Dashboard;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
-    public sealed class GetCurrentAssemblyTypeMethodsDispatcher : IDashboardDispatcher
+    internal sealed class GetCurrentAssemblyTypeMethodsDispatcher : IDashboardDispatcher
     {
         public async Task Dispatch([NotNull] DashboardContext context)
         {

@@ -2,14 +2,12 @@
 using Hangfire.Dashboard;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Pages;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers;
 using Hangfire;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
-using Hangfire.States;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {
@@ -28,8 +26,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             {
                 config.UseFilter(new DisableConcurrentlyJobExecutionAttribute());
             }
-         
-            config.UseFilter(new StateHandlerFilter(new CancelledStateHandler()));
+
+            config.UseFilter(new StateHandlerFilterAttribute(new CancelledStateHandler()));
 
             StoreAssemblies();
 
@@ -57,12 +55,20 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
         {
             DashboardRoutes.Routes.AddRazorPage(JobExtensionPage.PageRoute, x => new JobExtensionPage());
             DashboardRoutes.Routes.AddRazorPage(JobsStoppedPage.PageRoute, x => new JobsStoppedPage());
-            DashboardRoutes.Routes.AddRazorPage(JobsCancelledPage.PageRoute, x => new JobsCancelledPage());
+
+            if (Options.Instance.ConcurrentJobExecution == ConcurrentJobExecution.Disable)
+            {
+                DashboardRoutes.Routes.AddRazorPage(JobsCancelledPage.PageRoute, x => new JobsCancelledPage());
+            }
+
         }
 
         private static void AddApiRoutes()
         {
-            DashboardRoutes.Routes.Add("/jobs/get-job-cancelled", new GetJobsCancelledDispatcher());
+            if (Options.Instance.ConcurrentJobExecution == ConcurrentJobExecution.Disable)
+            {
+                DashboardRoutes.Routes.Add("/jobs/get-job-cancelled", new GetJobsCancelledDispatcher());
+            }
             DashboardRoutes.Routes.Add("/jobs/get-job-stopped", new GetJobsStoppedDispatcher());
             DashboardRoutes.Routes.Add("/job-manager/get-jobs", new GetJobDispatcher());
             DashboardRoutes.Routes.Add("/job-manager/update-jobs", new SaveJobDispatcher());
@@ -82,7 +88,11 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
         private static void AddMetrics()
         {
             DashboardMetrics.AddMetric(TagDashboardMetrics.JobsStoppedCount);
-            DashboardMetrics.AddMetric(TagDashboardMetrics.JobsCancelledCount);
+
+            if (Options.Instance.ConcurrentJobExecution == ConcurrentJobExecution.Disable)
+            {
+                DashboardMetrics.AddMetric(TagDashboardMetrics.JobsCancelledCount);
+            }
         }
 
         private static void AddMenuItems()
@@ -93,11 +103,14 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                 Metric = TagDashboardMetrics.JobsStoppedCount,
             });
 
-            JobsSidebarMenu.Items.Add(page => new MenuItem("Cancelled", page.Url.To("/jobs/cancelled"))
+            if (Options.Instance.ConcurrentJobExecution == ConcurrentJobExecution.Disable)
             {
-                Active = page.RequestPath.StartsWith("/jobs/cancelled"),
-                Metric = TagDashboardMetrics.JobsCancelledCount,
-            });
+                JobsSidebarMenu.Items.Add(page => new MenuItem("Cancelled", page.Url.To("/jobs/cancelled"))
+                {
+                    Active = page.RequestPath.StartsWith("/jobs/cancelled"),
+                    Metric = TagDashboardMetrics.JobsCancelledCount,
+                });
+            }
 
 
             NavigationMenu.Items.Add(page => new MenuItem(JobExtensionPage.Title, page.Url.To("/job-manager"))
@@ -126,6 +139,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             AddDashboardRouteToEmbeddedResource("/job-manager/js/sweetalert", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.sweetalert.js");
             AddDashboardRouteToEmbeddedResource("/job-manager/js/cron-expression-input", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.cron-expression-input.js");
             AddDashboardRouteToEmbeddedResource("/job-manager/js/jsoneditor", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.jsoneditor.min.js");
+            AddDashboardRouteToEmbeddedResource("/job-manager/js/relativetime", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.relativetime.js");
 
         }
 

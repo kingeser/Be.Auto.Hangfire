@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
-public class MethodParameterConverter(MethodInfo methodInfo) : JsonConverter
+internal class MethodParameterConverter(MethodInfo methodInfo) : JsonConverter
 {
     private readonly ParameterInfo[] _parameters = methodInfo.GetParameters();
     public override bool CanConvert(Type objectType)

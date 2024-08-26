@@ -5,14 +5,13 @@ using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Threading.Tasks;
-using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 using Hangfire;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
-    public sealed class SaveJobDispatcher : IDashboardDispatcher
+    internal sealed class SaveJobDispatcher : IDashboardDispatcher
     {
         public async Task Dispatch([NotNull] DashboardContext context)
         {
@@ -62,7 +61,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     MethodParameters = context.Request.GetQuery(nameof(RecurringJobMethodCall.MethodParameters)),
                     LastJobState = string.Empty,
                     NextExecution = string.Empty,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.Now.ToString("G"),
                     Error = string.Empty,
                     JobState = string.Empty,
                     Removed = false,
@@ -90,7 +89,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                             context.Request.GetQuery(nameof(RecurringJobBase.MisfireHandlingMode))),
                     LastJobState = string.Empty,
                     NextExecution = string.Empty,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.Now.ToString("G"),
                     Error = string.Empty,
                     JobState = string.Empty,
                     Removed = false,

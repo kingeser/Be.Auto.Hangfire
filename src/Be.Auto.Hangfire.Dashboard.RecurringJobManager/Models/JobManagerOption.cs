@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
 {
-    public enum ConcurrentJobExecution
-    {
-        Allow,
-        Disable
-    }
     public class JobManagerOption
     {
         internal ICollection<Assembly> Assemblies { get; set; } = new List<Assembly>();
@@ -17,15 +12,15 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
         internal WebRequestJobOption WebRequestJob { get; set; } = new WebRequestJobOption();
 
 
-        public JobManagerOption SetWebRequestJobTimeout(TimeSpan timeout)
+        public JobManagerOption WebRequestJobTimeout(TimeSpan timeout)
         {
             WebRequestJob.TimeOut = timeout;
             return this;
         }
 
-        public JobManagerOption SetConcurrentJobExecution(ConcurrentJobExecution execution)
+        public JobManagerOption DisableConcurrentlyJobExecution()
         {
-            this.ConcurrentJobExecution = execution;
+            this.ConcurrentJobExecution = ConcurrentJobExecution.Disable;
             return this;
         }
 

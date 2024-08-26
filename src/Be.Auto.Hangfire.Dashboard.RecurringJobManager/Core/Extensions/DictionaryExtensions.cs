@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
-public static class DictionaryExtensions
+internal static class DictionaryExtensions
 {
     public static T BindFromDictionary<T>(this Dictionary<string, string> dictionary) where T : new()
     {

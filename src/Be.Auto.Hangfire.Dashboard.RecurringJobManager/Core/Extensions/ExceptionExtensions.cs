@@ -4,7 +4,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
 using System;
 
-public static class ExceptionExtensions
+internal static class ExceptionExtensions
 {
     /// <summary>
     /// Gets all exception messages recursively, including inner exceptions.

@@ -9,7 +9,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {
-    public static class RecurringJobExtensions
+    internal static class RecurringJobExtensions
     {
         public static void Register(this RecurringJobBase job)
         {

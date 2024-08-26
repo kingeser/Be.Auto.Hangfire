@@ -9,7 +9,7 @@ using System.Net;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
-    public sealed class GetJobForEdit : IDashboardDispatcher
+    internal sealed class GetJobForEdit : IDashboardDispatcher
     {
 
         public async Task Dispatch([NotNull] DashboardContext conterecurringJobt)

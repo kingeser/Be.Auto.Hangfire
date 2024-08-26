@@ -253,7 +253,9 @@
                                 <th>Type / Host Name</th>
                                 <th>Method / Path</th>
                                 <th>Time Zone</th>
-
+                                <th>Created</th>
+                                <th>Last Execution</th>
+                                <th>Next Execution</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -293,6 +295,9 @@
                                 <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.HostName : job.Type }}</td>
                                 <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.UrlPath : job.Method }}</td>
                                 <td class="word-break ">{{ job.TimeZoneId }}</td>
+                                <td class="word-break ">{{ job.CreatedAt }}</td>
+                                <td class="word-break ">{{ job.LastExecution }}</td>
+                                <td class="word-break ">{{ job.NextExecution }}</td>
 
                             </tr>
 
