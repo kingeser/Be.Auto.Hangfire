@@ -133,7 +133,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             AddDashboardRouteToEmbeddedResource("/job-manager/css/cron-expression-input", "text/css", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.css.cron-expression-input.css");
 
 
-            AddDashboardRouteToEmbeddedResource("/job-manager/js/page", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.jobextension.js");
+          
             AddDashboardRouteToEmbeddedResource("/job-manager/js/vue", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.vue.js");
             AddDashboardRouteToEmbeddedResource("/job-manager/js/axio", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.axios.min.js");
             AddDashboardRouteToEmbeddedResource("/job-manager/js/sweetalert", "application/javascript", "Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.Content.js.sweetalert.js");

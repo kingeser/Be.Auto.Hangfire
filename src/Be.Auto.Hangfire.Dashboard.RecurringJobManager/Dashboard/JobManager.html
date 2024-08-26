@@ -559,7 +559,7 @@
                             var params = parseMultipleSerializedJSON(job.value.BodyParameters);
 
                             if (params !== null) {
-                                bodyParametersJsonEditor.value.setValue();
+                                bodyParametersJsonEditor.value.setValue(params);
                                 checkJsonEditorProperties("bodyParametersJsonEditor");
 
                             }
@@ -640,7 +640,7 @@
                         var params = parseMultipleSerializedJSON(job.value.HeaderParameters);
 
                         if (params !== null) {
-                            headerParametersJsonEditor.value.setValue();
+                            headerParametersJsonEditor.value.setValue(params);
                             checkJsonEditorProperties("headerParametersJsonEditor");
 
                         }

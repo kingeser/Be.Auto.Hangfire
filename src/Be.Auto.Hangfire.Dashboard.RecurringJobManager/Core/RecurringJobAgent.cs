@@ -180,14 +180,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             if (dataJob == null) return default;
 
             var jobType = JobType.MethodCall;
+
             if (dataJob.TryGetValue(nameof(RecurringJobBase.JobType), out var jobTypeValue) && !string.IsNullOrWhiteSpace(jobTypeValue))
             {
                 jobType = (JobType)Enum.Parse(typeof(JobType), jobTypeValue);
             }
 
-
             RecurringJobBase dto = null;
-
 
             switch (jobType)
             {
@@ -218,7 +217,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
                         methodCallJob.Method = job.Method.GenerateFullName();
                         methodCallJob.Type = job.Type.FullName;
                     }
-
 
                 }
             }
@@ -272,6 +270,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             }
 
             dto.Removed = removed;
+
             dto.JobState = status;
 
             return dto;
