@@ -21,9 +21,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
 
             var processingJobs = context.Storage.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
 
-
             if (processingJobs.Count <= 0) return;
-
 
             var type = context.BackgroundJob.Job.Type.FullName;
             var methodName = context.BackgroundJob.Job.Method.GenerateFullName();
@@ -44,25 +42,17 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
 
         public bool AreArgsEqual(IReadOnlyList<object> args1, IReadOnlyList<object> args2)
         {
+            if (args1 == null || args2 == null)
+            {
+                return true;
+            }
 
             if (ReferenceEquals(args1, args2))
             {
                 return true;
             }
 
-
-            if (args1 == null || args2 == null)
-            {
-                return true;
-            }
-
-
-            if (args1.Count != args2.Count)
-            {
-                return false;
-            }
-
-            return args1.SequenceEqual(args2);
+            return args1.Count == args2.Count && args1.SequenceEqual(args2);
         }
 
     }
