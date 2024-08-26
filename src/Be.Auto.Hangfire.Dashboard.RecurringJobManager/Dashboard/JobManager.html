@@ -1,5 +1,5 @@
 ﻿
-<link rel="stylesheet" type="text/css" href="job-manager/css/jobExtension" />
+<link rel="stylesheet" type="text/css" href="job-manager/css/app" />
 <link rel="stylesheet" type="text/css" href="job-manager/css/cron-expression-input" />
 <link rel="stylesheet" type="text/css" href="job-manager/css/fontawesome" />
 
@@ -277,8 +277,8 @@
                                     </button>
                                 </td>
                                 <td class="word-break ">{{ job.Id }}</td>
-                                <td class="word-break ">{{ job.JobType }}</td>
-                                <td class="word-break ">{{ job.MisfireHandlingMode }}</td>
+                                <td :class="job.JobType" >{{ job.JobType }}</td>
+                                <td :style="{color:stringToColor(job.MisfireHandlingMode)}" class="word-break ">{{ job.MisfireHandlingMode }}</td>
                                 <td class="min-width min-width-125p ">
                                     <code class="cron-badge">
                                         {{ job.Cron }}
@@ -294,7 +294,7 @@
 
                                 <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.HostName : job.Type }}</td>
                                 <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.UrlPath : job.Method }}</td>
-                                <td class="word-break ">{{ job.TimeZoneId }}</td>
+                                <td :style="{color:stringToColor(job.TimeZoneId)}" class="word-break ">{{ job.TimeZoneId }}</td>
                                 <td class="word-break ">{{ job.CreatedAt }}</td>
                                 <td class="word-break ">{{ job.LastExecution }}</td>
                                 <td class="word-break ">{{ job.NextExecution }}</td>
@@ -1181,6 +1181,39 @@
                 return Math.ceil(jobs.value.length / pagination.value.parPage);
             });
 
+
+            const hashString = (str) => {
+                
+                let hash = 0;
+                if (str.length === 0) return hash;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = (hash << 5) - hash + char;
+                    hash = hash & hash; 
+                }
+                return hash;
+            };
+
+            const stringToColor = (str) => {
+            
+                const hash = hashString(str);
+
+             
+                let r = (hash >> 16) & 0xFF;
+                let g = (hash >> 8) & 0xFF;
+                let b = hash & 0xFF;
+
+               
+                r = Math.min(255, Math.floor(r * 0.75));
+                g = Math.min(255, Math.floor(g * 0.75));
+                b = Math.min(255, Math.floor(b * 0.75));
+
+                
+                return `rgb(${r}, ${g}, ${b})`;
+            };
+
+          
+
             return {
                 title,
                 jobs,
@@ -1237,7 +1270,9 @@
                 onHttpMethodChange,
                 checkJsonEditorProperties,
                 deleteSelectedJobs,
-                generateUUID
+                generateUUID,
+                stringToColor,
+                hashString
 
             };
         },

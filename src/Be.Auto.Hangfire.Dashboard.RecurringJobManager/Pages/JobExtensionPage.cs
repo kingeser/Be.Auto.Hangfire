@@ -12,7 +12,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Pages
 
         static JobExtensionPage()
         {
-            PageHtml = ManifestResource.ReadStringResource("Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.JobExtension.html");
+            PageHtml = ManifestResource.ReadStringResource("Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dashboard.JobManager.html");
         }
 
         public override void Execute()

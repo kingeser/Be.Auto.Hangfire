@@ -1,4 +1,4 @@
-﻿<link rel="stylesheet" type="text/css" href="../job-manager/css/jobExtension" />
+﻿<link rel="stylesheet" type="text/css" href="../job-manager/css/app" />
 
 
 <script src="../job-manager/js/vue"></script>
@@ -63,7 +63,7 @@
                     <tbody>
                         <tr class="js-jobs-list-row" v-for="job in getItems" :key="job.Id">
                             <td class="word-break ">{{ job.Id }}</td>
-                            <td class="word-break ">{{ job.Type }}</td>
+                            <td :class="job.Type">{{ job.Type }}</td>
                             <td class="word-break ">{{ job.Reason }}</td>
                             <td class="word-break ">{{ job.Job }}</td>
                             <td class="word-break ">{{ job.CancelledAt }}</td>

@@ -87,3 +87,13 @@ svg {
         overflow: hidden;
         text-overflow: ellipsis;
     }
+
+.WebRequest {
+  
+    color: dodgerblue;
+    font-weight:bolder;
+}
+.MethodCall {
+    color: darkorange;
+    font-weight: bolder;
+}
