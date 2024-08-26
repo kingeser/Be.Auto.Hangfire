@@ -41,13 +41,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             transaction.Commit();
         }
 
-        public static void DeleteJobDetails(string jobId)
-        {
-            using var connection = JobStorage.Current.GetConnection();
-            using var transaction = connection.CreateWriteTransaction();
-            transaction.RemoveHash($"{TagRecurringJobBase}:{jobId}");
-            transaction.Commit();
-        }
+      
         public static void DeleteJobDetails(string[] jobIds)
         {
             foreach (var jobId in jobIds)
