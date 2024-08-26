@@ -60,6 +60,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             DashboardRoutes.Routes.Add("/jobs/get-job-stopped", new GetJobsStoppedDispatcher());
             DashboardRoutes.Routes.Add("/job-manager/get-jobs", new GetJobDispatcher());
             DashboardRoutes.Routes.Add("/job-manager/update-jobs", new SaveJobDispatcher());
+            DashboardRoutes.Routes.Add("/job-manager/delete-job", new JobDeleteDispatcher());
             DashboardRoutes.Routes.Add("/job-manager/get-job", new GetJobForEdit());
             DashboardRoutes.Routes.Add("/job-manager/job-agent", new JobStatustDispatcher());
             DashboardRoutes.Routes.Add("/job-manager/get-job-types", new GetJobTypesDispatcher());

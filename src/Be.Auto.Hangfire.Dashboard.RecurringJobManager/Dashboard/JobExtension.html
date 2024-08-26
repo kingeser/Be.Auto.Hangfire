@@ -176,11 +176,15 @@
                         <span class="glyphicon glyphicon-plus"></span>
                         Add New Job
                     </button>
+                    <button type="button" class="btn btn-sm btn-danger" @click="deleteSelectedJobs" :disabled="selectedJobIds.length === 0">
+                        <span class="glyphicon glyphicon-play"></span>
+                        Delete Selected Jobs
+                    </button>
                     <button type="button" class="btn btn-sm btn-success" @click="startSelectedJobs" :disabled="selectedJobIds.length === 0">
                         <span class="glyphicon glyphicon-play"></span>
                         Start Selected Jobs
                     </button>
-                    <button type="button" class="btn btn-sm btn-danger" @click="stopSelectedJobs" :disabled="selectedJobIds.length === 0">
+                    <button type="button" class="btn btn-sm btn-warning" @click="stopSelectedJobs" :disabled="selectedJobIds.length === 0">
                         <span class="glyphicon glyphicon-stop"></span>
                         Stop Selected Jobs
                     </button>
@@ -246,8 +250,8 @@
 
                                 </td>
                                 <td>
-                                    <button type="button" title="Edit Job" class="btn btn-warning" style="width:32px;height:32px; padding-top: 10px; margin-right: 5px;" @click="GetJob(job.Id)">
-                                        <i style="margin-top: -9px; position: absolute; margin-left: -6px; zoom: 1.5;" class="fas fa-edit"></i>
+                                    <button type="button" title="Edit Job" class="btn btn-warning" style="width:24px;height:24px; padding-top: 10px; margin-right: 5px;" @click="GetJob(job.Id)">
+                                        <i style="margin-top: -9px; position: absolute; margin-left: -6px; zoom: 1.2;" class="fas fa-edit"></i>
                                     </button>
                                 </td>
                                 <td class="word-break ">{{ job.Id }}</td>
@@ -904,6 +908,42 @@
                 });
 
             };
+
+            const deleteSelectedJobs = () => {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Do you want to delete the selected ' + selectedJobIds.value.length + ' jobs?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete them!',
+                    cancelButtonText: 'No, cancel'
+                }).then((result) => {
+                    if (result.value) {
+
+                        axios.get('job-manager/delete-job?SelectedJobs=' + selectedJobIds.value.join('|')).then(response => {
+
+                            selectedJobIds.value = [];
+
+                            closeModal();
+
+                            GetJobs();
+
+
+                        }).catch(e => {
+
+                            showModal.value = false;
+
+                            Swal.fire({
+                                title: 'Error!',
+                                icon: 'error',
+                                text: e.response.data.Message,
+                                confirmButtonText: 'OK'
+                            });
+                        });
+
+                    }
+                });
+            };
             const getBodyParameterTypes = () => {
 
                 axios.get('job-manager/get-body-parameter-types?HttpMethod=' + job.value.HttpMethod).then(response => {
@@ -997,7 +1037,7 @@
                     errors.value.push("Job ID is missing. Please provide a unique identifier for the job.");
                 }
 
-                if (jobs.value.some(item => item.Id === job.value.Id)) {
+                if (jobs.value.some(item => item.Id === job.value.Id && item.Guid !== job.value.Guid)) {
                     errors.value.push("The Job Id already exists. Please provide a unique ID.");
                 }
 
@@ -1133,7 +1173,8 @@
                 isValidJson,
                 parseMultipleSerializedJSON,
                 onHttpMethodChange,
-                checkJsonEditorProperties
+                checkJsonEditorProperties,
+                deleteSelectedJobs
 
             };
         },
