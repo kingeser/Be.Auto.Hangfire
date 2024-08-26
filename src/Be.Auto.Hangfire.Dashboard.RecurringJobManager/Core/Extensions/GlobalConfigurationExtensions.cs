@@ -65,7 +65,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
         private static void AddMenuItems()
         {
-            JobsSidebarMenu.Items.Add(page => new MenuItem("Jobs Stopped", page.Url.To("/jobs/stopped"))
+            JobsSidebarMenu.Items.Add(page => new MenuItem("Stopped", page.Url.To("/jobs/stopped"))
             {
                 Active = page.RequestPath.StartsWith("/jobs/stopped"),
                 Metric = TagDashboardMetrics.JobsStoppedCount,

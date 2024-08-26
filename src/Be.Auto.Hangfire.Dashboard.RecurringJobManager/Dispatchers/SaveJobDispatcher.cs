@@ -23,13 +23,14 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                 var job = CreateRecurringJob(context);
                 job.Register();
                 context.Response.StatusCode = (int)HttpStatusCode.OK;
-
+                response.Status = true;
             }
             catch (Exception e)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                response.Message = e.GetAllMessages();
+                response.Status = false;
 
-                await WriteErrorResponse(context, response, e.GetAllMessages());
             }
             finally
             {
@@ -96,13 +97,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
             };
         }
 
-        private static async Task WriteErrorResponse(DashboardContext context, Response response, string message)
-        {
-            response.Status = false;
-            response.Message = message;
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
-        }
+
 
     }
 }

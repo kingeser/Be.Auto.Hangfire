@@ -393,7 +393,7 @@
                 parPage: 10,
                 currentPage: 1
             });
-            const paginationOptions = ref([ 10, 20, 50, 100, 500, 1000, 5000]);
+            const paginationOptions = ref([10, 20, 50, 100, 500, 1000, 5000]);
             const selectedJobType = ref('');
             const headerCount = ref(0);
 
@@ -631,7 +631,7 @@
             };
 
             const addJob = () => {
-                UpdateJob(job.value);
+                SaveJob(job.value);
             };
 
 
@@ -698,7 +698,7 @@
 
             };
 
-            const UpdateJob = (job) => {
+            const SaveJob = (job) => {
                 if (checkForm()) {
 
                     const formData = new FormData(document.getElementById('formJob'));
@@ -710,25 +710,20 @@
 
                     axios.get('recurring-job-manager/update-jobs?' + params.toString()).then(response => {
 
+                        selectedJobIds.value = [];
                         closeModal();
                         GetJobs();
-                        selectedJobIds.value = [];
-
 
 
                     }).catch(e => {
 
-                        var error = e.response.data;
-                        console.info("ERRORRRRR", error);
                         showModal.value = false;
 
                         Swal.fire({
                             title: 'Error!',
-                            text: error.Message,
-                            type: 'error',
-                            confirmButtonText: 'Okay'
-                        }).then(() => {
-                            closeModal();
+                            icon: 'error',
+                            text: e.response.data.Message,
+                            confirmButtonText: 'OK'
                         });
                     });
                 }
@@ -838,8 +833,6 @@
 
                         axios.get('recurring-job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Start").then(response => {
 
-                            console.info("startSelectedJobs", response);
-
                             selectedJobIds.value = [];
 
                             closeModal();
@@ -848,9 +841,14 @@
 
                         }).catch(e => {
 
+                            showModal.value = false;
 
-                            console.log("startSelectedJobs Error !!!", e);
-
+                            Swal.fire({
+                                title: 'Error!',
+                                icon: 'error',
+                                text: e.response.data.Message,
+                                confirmButtonText: 'OK'
+                            });
                         });
 
                     }
@@ -885,7 +883,14 @@
 
                         }).catch(e => {
 
-                            console.log("stopSelectedJobs Error !!!", e);
+                            showModal.value = false;
+
+                            Swal.fire({
+                                title: 'Error!',
+                                icon: 'error',
+                                text: e.response.data.Message,
+                                confirmButtonText: 'OK'
+                            });
                         });
 
                     }
@@ -1008,7 +1013,7 @@
                 return errors.value.length === 0;
             };
 
-        
+
 
             const checkJsonEditorProperties = (id) => {
 
@@ -1085,7 +1090,7 @@
                 startSelectedJobs,
                 GetJobs,
                 GetJob,
-                UpdateJob,
+                SaveJob,
                 getTimeZones,
                 getAssemblyTypeMethodJsonSchema,
                 getMisfireHandlingModes,
