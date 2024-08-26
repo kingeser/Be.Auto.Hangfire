@@ -37,8 +37,10 @@
                         <button class="modal-default-button btn btn-danger pull-left" @click="closeModal">
                             Close
                         </button>
+
                         <slot name="footer">
-                            <button class="modal-default-button btn btn-success" @click="closeModal">
+
+                            <button class="modal-default-button btn btn-success pull-right" @click="closeModal">
                                 Save
                             </button>
                         </slot>
@@ -167,7 +169,8 @@
             </form>
         </template>
         <template v-slot:footer>
-            <button class="btn btn-success" @click="addJob">Save</button>
+            <button class="btn btn-secondary" @click="addJob(true)">Save As</button>
+            <button class="btn btn-success" @click="addJob(false)">Save</button>
         </template>
     </modal>
 
@@ -408,6 +411,14 @@
             const paginationOptions = ref([10, 20, 50, 100, 500, 1000, 5000]);
             const selectedJobType = ref('');
             const headerCount = ref(0);
+
+            const generateUUID = () => {
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                    var r = Math.random() * 16 | 0,
+                        v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            };
 
             const initBodyParametersJsonEditor = () => {
                 Vue.nextTick(() => {
@@ -650,8 +661,20 @@
                 getAssemblyTypeMethods();
             };
 
-            const addJob = () => {
-                SaveJob(job.value);
+            const addJob = (clone) => {
+
+                if (clone === true) {
+
+                    document.getElementById("Guid").value = generateUUID();
+                    document.getElementById("Id").value = job.value.Id +"-Cloned";
+
+                    SaveJob(job.value);
+                }
+                else {
+
+                    SaveJob(job.value);
+                }
+
             };
 
 
@@ -966,6 +989,8 @@
                 });
             };
 
+
+
             const getJobTypes = () => {
                 axios.get('job-manager/get-job-types').then(response => {
                     jobTypes.value = response.data;
@@ -1186,13 +1211,14 @@
                 parseMultipleSerializedJSON,
                 onHttpMethodChange,
                 checkJsonEditorProperties,
-                deleteSelectedJobs
+                deleteSelectedJobs,
+                generateUUID
 
             };
         },
         mounted() {
 
-          
+
             this.getMisfireHandlingModes();
             this.gethttpMethods();
             this.getAssemblyTypes();
