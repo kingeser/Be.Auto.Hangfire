@@ -2,13 +2,11 @@
 <link rel="stylesheet" type="text/css" href="recurring-job-manager/css/cron-expression-input" />
 <link rel="stylesheet" type="text/css" href="recurring-job-manager/css/fontawesome" />
 
-
 <script src="recurring-job-manager/js/vue"></script>
 <script src="recurring-job-manager/js/axio"></script>
 <script src="recurring-job-manager/js/sweetalert"></script>
 <script src="recurring-job-manager/js/cron-expression-input"></script>
 <script src="recurring-job-manager/js/jsoneditor"></script>
-
 
 <script type="text/x-template" id="modal-template">
     <transition name="modal">
@@ -21,7 +19,6 @@
                             default header
                         </slot>
                     </div>
-
 
                     <div class="modal-scroll">
 
@@ -58,6 +55,7 @@
             <form id="formJob">
 
                 <input type="hidden" id="Guid" name="Guid" v-model="job.Guid" />
+
                 <div class="form-group">
                     <label for="JobType">Job Type</label>
                     <select id="JobType" name="JobType" class="form-control" v-model="job.JobType" @change="onJobTypeChange">
@@ -186,7 +184,7 @@
                         <span class="glyphicon glyphicon-stop"></span>
                         Stop Selected Jobs
                     </button>
-               
+
                     <div class="btn-group paginator pull-right hidden-xs" v-if="getPageCount > 1">
                         <a href="javascript:" :class="{ disabled:  pagination.currentPage === 1 }" @click="clickCallbackPagination(pagination.currentPage - 1)" class="btn btn-default btn-sm ">
                             Prev
@@ -214,7 +212,7 @@
                 </div>
 
                 <div class="table-responsive">
-                    <input type="text" class="form-control" v-model="searchTerm" placeholder="Search..."/>
+                    <input type="text" class="form-control" v-model="searchTerm" placeholder="Search..." />
                     <table id="joblist" class="table">
 
                         <thead>
@@ -288,7 +286,6 @@
 
                 <div class="btn-toolbar">
 
-                    <!-- Pagination Controls -->
                     <div class="btn-group paginator" v-if="getPageCount > 1">
                         <a href="javascript:"
                            class="btn btn-default"
@@ -393,10 +390,10 @@
                 MethodParameters: ''
             });
             const pagination = ref({
-                parPage: 2,
+                parPage: 10,
                 currentPage: 1
             });
-            const paginationOptions = ref([2,10, 20, 50, 100, 500, 1000, 5000]);
+            const paginationOptions = ref([ 10, 20, 50, 100, 500, 1000, 5000]);
             const selectedJobType = ref('');
             const headerCount = ref(0);
 
@@ -830,8 +827,8 @@
 
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: 'Do you want to start the selected tasks?',
-                    icon: 'warning',
+                    text: 'Do you want to start the selected ' + selectedJobIds.value.length + ' jobs?',
+                    icon: 'question',
                     showCancelButton: true,
                     confirmButtonText: 'Yes, start them!',
                     cancelButtonText: 'No, cancel'
@@ -856,18 +853,18 @@
 
                         });
 
-                    } 
+                    }
                 });
 
 
-               
+
             };
             const stopSelectedJobs = () => {
 
 
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: 'Do you want to stop the selected tasks?',
+                    text: 'Do you want to stop the selected ' + selectedJobIds.value.length + ' jobs?',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Yes, stop them!',
@@ -1011,13 +1008,7 @@
                 return errors.value.length === 0;
             };
 
-            const capitalizeString = (s) => {
-                return s.charAt(0).toUpperCase() + s.slice(1);
-            };
-
-            const getTimeFromNow = (date) => {
-                return dayjs().from(dayjs(date));
-            };
+        
 
             const checkJsonEditorProperties = (id) => {
 
@@ -1039,7 +1030,7 @@
                 if (searchTerm.value) {
 
                     pagination.value.currentPage = 1;
-                  
+
                     const search = searchTerm.value.toLowerCase();
 
                     allRecords = jobs.value.filter(item => {
@@ -1048,7 +1039,7 @@
                         );
                     });
                 }
-               
+
                 let current = pagination.value.currentPage * pagination.value.parPage;
 
                 let start = current - pagination.value.parPage;
