@@ -7,7 +7,9 @@
 
 ## Overview
 
+
 **Be.Auto.Hangfire.Dashboard.RecurringJobManager** is a specialized library for managing recurring jobs in Hangfire-based projects. It allows you to configure and manage various types of jobs, including method calls and web requests, directly from the Hangfire Dashboard. This enables all job management tasks to be handled through the dashboard interface without needing to manually add jobs in code.
+
 
 ## Key Features
 
