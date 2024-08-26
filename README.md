@@ -38,19 +38,7 @@
    }
    ```
 
-3. **Configure the Application**:
-   Enable the Hangfire Dashboard in the `Configure` method:
-   ```csharp
-   public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-   {
-       app.UseHangfireDashboard("/hangfire", new DashboardOptions
-       {
-           DarkModeEnabled = false
-       });
 
-       app.UseStaticFiles(); // Serve static files if required
-   }
-   ```
 
 ## Usage
 
