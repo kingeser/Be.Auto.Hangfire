@@ -6,7 +6,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Pages
     public sealed class JobExtensionPage : PageBase
     {
         public const string Title = "Recurring Job Manager";
-        public const string PageRoute = "/recurring-job-manager";
+        public const string PageRoute = "/job-manager";
 
         private static readonly string PageHtml;
 

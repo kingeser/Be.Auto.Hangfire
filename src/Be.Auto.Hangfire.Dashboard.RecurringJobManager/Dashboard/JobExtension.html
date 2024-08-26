@@ -1,12 +1,12 @@
-﻿<link rel="stylesheet" type="text/css" href="recurring-job-manager/css/jobExtension" />
-<link rel="stylesheet" type="text/css" href="recurring-job-manager/css/cron-expression-input" />
-<link rel="stylesheet" type="text/css" href="recurring-job-manager/css/fontawesome" />
+﻿<link rel="stylesheet" type="text/css" href="job-manager/css/jobExtension" />
+<link rel="stylesheet" type="text/css" href="job-manager/css/cron-expression-input" />
+<link rel="stylesheet" type="text/css" href="job-manager/css/fontawesome" />
 
-<script src="recurring-job-manager/js/vue"></script>
-<script src="recurring-job-manager/js/axio"></script>
-<script src="recurring-job-manager/js/sweetalert"></script>
-<script src="recurring-job-manager/js/cron-expression-input"></script>
-<script src="recurring-job-manager/js/jsoneditor"></script>
+<script src="job-manager/js/vue"></script>
+<script src="job-manager/js/axio"></script>
+<script src="job-manager/js/sweetalert"></script>
+<script src="job-manager/js/cron-expression-input"></script>
+<script src="job-manager/js/jsoneditor"></script>
 
 <script type="text/x-template" id="modal-template">
     <transition name="modal">
@@ -118,7 +118,7 @@
                 </div>
                 <div class="form-group" v-show="job.JobType === 'WebRequest'">
                     <label for="HttpMethod">Http Method</label>
-                    <select id="HttpMethod" name="HttpMethod" class="form-control" v-model="job.HttpMethod" @change="getBodyParameterTypes">
+                    <select id="HttpMethod" name="HttpMethod" class="form-control" v-model="job.HttpMethod" @change="onHttpMethodChange">
                         <option value="">Please select</option>
                         <option v-for="(item, index) in httpMethods" :key="index" :value="item">{{ item }}</option>
                     </select>
@@ -129,7 +129,7 @@
                     <div id="headerParametersJsonEditor"></div>
                 </div>
                 <div class="form-group" v-show="job.JobType === 'WebRequest' && job.HttpMethod!=''">
-                    <label for="BodyParameterType">Body Parameters Type</label>
+                    <label for="BodyParameterType">Request Parameters Type</label>
                     <select id="BodyParameterType" name="BodyParameterType" @change="onBodyParameterTypeChange" class="form-control" v-model="job.BodyParameterType">
                         <option value="">Please select</option>
                         <option :disabled="job.HttpMethodGet && item.Value === 'Json'" v-for="(item, index) in bodyParameterTypes" :key="index" :value="item.Value">{{ item.Text }}</option>
@@ -331,7 +331,6 @@
 
 
 
-
     const ModalComponent = {
         template: '#modal-template',
         methods: {
@@ -343,7 +342,7 @@
 
     const app = createApp({
         components: {
-            'modal': ModalComponent,
+            'modal': ModalComponent
         },
         setup() {
             const selectedJobIds = ref([]);
@@ -446,7 +445,7 @@
                                                 "type": "string",
                                             },
                                             "Value": {
-                                                "title": "value",
+                                                "title": "Value",
                                                 "type": "string"
                                             }
                                         },
@@ -522,20 +521,29 @@
 
                         bodyParametersJsonEditor.value.on('ready', () => {
 
-
-                            if (job.value.BodyParameters && job.value.BodyParameters !== '') {
-
-                                bodyParametersJsonEditor.value.setValue(JSON.parse(job.value.BodyParameters));
-
-                                checkJsonEditorProperties('bodyParametersJsonEditor');
-                            }
-
+                            bodyParametersJsonEditor.value.setValue(parseMultipleSerializedJSON(job.value.BodyParameters));
 
                         });
                     }
 
 
                 });
+            };
+
+            const parseMultipleSerializedJSON = (jsonString) => {
+                let parsedObject = jsonString;
+
+                while (typeof parsedObject === 'string') {
+                    try {
+                        parsedObject = JSON.parse(parsedObject);
+
+                    } catch (error) {
+
+                        return {};
+                    }
+                }
+
+                return parsedObject;
             };
 
             const initHeaderParametersJsonEditor = () => {
@@ -588,11 +596,9 @@
 
                     headerParametersJsonEditor.value.on('ready', () => {
 
-                        if (job.value.HeaderParameters && job.value.HeaderParameters != '') {
-                            headerParametersJsonEditor.value.setValue(JSON.parse(job.value.HeaderParameters));
 
-                            checkJsonEditorProperties('headerParametersJsonEditor');
-                        }
+                        headerParametersJsonEditor.value.setValue(parseMultipleSerializedJSON(job.value.HeaderParameters));
+
 
                     });
 
@@ -636,7 +642,7 @@
 
 
             const GetJobs = () => {
-                axios.get('recurring-job-manager/get-jobs')
+                axios.get('job-manager/get-jobs')
                     .then(res => (jobs.value = res.data))
                     .catch(error => console.error('Error fetching jobs:', error));
             };
@@ -645,10 +651,17 @@
                 pagination.value.parPage = count;
                 pagination.value.currentPage = 1;
             };
+            const onHttpMethodChange = (e) => {
 
+
+                job.value.HttpMethod = e.target.value;
+                job.value.BodyParameterType = 'None';
+
+                getBodyParameterTypes();
+            };
             const GetJob = (_Id) => {
                 title.value = 'Edit Job';
-                axios.get('recurring-job-manager/get-job?Id=' + _Id).then(response => {
+                axios.get('job-manager/get-job?Id=' + _Id).then(response => {
                     if (response.data != null) {
                         showModal.value = true;
                         const jobData = response.data.Object;
@@ -671,7 +684,7 @@
                                 break;
 
                             case "WebRequest":
-
+                                getBodyParameterTypes();
                                 initHeaderParametersJsonEditor();
                                 initBodyParametersJsonEditor();
                                 break;
@@ -708,7 +721,7 @@
                         params.append(key, value);
                     }
 
-                    axios.get('recurring-job-manager/update-jobs?' + params.toString()).then(response => {
+                    axios.get('job-manager/update-jobs?' + params.toString()).then(response => {
 
                         selectedJobIds.value = [];
                         closeModal();
@@ -730,7 +743,7 @@
             };
 
             const getTimeZones = () => {
-                axios.get('recurring-job-manager/get-time-zones').then(response => {
+                axios.get('job-manager/get-time-zones').then(response => {
                     timeZones.value = response.data;
                 }).catch(e => {
                     console.log(e);
@@ -747,10 +760,10 @@
 
                 if (job.value.Type != '' && job.value.Method != '') {
 
-                    axios.get('recurring-job-manager/get-current-assembly-type-method-json-schema?Type=' + job.value.Type + '&Method=' + job.value.Method).then(response => {
+                    axios.get('job-manager/get-current-assembly-type-method-json-schema?Type=' + job.value.Type + '&Method=' + job.value.Method).then(response => {
                         Vue.nextTick(() => {
 
-                            methodParametersIsExist.value = response !== null && response.data !== null && response.data.Schema != null && response.data.Schema != '';
+                            methodParametersIsExist.value = isValidJson(response.data.Schema);
 
                             if (!methodParametersIsExist.value) {
 
@@ -783,12 +796,8 @@
 
                             methodParametersJsonEditor.value.on('ready', () => {
 
-                                if (job.value.MethodParameters && job.value.MethodParameters != '') {
+                                methodParametersJsonEditor.value.setValue(parseMultipleSerializedJSON(job.value.MethodParameters));
 
-                                    methodParametersJsonEditor.value.setValue(JSON.parse(job.value.MethodParameters));
-
-                                    checkJsonEditorProperties('methodParametersJsonEditor');
-                                }
 
                             });
                         });
@@ -804,7 +813,7 @@
             };
 
             const getMisfireHandlingModes = () => {
-                axios.get('recurring-job-manager/get-misfire-handling-modes').then(response => {
+                axios.get('job-manager/get-misfire-handling-modes').then(response => {
                     misfireHandlingModes.value = response.data;
                 }).catch(e => {
                     console.log(e);
@@ -812,7 +821,7 @@
             };
 
             const gethttpMethods = () => {
-                axios.get('recurring-job-manager/get-http-methods').then(response => {
+                axios.get('job-manager/get-http-methods').then(response => {
                     httpMethods.value = response.data;
                 }).catch(e => {
                     console.log(e);
@@ -831,7 +840,7 @@
                     if (result.value) {
 
 
-                        axios.get('recurring-job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Start").then(response => {
+                        axios.get('job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Start").then(response => {
 
                             selectedJobIds.value = [];
 
@@ -870,7 +879,7 @@
                 }).then((result) => {
                     if (result.value) {
 
-                        axios.get('recurring-job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Stop").then(response => {
+                        axios.get('job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Stop").then(response => {
 
                             console.info("stopSelectedJobs", response);
 
@@ -897,24 +906,30 @@
                 });
 
             };
-            const getBodyParameterTypes = (e) => {
-                axios.get('recurring-job-manager/get-body-parameter-types?HttpMethod=' + e.target.value).then(response => {
+            const getBodyParameterTypes = () => {
+
+                axios.get('job-manager/get-body-parameter-types?HttpMethod=' + job.value.HttpMethod).then(response => {
                     bodyParameterTypes.value = response.data;
+
                 }).catch(e => {
                     console.log(e);
                 });
             };
 
             const getJobTypes = () => {
-                axios.get('recurring-job-manager/get-job-types').then(response => {
+                axios.get('job-manager/get-job-types').then(response => {
                     jobTypes.value = response.data;
+
+                    if (jobTypes.value.length == 1) {
+                        job.value.JobType = jobTypes.value[0];
+                    }
                 }).catch(e => {
                     console.log(e);
                 });
             };
 
             const getAssemblyTypes = () => {
-                axios.get('recurring-job-manager/get-current-assembly-types').then(response => {
+                axios.get('job-manager/get-current-assembly-types').then(response => {
                     assemblyTypes.value = response.data;
                 }).catch(e => {
                     console.log(e);
@@ -922,7 +937,7 @@
             };
 
             const getAssemblyTypeMethods = () => {
-                axios.get('recurring-job-manager/get-current-assembly-type-methods?Type=' + job.value.Type).then(response => {
+                axios.get('job-manager/get-current-assembly-type-methods?Type=' + job.value.Type).then(response => {
                     assemblyTypeMethods.value = response.data;
 
 
@@ -1013,18 +1028,16 @@
                 return errors.value.length === 0;
             };
 
-
-
-            const checkJsonEditorProperties = (id) => {
-
-                const checkboxes = document.querySelectorAll('#' + id + ' input[type="checkbox"].form-check-input');
-
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = true;
-                    checkbox.dispatchEvent(new Event('change'));
-                });
-
+            const isValidJson = (str) => {
+                try {
+                    JSON.parse(str);
+                    return true;
+                } catch (e) {
+                    return false;
+                }
             };
+
+
 
 
             const getItems = computed(() => {
@@ -1075,7 +1088,6 @@
                 headerParametersJsonEditor,
                 bodyParametersJsonEditor,
                 job,
-                checkJsonEditorProperties,
                 pagination,
                 selectedJobType,
                 headerCount,
@@ -1110,7 +1122,10 @@
                 clickCallbackPagination,
                 paginationOptions,
                 updatePagination,
-                searchTerm
+                searchTerm,
+                isValidJson,
+                parseMultipleSerializedJSON,
+                onHttpMethodChange
 
             };
         },
