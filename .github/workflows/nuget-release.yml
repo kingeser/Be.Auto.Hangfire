@@ -21,19 +21,21 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Setup .NET Core
+    - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '2.0.x'
+        dotnet-version: '2.0.x' # .NET Standard 2.0 için gerekli
 
     - name: Install dependencies
-      run: dotnet restore src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj
+      run: |
+        sudo apt-get install -y libssl1.0.0
+        msbuild /t:Restore src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj
 
     - name: Build
-      run: dotnet build --configuration Release --no-restore src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj
+      run: msbuild /p:Configuration=Release src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj
 
     - name: Pack
-      run: dotnet pack --configuration Release --no-build --output ./nupkg src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj
+      run: msbuild /t:Pack /p:Configuration=Release src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj /p:PackageOutputPath=./nupkg
 
     - name: Publish to NuGet
       env:
