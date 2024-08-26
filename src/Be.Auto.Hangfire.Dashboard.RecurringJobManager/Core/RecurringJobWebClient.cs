@@ -27,8 +27,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
                 return new
                 {
-                    Response = simpleResponse,
-                    ResponseString = await ReadResponseStreamAsync(simpleResponse)
+                    Response = simpleResponse.Item1,
+                    ResponseString = simpleResponse.Item2
                 };
             }
 
@@ -38,23 +38,16 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
             return new
             {
-                Response = response,
-                ResponseString = await ReadResponseStreamAsync(response)
+                Response = response.Item1,
+                ResponseString = response.Item2
             };
 
         }
 
-        private static async Task<string> ReadResponseStreamAsync(HttpWebResponse response)
-        {
-            using var responseStream = new StreamReader(response.GetResponseStream() ?? Stream.Null);
-
-            var responseString = await responseStream.ReadToEndAsync();
-            return responseString;
-        }
-
+   
         private static bool IsSimpleRequest(HttpMethodType method) => method is HttpMethodType.GET or HttpMethodType.DELETE or HttpMethodType.HEAD or HttpMethodType.OPTIONS or HttpMethodType.TRACE;
 
-        private static async Task<HttpWebResponse> HandleSimpleRequestAsync(WebRequestJob job, string url)
+        private static async Task<Tuple<HttpWebResponse,string>> HandleSimpleRequestAsync(WebRequestJob job, string url)
         {
             var queryString = BuildQueryStringParameters(job);
 
@@ -70,7 +63,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
         private static bool IsComplexRequest(HttpMethodType method) => method is HttpMethodType.POST or HttpMethodType.PUT or HttpMethodType.PATCH;
 
-        private static async Task<HttpWebResponse> HandleComplexRequestAsync(WebRequestJob job, string url)
+        private static async Task<Tuple<HttpWebResponse,string>> HandleComplexRequestAsync(WebRequestJob job, string url)
         {
             var httpWebRequest = CreateWebRequest(job, url);
 
@@ -86,13 +79,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             };
         }
 
-        private static async Task<HttpWebResponse> SendRequestWithEmptyBodyAsync(HttpWebRequest httpWebRequest)
+        private static async Task<Tuple<HttpWebResponse,string>> SendRequestWithEmptyBodyAsync(HttpWebRequest httpWebRequest)
         {
             httpWebRequest.ContentLength = 0;
             return await GetResponseAsync(httpWebRequest);
         }
 
-        private static async Task<HttpWebResponse> SendRequestWithBodyAsync(HttpWebRequest httpWebRequest, string body, string contentType)
+        private static async Task<Tuple<HttpWebResponse,string>> SendRequestWithBodyAsync(HttpWebRequest httpWebRequest, string body, string contentType)
         {
             httpWebRequest.ContentType = contentType;
             using (var requestStream = new StreamWriter(await httpWebRequest.GetRequestStreamAsync()))
@@ -105,7 +98,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             return await GetResponseAsync(httpWebRequest);
         }
 
-        private static async Task<HttpWebResponse> SendFormUrlEncodedRequestAsync(HttpWebRequest httpWebRequest, string bodyParameters)
+        private static async Task<Tuple<HttpWebResponse,string>> SendFormUrlEncodedRequestAsync(HttpWebRequest httpWebRequest, string bodyParameters)
         {
             httpWebRequest.ContentType = "application/x-www-form-urlencoded";
             var parameters = bodyParameters.DeserializeObjectFromJson<List<HttpFormUrlEncodedParameter>>();
@@ -128,7 +121,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             return await GetResponseAsync(httpWebRequest);
         }
 
-        private static async Task<HttpWebResponse> SendMultipartFormDataRequestAsync(HttpWebRequest httpWebRequest, string bodyParameters)
+        private static async Task<Tuple<HttpWebResponse,string>> SendMultipartFormDataRequestAsync(HttpWebRequest httpWebRequest, string bodyParameters)
         {
             var boundary = "------------------------" + DateTime.Now.Ticks.ToString("x");
             httpWebRequest.ContentType = "multipart/form-data; boundary=" + boundary;
@@ -160,9 +153,33 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             return await GetResponseAsync(httpWebRequest);
         }
 
-        private static async Task<HttpWebResponse> GetResponseAsync(HttpWebRequest httpWebRequest)
+        private static async Task<Tuple<HttpWebResponse, string>> GetResponseAsync(HttpWebRequest httpWebRequest)
         {
-            return (HttpWebResponse)await httpWebRequest.GetResponseAsync();
+            try
+            {
+                var response = (HttpWebResponse)await httpWebRequest.GetResponseAsync();
+
+                if (response.StatusCode != HttpStatusCode.OK) return new Tuple<HttpWebResponse, string>(response, string.Empty);
+
+                using var stream = response.GetResponseStream();
+
+                if (stream == null) return new Tuple<HttpWebResponse, string>(response, string.Empty);
+
+                using var reader = new StreamReader(stream);
+
+                var responseBody = await reader.ReadToEndAsync();
+
+                return new Tuple<HttpWebResponse, string>(response, responseBody);
+            }
+            catch (WebException ex)
+            {
+                if (ex.Response is HttpWebResponse errorResponse)
+                {
+                    throw new RecurringJobException($"{errorResponse.StatusCode} : {errorResponse.StatusDescription}", ex);
+
+                }
+                throw;
+            }
         }
 
         private static HttpWebRequest CreateWebRequest(WebRequestJob job, string url)
