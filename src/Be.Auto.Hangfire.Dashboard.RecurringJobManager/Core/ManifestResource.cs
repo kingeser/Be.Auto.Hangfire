@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using System.Resources;
+using Hangfire;
+using Newtonsoft.Json;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 {

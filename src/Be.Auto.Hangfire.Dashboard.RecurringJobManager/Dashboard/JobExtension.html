@@ -681,7 +681,7 @@
                 if (clone === true) {
 
                     document.getElementById("Guid").value = generateUUID();
-                    document.getElementById("Id").value = job.value.Id + " " + generateUUID();
+                    document.getElementById("Id").value = job.value.Id.replace(/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}/g,'') + " " + generateUUID();
 
                     SaveJob(job.value);
                 }

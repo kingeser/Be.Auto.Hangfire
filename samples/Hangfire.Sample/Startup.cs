@@ -1,4 +1,5 @@
 using System;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Hangfire;
@@ -19,6 +20,7 @@ namespace Sample
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -35,8 +37,8 @@ namespace Sample
                                                      option.SetWebRequestJobTimeout(TimeSpan.FromSeconds(15));
 
                                                  })
-            );
-            services.AddHangfireServer();
+                                                );
+                services.AddHangfireServer();
 
 
             services.AddScoped<IProductService, ProductService>(t => new ProductService("https://domain.com"));

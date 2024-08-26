@@ -7,6 +7,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using System.Net;
 using System.Threading.Tasks;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
+using Hangfire;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
@@ -41,6 +42,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     return;
                 }
 
+               
                 RecurringJobAgent.DeleteJobDetails(selectedJobsArray);
 
                 context.Response.StatusCode = (int)HttpStatusCode.OK;

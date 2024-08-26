@@ -51,7 +51,9 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
         {
             foreach (var jobId in jobIds)
             {
-                DeleteJobDetails(jobId);
+              
+                RecurringJob.RemoveIfExists(jobId);
+
             }
         }
         public static void SaveJobDetails(RecurringJobBase job)

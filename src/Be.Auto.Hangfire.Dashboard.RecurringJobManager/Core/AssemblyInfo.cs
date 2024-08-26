@@ -22,7 +22,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
             var result = assembly
                 .GetTypes()
-                .Where(t => t.IsPublic && !t.IsSpecialName && (!t.IsAbstract || t.IsInterface) && !t.IsSealed && !$"{t.FullName}".StartsWith("System") && !$"{t.FullName}".StartsWith("Microsoft") && !$"{t.FullName}".StartsWith("Hangfire") && !$"{t.FullName}".StartsWith("Be.Auto"))
+                .Where(t => t.IsPublic && !t.IsSpecialName && !$"{t.FullName}".StartsWith("System") && !$"{t.FullName}".StartsWith("Microsoft") && !$"{t.FullName}".StartsWith("Hangfire") && !$"{t.FullName}".StartsWith("Be.Auto"))
                 .Select(type => new
                 {
                     Type = type,

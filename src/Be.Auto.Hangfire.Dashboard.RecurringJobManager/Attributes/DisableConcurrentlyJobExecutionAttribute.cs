@@ -5,18 +5,16 @@ using Hangfire.Common;
 using Hangfire.States;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 using System.Collections.Generic;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 using Hangfire.Dashboard;
 using Hangfire;
 using Hangfire.Server;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
 {
-
     public class DisableConcurrentlyJobExecutionAttribute : JobFilterAttribute, IElectStateFilter
     {
-
-        private const string DefaultReason = "It is not allowed to perform multiple same tasks.";
-
+        
         public void OnStateElection(ElectStateContext context)
         {
             if (context.BackgroundJob.Job == null) return;
@@ -34,16 +32,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
 
             if (processingJobs.Exists(t =>
                     t.Value.Job.Method.GenerateFullName().Equals(methodName, StringComparison.InvariantCultureIgnoreCase)
-                    && t.Value.Job.Type.FullName.Equals(type, StringComparison.InvariantCultureIgnoreCase)
+                    && $"{t.Value.Job.Type.FullName}".Equals(type, StringComparison.InvariantCultureIgnoreCase)
                     && t.Value.Job.ToString() == recurringJobId
                     && AreArgsEqual(t.Value.Job.Args, args)
                     && !context.CandidateState.IsFinal))
             {
-                context.CandidateState = new DeletedState()
-                {
-                    Reason = DefaultReason,
-
-                };
+             
+                context.CandidateState = new CancelledState(context.BackgroundJob.CreatedAt);
             }
         }
 
