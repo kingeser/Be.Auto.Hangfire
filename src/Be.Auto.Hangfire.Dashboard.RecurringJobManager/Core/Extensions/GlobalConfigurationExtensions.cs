@@ -27,6 +27,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                 config.UseFilter(new DisableConcurrentlyJobExecutionAttribute());
             }
 
+
             config.UseFilter(new StateHandlerFilterAttribute(new CancelledStateHandler()));
 
             StoreAssemblies();

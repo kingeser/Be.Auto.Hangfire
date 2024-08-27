@@ -61,7 +61,8 @@ namespace Sample
 
             app.UseHangfireDashboard("/hangfire", new DashboardOptions()
             {
-                DarkModeEnabled = false
+                DarkModeEnabled = false,
+                DisplayNameFunc = DisplayNameFunctions.WithJobId
             });
 
             app.UseHttpsRedirection();
