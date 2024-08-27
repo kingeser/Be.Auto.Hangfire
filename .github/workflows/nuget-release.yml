@@ -1,43 +1,47 @@
 name: Build and Publish Hangfire Recurring Job Manager NuGet Package
 
 on:
-  push:
-    branches:
-      - main
-      - 'releases/*'
-    paths:
-      - 'src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/**'
   pull_request:
-    branches:
-      - main
-    paths:
-      - 'src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/**'
+    branches: 
+      - master
+      - develop    
+  push:
+    branches: 
+      - master
+      - develop
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: 
+          - macOS-latest
+          - ubuntu-latest
+          - windows-latest
 
+    runs-on: ${{matrix.os}}
+    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '2.0.x' # .NET Standard 2.0 için gerekli
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 2.2.108
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get install -y libssl1.0.0
-        msbuild /t:Restore src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj
+      - name: Install dependencies on Ubuntu
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl1.1
 
-    - name: Build
-      run: msbuild /p:Configuration=Release src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj
+      - name: Build with dotnet
+        run: dotnet build --configuration Release src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj
 
-    - name: Pack
-      run: msbuild /t:Pack /p:Configuration=Release src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj /p:PackageOutputPath=./nupkg
+      - name: Pack NuGet Package
+        run: dotnet pack --configuration Release --output ./nupkg src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/Be.Auto.Hangfire.Dashboard.RecurringJobManager.csproj
 
-    - name: Publish to NuGet
-      env:
-        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-      run: dotnet nuget push ./nupkg/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+      - name: Publish to NuGet
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: dotnet nuget push ./nupkg/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
