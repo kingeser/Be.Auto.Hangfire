@@ -10,3 +10,5 @@
 /samples/Hangfire.Sample/bin/Debug/net8.0
 /samples/Hangfire.Sample.Library/bin/Debug/netstandard2.0
 /samples/Hangfire.Sample/bin/Release/net8.0
+/samples/Hangfire.Sample.Library/bin/Release/netstandard2.0
+/src/Be.Auto.Hangfire.Dashboard.RecurringJobManager/bin/Release
