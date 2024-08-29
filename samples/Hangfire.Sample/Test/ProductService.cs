@@ -1,19 +1,13 @@
-﻿using System.Collections.Generic;
-
-namespace Sample.Library
+﻿namespace Sample.Test
 {
     public interface IService
     {
         void GetTest();
     }
-    public class ProductService : IService, IProductService
+    public class ProductService(string serviceUrl) : IService, IProductService
     {
-        private readonly string _serviceUrl;
+        private readonly string _serviceUrl = serviceUrl;
 
-        public ProductService(string serviceUrl)
-        {
-            _serviceUrl = serviceUrl;
-        }
         // This would be a mock in-memory list acting as a simple database for demonstration
         private readonly List<Product> _productList = new List<Product>();
 

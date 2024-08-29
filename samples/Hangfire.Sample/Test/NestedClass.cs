@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Sample.Library
+﻿namespace Sample.Test
 {
     public class NestedClass
     {

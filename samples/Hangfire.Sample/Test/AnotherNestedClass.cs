@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Sample.Library
+﻿namespace Sample.Test
 {
     public class AnotherNestedClass
     {

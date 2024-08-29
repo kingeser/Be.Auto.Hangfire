@@ -1,17 +1,8 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Sample.Library
+﻿namespace Sample.Test
 {
-    public class AppointmentSmsNotificationService : IAppointmentSmsNotificationService
+    public class AppointmentSmsNotificationService(string url) : IAppointmentSmsNotificationService
     {
-        private readonly string _url;
-
-        public AppointmentSmsNotificationService(string url)
-        {
-            _url = url;
-        }
+        private readonly string _url = url;
 
         public async Task SendSms(string delayTime)
         {

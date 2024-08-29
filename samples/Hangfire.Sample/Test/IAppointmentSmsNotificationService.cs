@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-
-namespace Sample.Library
+﻿namespace Sample.Test
 {
     public interface IAppointmentSmsNotificationService
     {

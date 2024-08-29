@@ -1,7 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-
-namespace Sample.Library
+﻿namespace Sample.Test
 {
     public static class StaticJobTest
     {
