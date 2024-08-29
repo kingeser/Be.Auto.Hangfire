@@ -1,30 +1,25 @@
 ﻿namespace Sample.Test
 {
-    public interface IService
+  
+    public class ProductService(string serviceUrl) :  IProductService
     {
-        void GetTest();
-    }
-    public class ProductService(string serviceUrl) : IService, IProductService
-    {
-        private readonly string _serviceUrl = serviceUrl;
-
         // This would be a mock in-memory list acting as a simple database for demonstration
-        private readonly List<Product> _productList = new List<Product>();
+        private readonly List<Product?> _productList = new List<Product?>();
 
         // Get a product by its ID
-        public Product GetProductById(int id)
+        public Product? GetProductById(int id)
         {
             return _productList.Find(p => p.Id == id);
         }
 
         // Get a list of all products
-        public List<Product> GetAllProducts()
+        public List<Product?> GetAllProducts()
         {
             return _productList;
         }
 
         // Add a new product
-        public void AddProduct(Product product)
+        public void AddProduct(Product? product)
         {
             _productList.Add(product);
         }
@@ -33,23 +28,17 @@
         public void UpdateProduct(Product product)
         {
             var existingProduct = GetProductById(product.Id);
-            if (existingProduct != null)
-            {
-                existingProduct.Name = product.Name;
-                existingProduct.Price = product.Price;
-                existingProduct.Stock = product.Stock;
-                existingProduct.Description = product.Description;
-            }
+            existingProduct.Name = product.Name;
+            existingProduct.Price = product.Price;
+            existingProduct.Stock = product.Stock;
+            existingProduct.Description = product.Description;
         }
 
         // Delete a product by its ID
         public void DeleteProduct(int id)
         {
             var product = GetProductById(id);
-            if (product != null)
-            {
-                _productList.Remove(product);
-            }
+            _productList.Remove(product);
         }
 
         public void GetTest()

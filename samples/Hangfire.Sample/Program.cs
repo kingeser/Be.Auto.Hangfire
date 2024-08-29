@@ -13,6 +13,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sample.Options;
+using Sample.Test;
 
 namespace Sample;
 
@@ -24,6 +25,12 @@ public static class Program
         var builder = WebApplication.CreateBuilder(args);
 
         var hangfireOptions = GetHangfireOptions(builder);
+
+        builder.Services.AddScoped<IProductService>(t=>new ProductService("https://domain.com"));
+        builder.Services.AddScoped<IAppointmentSmsNotificationService>(t=> new AppointmentSmsNotificationService("https://domain.com"));
+        builder.Services.AddScoped(t => new ProductService("https://domain.com"));
+        builder.Services.AddScoped(t => new AppointmentSmsNotificationService("https://domain.com"));
+
 
         ConfigureHangfire(builder, hangfireOptions);
 

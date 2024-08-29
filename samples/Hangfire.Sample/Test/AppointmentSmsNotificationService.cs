@@ -2,8 +2,6 @@
 {
     public class AppointmentSmsNotificationService(string url) : IAppointmentSmsNotificationService
     {
-        private readonly string _url = url;
-
         public async Task SendSms(string delayTime)
         {
             var id = Guid.NewGuid();
