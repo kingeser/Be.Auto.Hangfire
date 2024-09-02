@@ -168,7 +168,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             });
 
             return (from a in result
-                    group a by a.Guid
+                    group a by a.Id
                 into g
                     select g.FirstOrDefault()).OrderByDescending(t => DateTime.Parse(t.CreatedAt)).ToList();
         }
@@ -299,14 +299,33 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
             if (string.IsNullOrEmpty(guidValue)) return false;
 
+            return job.Guid != guidValue;
+        }
 
-            if (job.Guid == guidValue)
+        public static Tuple<bool, string> GetJobIdWithGuid(string guid)
+        {
+            using var connection = JobStorage.Current.GetConnection();
+
+            var jobIds = connection.GetAllItemsFromSet("recurring-jobs");
+
+            if (jobIds == null)
+                return new Tuple<bool, string>(false, string.Empty);
+
+            foreach (var jobId in jobIds)
             {
-                return false;
+                var entries = connection.GetAllEntriesFromHash($"{TagRecurringJobBase}:{jobId}");
+
+
+                if (entries?.TryGetValue(nameof(RecurringJobBase.Guid), out var guidValue) != true) continue;
+
+                if (guid == guidValue)
+                {
+                    return new Tuple<bool, string>(true, jobId);
+                }
             }
 
+            return new Tuple<bool, string>(false, string.Empty);
 
-            return true;
         }
     }
 }

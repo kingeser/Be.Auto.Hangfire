@@ -13,7 +13,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
     {
         public static void Register(this RecurringJobBase job)
         {
-         
+
             if (string.IsNullOrEmpty(job.Id))
                 throw new RecurringJobException("Job registration failed: The 'Id' field cannot be null or empty.");
 
@@ -95,6 +95,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                                 job.Guid = Guid.NewGuid().ToString();
                             }
 
+                            RemoveIfExist(job);
 
                             new global::Hangfire.RecurringJobManager(JobStorage.Current).AddOrUpdate(job.Id, new Job(typeof(RecurringJobWebClient), typeof(RecurringJobWebClient).GetMethod(nameof(RecurringJobWebClient.CallRequestAsync)), new WebRequestJob()
                             {
@@ -154,6 +155,9 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                                 job.Guid = Guid.NewGuid().ToString();
                             }
 
+
+                            RemoveIfExist(job);
+
                             new global::Hangfire.RecurringJobManager(JobStorage.Current).AddOrUpdate(job.Id, new Job(method.DeclaringType, method, parametersFromJob), job.Cron, new RecurringJobOptions()
                             {
                                 TimeZone = job.TimeZone,
@@ -173,5 +177,17 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                     throw new RecurringJobException($"Job registration failed: Unsupported job type '{job.JobType}'. Please provide a valid job type such as 'WebRequest' or 'MethodCall'.");
             }
         }
+
+        private static void RemoveIfExist(RecurringJobBase job)
+        {
+            var result = RecurringJobAgent.GetJobIdWithGuid(job.Guid);
+
+            if (result.Item1)
+            {
+                new global::Hangfire.RecurringJobManager(JobStorage.Current).RemoveIfExists(result.Item2);
+            }
+
+        }
+
     }
 }
