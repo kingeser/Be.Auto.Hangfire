@@ -1,6 +1,7 @@
 ﻿using System;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 using Hangfire;
+using Newtonsoft.Json;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
 {
@@ -17,9 +18,10 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
         public string LastJobState { get; set; }
         public string LastExecution { get; set; }
         public string CreatedAt { get; set; }
+        [JsonIgnore]
         public bool Removed { get; set; }
         public string TimeZoneId { get; set; }
-
+        [JsonIgnore]
         public TimeZoneInfo TimeZone
         {
             get

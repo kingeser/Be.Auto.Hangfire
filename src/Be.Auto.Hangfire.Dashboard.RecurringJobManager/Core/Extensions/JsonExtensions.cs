@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
@@ -28,6 +30,20 @@ internal static class JsonExtensions
         {
             result = default(T);
             return false;
+        }
+    }
+    public static List<RecurringJobBase> TryDeserializeJobs(this string @this, out bool result)
+    {
+        try
+        {
+            var jobs = JsonConvert.DeserializeObject<List<RecurringJobBase>>(@this,new RecurringJobBaseConverter());
+            result = true;
+            return jobs;
+        }
+        catch
+        {
+            result = false;
+            return new List<RecurringJobBase>();
         }
     }
 

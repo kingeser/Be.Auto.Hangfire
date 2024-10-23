@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Hangfire.Annotations;
 using Hangfire.Dashboard;
@@ -42,16 +43,22 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     return;
                 }
 
-                var selectedJobsArray = selectedJobs.Split('|').Where(t => !string.IsNullOrEmpty(t)).ToArray();
+                var selectedJobsArray = new string[] { };
 
-                var notValidJobIds = selectedJobsArray.Where(t => !RecurringJobAgent.IsValidJobId(t)).ToArray();
+                if (!action.Equals("Import", StringComparison.OrdinalIgnoreCase))
 
-                if (notValidJobIds.Length > 0)
                 {
-                    response.Status = false;
-                    response.Message = $"The Job Id {string.Join(",", notValidJobIds)} was not found.";
-                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    return;
+                    selectedJobsArray = selectedJobs.Split('|').Where(t => !string.IsNullOrEmpty(t)).ToArray();
+
+                    var notValidJobIds = selectedJobsArray.Where(t => !RecurringJobAgent.IsValidJobId(t)).ToArray();
+
+                    if (notValidJobIds.Length > 0)
+                    {
+                        response.Status = false;
+                        response.Message = $"The Job Id {string.Join(",", notValidJobIds)} was not found.";
+                        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        return;
+                    }
                 }
 
                 switch (action)
@@ -61,6 +68,41 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                         break;
                     case "Start":
                         RecurringJobAgent.StartBackgroundJob(selectedJobsArray);
+                        break;
+                    case "Export":
+                        {
+
+                            var jobs = RecurringJobAgent.GetAllJobs().Where(t => selectedJobsArray.Contains(t.Id));
+
+                            var json = jobs.SerializeObjectToJson();
+
+                            response.Message = json;
+
+                        }
+                        break;
+                    case "Import":
+                        
+                    {
+
+                            var jobs = selectedJobs.TryDeserializeJobs(out var result);
+
+                            if (!result)
+                            {
+
+                                response.Status = false;
+                                response.Message = "Wrong json file!";
+                            }
+
+                            else
+                            {
+
+                                foreach (var recurringJobBase in jobs)
+                                {
+                                    recurringJobBase.Register();
+                                }
+                            }
+
+                        }
                         break;
                     default:
                         response.Status = false;

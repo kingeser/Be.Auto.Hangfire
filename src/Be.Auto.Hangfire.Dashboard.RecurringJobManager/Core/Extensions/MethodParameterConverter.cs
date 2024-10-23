@@ -16,7 +16,7 @@ internal class MethodParameterConverter(MethodInfo methodInfo) : JsonConverter
     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
     {
 
-        var jsonObject = JObject.Load(reader);
+        var jsonObject =  reader.Value?.GetType()==typeof(string) ? JObject.Parse(reader.Value?.ToString() ?? "{}") :JObject.Load(reader);
 
         var parameterValues = new object[_parameters.Length];
 

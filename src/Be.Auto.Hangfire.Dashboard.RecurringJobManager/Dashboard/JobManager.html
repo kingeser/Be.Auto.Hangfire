@@ -209,6 +209,19 @@
                         Stop Selected Jobs
                     </button>
 
+                    <button type="button" class="btn btn-sm btn-light" @click="exportSelectedJobs" :disabled="selectedJobIds.length === 0">
+                        <span class="glyphicon glyphicon-export"></span>
+                        Export Selected Jobs
+                    </button>
+
+
+                    <button type="button" class="btn btn-sm btn-light" @click="importJobs">
+                        <span class="glyphicon glyphicon-import"></span>
+                        Import Jobs
+                    </button>
+
+                    <input type="file" id="fileInput" accept=".json" style="display: none" @change="handleFileInput">
+
                     <div class="btn-group paginator pull-right hidden-xs" v-if="getPageCount > 1">
                         <a href="javascript:" :class="{ disabled:  pagination.currentPage === 1 }" @click="clickCallbackPagination(pagination.currentPage - 1)" class="btn btn-default btn-sm ">
                             Prev
@@ -974,6 +987,113 @@
 
             };
 
+            const handleFileInput = (handlefile) => {
+
+                const file = handlefile.target.files[0];
+
+                if (file) {
+
+                    const reader = new FileReader();
+
+                    reader.onload = (handlefileloaded) => {
+
+                        const content = handlefileloaded.target.result;
+
+                        console.info("CONTENT", content);
+                        console.info("CONTENT encodeURI", encodeURI(content));
+                        axios.get('job-manager/job-agent?SelectedJobs=' + encodeURIComponent(content) + "&Action=Import").then(response => {
+
+                            selectedJobIds.value = [];
+
+                            closeModal();
+
+                            GetJobs();
+
+                        }).catch(e => {
+
+                            showModal.value = false;
+
+                            Swal.fire({
+                                title: 'Error!',
+                                icon: 'error',
+                                text: e.response.data.Message,
+                                confirmButtonText: 'OK'
+                            });
+                        });
+
+                    };
+
+                    reader.readAsText(file);
+                }
+
+            };
+
+            const importJobs = () => {
+
+                console.info("Import jobs clicked!");
+                document.getElementById("fileInput").value="";
+                document.getElementById("fileInput").click();
+
+            };
+
+            const exportSelectedJobs = () => {
+
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Do you want to export the selected ' + selectedJobIds.value.length + ' jobs?',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, export them!',
+                    cancelButtonText: 'No, cancel'
+                }).then((result) => {
+                    if (result.value) {
+
+                        axios.get('job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Export").then(response => {
+
+                            console.info("exportSelectedJobs", response);
+
+                            selectedJobIds.value = [];
+
+                            closeModal();
+
+                            const now = new Date();
+                            const year = now.getFullYear();
+                            const month = String(now.getMonth() + 1).padStart(2, '0');
+                            const day = String(now.getDate()).padStart(2, '0');
+                            const hours = String(now.getHours()).padStart(2, '0');
+                            const minutes = String(now.getMinutes()).padStart(2, '0');
+                            const fileName = `Exported-Jobs_${year}-${month}-${day}_${hours}-${minutes}.json`;
+                            const blob = new Blob([JSON.stringify(JSON.parse(response.data.Message), null, 2)], { type: 'application/json' });
+                            const link = document.createElement('a');
+                            const url = window.URL.createObjectURL(blob);
+                            link.href = url;
+                            link.download = fileName;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(url);
+
+
+
+
+                        }).catch(e => {
+
+                            showModal.value = false;
+
+                            Swal.fire({
+                                title: 'Error!',
+                                icon: 'error',
+                                text: e.response.data.Message,
+                                confirmButtonText: 'OK'
+                            });
+                        });
+
+                    }
+                });
+
+            };
+
             const deleteSelectedJobs = () => {
                 Swal.fire({
                     title: 'Are you sure?',
@@ -1252,6 +1372,9 @@
                 onClassChange,
                 addJob,
                 stopSelectedJobs,
+                exportSelectedJobs,
+                importJobs,
+                handleFileInput,
                 startSelectedJobs,
                 GetJobs,
                 GetJob,
