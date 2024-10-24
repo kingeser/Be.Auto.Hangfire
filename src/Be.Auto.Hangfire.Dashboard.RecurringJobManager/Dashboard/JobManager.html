@@ -999,27 +999,60 @@
 
                         const content = handlefileloaded.target.result;
 
-                        console.info("CONTENT", content);
-                        console.info("CONTENT encodeURI", encodeURI(content));
-                        axios.get('job-manager/job-agent?SelectedJobs=' + encodeURIComponent(content) + "&Action=Import").then(response => {
+                        try {
 
-                            selectedJobIds.value = [];
+                            var jobItems = JSON.parse(content);
 
-                            closeModal();
+                            Swal.fire({
+                                title: 'Import Jobs',
+                                text: 'Do you want to import ' + jobItems.length + ' jobs?',
+                                icon: 'question',
+                                showCancelButton: true,
+                                confirmButtonText: 'Yes, import them!',
+                                cancelButtonText: 'No, cancel'
+                            }).then((result) => {
+                                if (result.value) {
 
-                            GetJobs();
 
-                        }).catch(e => {
 
-                            showModal.value = false;
+                                    const formData = new FormData();
+                                    formData.append('SelectedJobs', content);
+                                    formData.append('Action', 'Import');
+                                    axios.post('job-manager/job-export-import', formData, {
+                                        headers: {
+                                            'Content-Type': 'multipart/form-data'
+                                        }
+                                    })
+                                        .then(response => {
+                                            selectedJobIds.value = [];
+                                            closeModal();
+                                            GetJobs();
+                                        })
+                                        .catch(e => {
+                                            showModal.value = false;
+                                            Swal.fire({
+                                                title: 'Error!',
+                                                icon: 'error',
+                                                text: e.response.data.Message,
+                                                confirmButtonText: 'OK'
+                                            });
+                                        });
 
+
+                                }
+                            });
+
+
+                        } catch (parseError) {
                             Swal.fire({
                                 title: 'Error!',
                                 icon: 'error',
-                                text: e.response.data.Message,
+                                text: 'Invalid json file!',
                                 confirmButtonText: 'OK'
                             });
-                        });
+                        }
+
+                     
 
                     };
 
@@ -1040,16 +1073,16 @@
 
 
                 Swal.fire({
-                    title: 'Are you sure?',
+                    title: 'Export Jobs',
                     text: 'Do you want to export the selected ' + selectedJobIds.value.length + ' jobs?',
-                    icon: 'info',
+                    icon: 'question',
                     showCancelButton: true,
                     confirmButtonText: 'Yes, export them!',
                     cancelButtonText: 'No, cancel'
                 }).then((result) => {
                     if (result.value) {
 
-                        axios.get('job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Export").then(response => {
+                        axios.get('job-manager/job-export-import?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Export").then(response => {
 
                             console.info("exportSelectedJobs", response);
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using Hangfire.Dashboard;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -15,8 +17,8 @@ internal class MethodParameterConverter(MethodInfo methodInfo) : JsonConverter
 
     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
     {
-
-        var jsonObject =  reader.Value?.GetType()==typeof(string) ? JObject.Parse(reader.Value?.ToString() ?? "{}") :JObject.Load(reader);
+      
+        var jsonObject = GetJsonObject(reader);
 
         var parameterValues = new object[_parameters.Length];
 
@@ -37,6 +39,28 @@ internal class MethodParameterConverter(MethodInfo methodInfo) : JsonConverter
         }
 
         return parameterValues;
+    }
+
+    private static JObject GetJsonObject(JsonReader reader)
+    {
+        if (reader.Value?.GetType() != typeof(string)) return JObject.Load(reader);
+
+        var readerValue = reader.Value?.ToString() ?? "{}";
+
+        while (Regex.IsMatch(readerValue, @"\\[\\nt\""]"))
+        {
+            readerValue = Regex.Unescape(readerValue); 
+        }
+
+        while (readerValue.StartsWith("\"") && readerValue.EndsWith("\""))
+        {
+            readerValue = readerValue.Substring(1, readerValue.Length - 2);
+          
+        }
+
+
+        return JObject.Parse(readerValue);
+
     }
 
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
