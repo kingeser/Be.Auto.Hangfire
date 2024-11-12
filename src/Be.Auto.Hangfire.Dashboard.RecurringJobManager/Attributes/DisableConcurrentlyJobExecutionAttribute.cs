@@ -5,12 +5,13 @@ using Hangfire.Common;
 using Hangfire.States;
 using System.Collections.Generic;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
+using System.Collections;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
 {
     internal class DisableConcurrentlyJobExecutionAttribute : JobFilterAttribute, IElectStateFilter
     {
-        
+
         public void OnStateElection(ElectStateContext context)
         {
             if (context.BackgroundJob.Job == null) return;
@@ -31,24 +32,21 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
                     && AreArgsEqual(t.Value.Job.Args, args)
                     && !context.CandidateState.IsFinal))
             {
-             
+
                 context.CandidateState = new CancelledState(context.BackgroundJob.CreatedAt);
             }
         }
 
         public bool AreArgsEqual(IReadOnlyList<object> args1, IReadOnlyList<object> args2)
         {
-            if (args1 == null || args2 == null)
-            {
-                return true;
-            }
 
-            if (ReferenceEquals(args1, args2))
-            {
-                return true;
-            }
 
-            return args1.Count == args2.Count && args1.SequenceEqual(args2);
+            var arg1Json = args1.SerializeObjectToJson();
+            var arg2Json=args2.SerializeObjectToJson();
+
+
+            return string.Equals(arg1Json, arg2Json);
+
         }
 
     }

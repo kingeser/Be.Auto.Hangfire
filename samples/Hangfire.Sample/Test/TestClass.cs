@@ -9,4 +9,21 @@
 
         public string[] Options { get; set; }
     }
+
+    public class LongDuringJobTest
+    {
+
+
+        public async Task LongTest()
+        {
+
+             await Task.Delay(TimeSpan.FromDays(1));
+        }
+
+        public  Task LongTestWithParams(params string[] args)
+        {
+
+            return Task.Delay(TimeSpan.FromDays(1));
+        }
+    }
 }
