@@ -175,7 +175,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             {
                 if (ex.Response is HttpWebResponse errorResponse)
                 {
-                    throw new RecurringJobException($"{errorResponse.StatusCode} : {errorResponse.StatusDescription}", ex);
+                    throw new RecurringJobException($"{errorResponse.StatusCode} : {errorResponse.StatusDescription} > {ex.Message}", ex);
 
                 }
                 throw;
