@@ -14,16 +14,17 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
 
         public void OnStateElection(ElectStateContext context)
         {
+            if (context.CandidateState is FailedState) return;
+            if (context.CandidateState is not ProcessingState) return;
             if (context.BackgroundJob.Job == null) return;
-
             var processingJobs = context.Storage.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
-
             if (processingJobs.Count <= 0) return;
 
             var type = context.BackgroundJob.Job.Type.FullName;
             var methodName = context.BackgroundJob.Job.Method.GenerateFullName();
             var recurringJobId = context.BackgroundJob.Job.ToString();
             var args = context.BackgroundJob.Job.Args;
+
 
             if (processingJobs.Exists(t =>
                     t.Value.Job.Method.GenerateFullName().Equals(methodName, StringComparison.InvariantCultureIgnoreCase)
@@ -35,6 +36,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
 
                 context.CandidateState = new CancelledState(context.BackgroundJob.CreatedAt);
             }
+
         }
 
         public bool AreArgsEqual(IReadOnlyList<object> args1, IReadOnlyList<object> args2)
@@ -42,7 +44,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
 
 
             var arg1Json = args1.SerializeObjectToJson();
-            var arg2Json=args2.SerializeObjectToJson();
+            var arg2Json = args2.SerializeObjectToJson();
 
 
             return string.Equals(arg1Json, arg2Json);
