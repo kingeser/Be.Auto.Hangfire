@@ -4,6 +4,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 
 public class RecurringJobException : Exception
 {
+
     public RecurringJobException(string message) : base(message)
     {
 
@@ -12,4 +13,6 @@ public class RecurringJobException : Exception
     {
 
     }
+
+  
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -44,10 +45,10 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
         }
 
-   
+
         private static bool IsSimpleRequest(HttpMethodType method) => method is HttpMethodType.GET or HttpMethodType.DELETE or HttpMethodType.HEAD or HttpMethodType.OPTIONS or HttpMethodType.TRACE;
 
-        private static async Task<Tuple<HttpWebResponse,string>> HandleSimpleRequestAsync(WebRequestJob job, string url)
+        private static async Task<Tuple<HttpWebResponse, string>> HandleSimpleRequestAsync(WebRequestJob job, string url)
         {
             var queryString = BuildQueryStringParameters(job);
 
@@ -63,7 +64,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
         private static bool IsComplexRequest(HttpMethodType method) => method is HttpMethodType.POST or HttpMethodType.PUT or HttpMethodType.PATCH;
 
-        private static async Task<Tuple<HttpWebResponse,string>> HandleComplexRequestAsync(WebRequestJob job, string url)
+        private static async Task<Tuple<HttpWebResponse, string>> HandleComplexRequestAsync(WebRequestJob job, string url)
         {
             var httpWebRequest = CreateWebRequest(job, url);
 
@@ -79,13 +80,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             };
         }
 
-        private static async Task<Tuple<HttpWebResponse,string>> SendRequestWithEmptyBodyAsync(HttpWebRequest httpWebRequest)
+        private static async Task<Tuple<HttpWebResponse, string>> SendRequestWithEmptyBodyAsync(HttpWebRequest httpWebRequest)
         {
             httpWebRequest.ContentLength = 0;
             return await GetResponseAsync(httpWebRequest);
         }
 
-        private static async Task<Tuple<HttpWebResponse,string>> SendRequestWithBodyAsync(HttpWebRequest httpWebRequest, string body, string contentType)
+        private static async Task<Tuple<HttpWebResponse, string>> SendRequestWithBodyAsync(HttpWebRequest httpWebRequest, string body, string contentType)
         {
             httpWebRequest.ContentType = contentType;
             using (var requestStream = new StreamWriter(await httpWebRequest.GetRequestStreamAsync()))
@@ -98,7 +99,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             return await GetResponseAsync(httpWebRequest);
         }
 
-        private static async Task<Tuple<HttpWebResponse,string>> SendFormUrlEncodedRequestAsync(HttpWebRequest httpWebRequest, string bodyParameters)
+        private static async Task<Tuple<HttpWebResponse, string>> SendFormUrlEncodedRequestAsync(HttpWebRequest httpWebRequest, string bodyParameters)
         {
             httpWebRequest.ContentType = "application/x-www-form-urlencoded";
             var parameters = bodyParameters.DeserializeObjectFromJson<List<HttpFormUrlEncodedParameter>>();
@@ -121,7 +122,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             return await GetResponseAsync(httpWebRequest);
         }
 
-        private static async Task<Tuple<HttpWebResponse,string>> SendMultipartFormDataRequestAsync(HttpWebRequest httpWebRequest, string bodyParameters)
+        private static async Task<Tuple<HttpWebResponse, string>> SendMultipartFormDataRequestAsync(HttpWebRequest httpWebRequest, string bodyParameters)
         {
             var boundary = "------------------------" + DateTime.Now.Ticks.ToString("x");
             httpWebRequest.ContentType = "multipart/form-data; boundary=" + boundary;
@@ -171,17 +172,54 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
                 return new Tuple<HttpWebResponse, string>(response, responseBody);
             }
-            catch (WebException ex)
+            catch (Exception ex)
             {
-                if (ex.Response is HttpWebResponse errorResponse)
+                if (ex is not WebException { Response: HttpWebResponse errorResponse })
+                    throw;
+
+                using var reader = new StreamReader(errorResponse.GetResponseStream() ?? Stream.Null);
+
+                var errorContent = $"{(await reader.ReadToEndAsync())}";
+
+                if (!IsHtmlContent(errorContent))
                 {
                     throw new RecurringJobException($"{errorResponse.StatusCode} : {errorResponse.StatusDescription} > {ex.Message}", ex);
 
                 }
-                throw;
+
+                var errorDetails = ExtractErrorDetails(errorContent);
+
+
+                throw new RecurringJobException($"{errorResponse.StatusCode} : {errorResponse.StatusDescription} > {ex.Message}", new WebException(errorDetails, ex));
+
+
             }
         }
 
+        private static bool IsHtmlContent(string content)
+        {
+            return Regex.IsMatch(content, @"<[a-z][\s\S]*>", RegexOptions.IgnoreCase);
+        }
+
+        /// <summary>
+        /// For ServiceStack etc. html response errors
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        private static string ExtractErrorDetails(string content)
+        {
+            const string pattern = @"\{(?:[^{}]|(?<Open>\{)|(?<-Open>\}))*(?(Open)(?!))\}|\[(?:[^\[\]]|(?<Open>\[)|(?<-Open>\]))*(?(Open)(?!))\]";
+
+            var regex = new Regex(pattern, RegexOptions.Singleline);
+            var culture = new CultureInfo("en-US");
+            return string.Join("\r\n", regex.Matches(content)
+                .Cast<Match>()
+                .Where(m => m.Success)
+                .Where(t=>!string.IsNullOrEmpty(t.Value))
+                .Where(a => a.Value.ToLower(culture).Contains("error") || a.Value.Contains("exception") ||a.Value.Contains("fail") || a.Value.Contains("fatal")|| a.Value.Contains("unexpected"))
+                .Select(a => a.Value)
+                .Distinct());
+        }
         private static HttpWebRequest CreateWebRequest(WebRequestJob job, string url)
         {
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
