@@ -183,15 +183,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
                 if (!IsHtmlContent(errorContent))
                 {
-                    throw new RecurringJobException($"{errorResponse.StatusCode} : {errorResponse.StatusDescription} > {ex.Message}", ex);
+                    throw new RecurringJobException($"{errorResponse.StatusCode} : {errorResponse.StatusDescription} > {ex.Message}", new WebException(errorContent, ex));
 
                 }
 
                 var errorDetails = ExtractErrorDetails(errorContent);
 
-
                 throw new RecurringJobException($"{errorResponse.StatusCode} : {errorResponse.StatusDescription} > {ex.Message}", new WebException(errorDetails, ex));
-
 
             }
         }
