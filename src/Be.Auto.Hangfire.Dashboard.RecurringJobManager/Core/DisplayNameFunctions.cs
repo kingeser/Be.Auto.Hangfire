@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 using Hangfire;
 using Hangfire.Common;
 using Hangfire.Dashboard;
@@ -56,10 +57,10 @@ public static class DisplayNameFunctions
     private static Tuple<string, InvocationData>? FindMatchingInvocationData(InvocationData jobInvocationData)
     {
         return JobInvocationDatas.FirstOrDefault(entry =>
-            entry.Item2.Type == jobInvocationData.Type &&
+            entry.Item2.Type.CleanVersionDetails() == jobInvocationData.Type.CleanVersionDetails() &&
             entry.Item2.Method == jobInvocationData.Method &&
             entry.Item2.Arguments == jobInvocationData.Arguments &&
-            entry.Item2.ParameterTypes == jobInvocationData.ParameterTypes);
+            entry.Item2.ParameterTypes.CleanVersionDetails() == jobInvocationData.ParameterTypes.CleanVersionDetails());
     }
     public static string WithJobId(DashboardContext context, Job job)
     {

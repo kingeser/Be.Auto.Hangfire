@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -181,22 +182,17 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
                 var errorContent = $"{(await reader.ReadToEndAsync())}";
 
-                if (!IsHtmlContent(errorContent))
+                if (errorResponse.ContentType == "text/html")
                 {
-                    throw new RecurringJobException($"{errorResponse.StatusCode} : {errorResponse.StatusDescription} > {ex.Message}", new WebException(errorContent, ex));
-
+                    errorContent = ExtractErrorDetails(errorContent);
                 }
 
-                var errorDetails = ExtractErrorDetails(errorContent);
+                errorContent = $"{errorResponse.StatusDescription} > {ex.Message} \r\n {errorContent}";
 
-                throw new RecurringJobException($"{errorResponse.StatusCode} : {errorResponse.StatusDescription} > {ex.Message}", new WebException(errorDetails, ex));
+
+                throw new RecurringJobException(errorContent, ex);
 
             }
-        }
-
-        private static bool IsHtmlContent(string content)
-        {
-            return Regex.IsMatch(content, @"<[a-z][\s\S]*>", RegexOptions.IgnoreCase);
         }
 
         /// <summary>
@@ -207,16 +203,19 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
         private static string ExtractErrorDetails(string content)
         {
             const string pattern = @"\{(?:[^{}]|(?<Open>\{)|(?<-Open>\}))*(?(Open)(?!))\}|\[(?:[^\[\]]|(?<Open>\[)|(?<-Open>\]))*(?(Open)(?!))\]";
-
             var regex = new Regex(pattern, RegexOptions.Singleline);
             var culture = new CultureInfo("en-US");
-            return string.Join("\r\n", regex.Matches(content)
+            return regex.Matches(content)
                 .Cast<Match>()
                 .Where(m => m.Success)
-                .Where(t=>!string.IsNullOrEmpty(t.Value))
-                .Where(a => a.Value.ToLower(culture).Contains("error") || a.Value.Contains("exception") ||a.Value.Contains("fail") || a.Value.Contains("fatal")|| a.Value.Contains("unexpected"))
+                .Where(t => !string.IsNullOrEmpty(t.Value))
+                .Where(a => a.Value.ToLower(culture).Contains("error") ||
+                            a.Value.ToLower(culture).Contains("exception") ||
+                            a.Value.ToLower(culture).Contains("fail") ||
+                            a.Value.ToLower(culture).Contains("fatal") ||
+                            a.Value.ToLower(culture).Contains("unexpected"))
                 .Select(a => a.Value)
-                .Distinct());
+                .Distinct().FirstOrDefault() ?? string.Empty;
         }
         private static HttpWebRequest CreateWebRequest(WebRequestJob job, string url)
         {
