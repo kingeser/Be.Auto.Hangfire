@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
+using Newtonsoft.Json;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {
@@ -31,7 +32,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                 }
                 if (context.Request.Method == "POST")
                 {
-                    selectedJobs =(await context.Request.GetFormValuesAsync("SelectedJobs")).FirstOrDefault() ?? "[]";
+                    selectedJobs = (await context.Request.GetFormValuesAsync("SelectedJobs")).FirstOrDefault() ?? "[]";
                     action = (await context.Request.GetFormValuesAsync("Action")).FirstOrDefault();
                 }
 
@@ -86,6 +87,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                         break;
                     case "Import":
                         {
+
+                        
                             var jobs = selectedJobs.TryDeserializeJobs(out var result);
 
                             if (!result)
@@ -113,7 +116,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                             return;
                         }
-                      
+
                 }
 
                 context.Response.StatusCode = (int)HttpStatusCode.OK;

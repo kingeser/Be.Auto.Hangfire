@@ -19,7 +19,7 @@
       <NeutralLanguage>en</NeutralLanguage>
       <PackageProjectUrl>https://github.com/kingeser/Be.Auto.Hangfire</PackageProjectUrl>
       <RepositoryUrl>https://github.com/kingeser/Be.Auto.Hangfire.git</RepositoryUrl>
-      <Version>1.0.9</Version>
+      <Version>1.1.0</Version>
       <PackOnBuild>true</PackOnBuild>
       <Description>A dashboard to manage Hangfire's recurring jobs.</Description>
       <LangVersion>12</LangVersion>

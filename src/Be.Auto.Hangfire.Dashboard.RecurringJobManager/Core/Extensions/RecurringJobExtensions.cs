@@ -102,7 +102,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                                 BodyParameters = webRequestJob.BodyParameters,
                                 BodyParameterType = webRequestJob.BodyParameterType,
                                 UrlPath = webRequestJob.UrlPath,
-                                HeaderParameters = webRequestJob.HeaderParameters.DeserializeObjectFromJson<List<HttpHeaderParameter>>(),
+                                HeaderParameters = webRequestJob.HeaderParameters.UnescapeJson().DeserializeObjectFromJson<List<HttpHeaderParameter>>(),
                                 HostName = webRequestJob.HostName,
                                 HttpMethod = webRequestJob.HttpMethod,
 

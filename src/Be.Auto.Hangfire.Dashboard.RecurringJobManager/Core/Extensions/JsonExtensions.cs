@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -28,6 +29,8 @@ internal static class JsonExtensions
         }
         catch
         {
+
+
             result = default(T);
             return false;
         }
@@ -59,5 +62,23 @@ internal static class JsonExtensions
         {
             return false;
         }
+    }
+
+    public static string UnescapeJson(this string @json)
+    {
+
+        while (Regex.IsMatch(@json, @"\\[\\nt\""]"))
+        {
+            @json = Regex.Unescape(@json);
+        }
+
+        while (@json.StartsWith("\"") && @json.EndsWith("\""))
+        {
+            @json = @json.Substring(1, @json.Length - 2);
+
+        }
+
+        return @json;
+
     }
 }
