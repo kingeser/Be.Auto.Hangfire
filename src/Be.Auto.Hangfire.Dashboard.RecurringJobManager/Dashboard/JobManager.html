@@ -785,35 +785,29 @@
                 if (checkForm()) {
 
                     const formData = new FormData(document.getElementById('formJob'));
-                    const params = new URLSearchParams();
-
-                    for (const [key, value] of formData.entries()) {
-                        params.append(key, value);
-                    }
-
                     isInProgress.value = true;
 
-                    axios.get('job-manager/update-jobs?' + params.toString()).then(response => {
+                    // Send a POST request with the FormData object
+                    axios.post('job-manager/update-jobs', formData)
+                        .then(response => {
+                            isInProgress.value = false;
 
-                        isInProgress.value = false;
+                            selectedJobIds.value = [];
+                            closeModal();
+                            GetJobs();
+                        })
+                        .catch(e => {
+                            isInProgress.value = false;
+                            showModal.value = false;
 
-                        selectedJobIds.value = [];
-                        closeModal();
-                        GetJobs();
-
-
-                    }).catch(e => {
-
-                        isInProgress.value = false;
-                        showModal.value = false;
-
-                        Swal.fire({
-                            title: 'Error!',
-                            icon: 'error',
-                            text: e.response.data.Message,
-                            confirmButtonText: 'OK'
+                            Swal.fire({
+                                title: 'Error!',
+                                icon: 'error',
+                                text: e.response.data.Message,
+                                confirmButtonText: 'OK'
+                            });
                         });
-                    });
+
                 }
             };
 

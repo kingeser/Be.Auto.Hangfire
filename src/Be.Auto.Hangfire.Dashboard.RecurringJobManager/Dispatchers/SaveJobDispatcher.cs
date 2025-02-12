@@ -3,6 +3,7 @@ using Hangfire.Dashboard;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Hangfire;
@@ -19,7 +20,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 
             try
             {
-                var job = CreateRecurringJob(context);
+                var job = await CreateRecurringJob(context);
 
                 job.Register();
 
@@ -42,23 +43,23 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
             }
         }
 
-        private static RecurringJobBase CreateRecurringJob(DashboardContext context)
+        private static async Task<RecurringJobBase> CreateRecurringJob(DashboardContext context)
         {
-            var jobType = (JobType)Enum.Parse(typeof(JobType), context.Request.GetQuery(nameof(RecurringJobBase.JobType)));
+            var jobType = (JobType)Enum.Parse(typeof(JobType), (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.JobType))).First());
 
             return jobType switch
             {
                 JobType.MethodCall => new RecurringJobMethodCall()
                 {
-                    Id = context.Request.GetQuery(nameof(RecurringJobBase.Id)),
-                    Cron = context.Request.GetQuery(nameof(RecurringJobBase.Cron)),
-                    Type = context.Request.GetQuery(nameof(RecurringJobMethodCall.Type)),
-                    Method = context.Request.GetQuery(nameof(RecurringJobMethodCall.Method)),
-                    TimeZoneId = context.Request.GetQuery(nameof(RecurringJobBase.TimeZoneId)),
+                    Id =(await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Id))).First(),
+                    Cron = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Cron))).First(),
+                    Type =(await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.Type))).First(),
+                    Method = (await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.Method))).First(),
+                    TimeZoneId = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.TimeZoneId))).First(),
                     MisfireHandlingMode =
                         (MisfireHandlingMode)Enum.Parse(typeof(MisfireHandlingMode),
-                            context.Request.GetQuery(nameof(RecurringJobBase.MisfireHandlingMode))),
-                    MethodParameters = context.Request.GetQuery(nameof(RecurringJobMethodCall.MethodParameters)),
+                           (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.MisfireHandlingMode))).First()),
+                    MethodParameters = (await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.MethodParameters))).First(),
                     LastJobState = string.Empty,
                     NextExecution = string.Empty,
                     CreatedAt = DateTime.Now.ToString("G"),
@@ -67,26 +68,26 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     Removed = false,
                     LastExecution = string.Empty,
                     LastJobId = string.Empty,
-                    Guid = context.Request.GetQuery(nameof(RecurringJobBase.Guid)),
+                    Guid = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Guid))).First(),
                 },
                 JobType.WebRequest => new RecurringJobWebRequest()
                 {
-                    Id = context.Request.GetQuery(nameof(RecurringJobBase.Id)),
-                    Cron = context.Request.GetQuery(nameof(RecurringJobBase.Cron)),
-                    HostName = context.Request.GetQuery(nameof(RecurringJobWebRequest.HostName)),
-                    UrlPath = context.Request.GetQuery(nameof(RecurringJobWebRequest.UrlPath)),
-                    TimeZoneId = context.Request.GetQuery(nameof(RecurringJobBase.TimeZoneId)),
+                    Id = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Id))).First(),
+                    Cron = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Cron))).First(),
+                    HostName = (await context.Request.GetFormValuesAsync(nameof(RecurringJobWebRequest.HostName))).First(),
+                    UrlPath = (await context.Request.GetFormValuesAsync(nameof(RecurringJobWebRequest.UrlPath))).First(),
+                    TimeZoneId = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.TimeZoneId))).First(),
                     BodyParameterType =
                         (BodyParameterType)Enum.Parse(typeof(BodyParameterType),
-                            context.Request.GetQuery(nameof(RecurringJobWebRequest.BodyParameterType))),
+                            (await context.Request.GetFormValuesAsync(nameof(RecurringJobWebRequest.BodyParameterType))).First()),
                     HttpMethod =
                         (HttpMethodType)Enum.Parse(typeof(HttpMethodType),
-                            context.Request.GetQuery(nameof(RecurringJobWebRequest.HttpMethod))),
-                    BodyParameters = context.Request.GetQuery(nameof(RecurringJobWebRequest.BodyParameters)),
-                    HeaderParameters = context.Request.GetQuery(nameof(RecurringJobWebRequest.HeaderParameters)),
+                            (await context.Request.GetFormValuesAsync(nameof(RecurringJobWebRequest.HttpMethod))).First()),
+                    BodyParameters = (await context.Request.GetFormValuesAsync(nameof(RecurringJobWebRequest.BodyParameters))).First(),
+                    HeaderParameters = (await context.Request.GetFormValuesAsync(nameof(RecurringJobWebRequest.HeaderParameters))).First(),
                     MisfireHandlingMode =
                         (MisfireHandlingMode)Enum.Parse(typeof(MisfireHandlingMode),
-                            context.Request.GetQuery(nameof(RecurringJobBase.MisfireHandlingMode))),
+                            (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.MisfireHandlingMode))).First()),
                     LastJobState = string.Empty,
                     NextExecution = string.Empty,
                     CreatedAt = DateTime.Now.ToString("G"),
@@ -95,7 +96,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     Removed = false,
                     LastExecution = string.Empty,
                     LastJobId = string.Empty,
-                    Guid = context.Request.GetQuery(nameof(RecurringJobBase.Guid)),
+                    Guid = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Guid))).First(),
+
                 },
                 _ => default
             };
