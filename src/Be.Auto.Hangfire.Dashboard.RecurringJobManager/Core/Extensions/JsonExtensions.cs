@@ -53,6 +53,11 @@ internal static class JsonExtensions
     public static bool IsValidJson(this string @this)
     {
         if (string.IsNullOrEmpty(@this)) return false;
+
+        var jsonRegex = new Regex(@"^\s*(\{.*\}|\[.*\])\s*$", RegexOptions.Singleline);
+
+        if (!jsonRegex.IsMatch(@this)) return false;
+        
         try
         {
             JToken.Parse(@this);
