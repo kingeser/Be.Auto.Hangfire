@@ -142,7 +142,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
                         try
                         {
-                            var parametersFromJob = method.GetDefaultParameters(methodCallJob);
+                            
                             var defaultParameters = method.GetDefaultParameters();
 
                             if (string.IsNullOrEmpty(job.Guid))
@@ -152,8 +152,10 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
                             RemoveIfExist(job);
 
-                            if (parametersFromJob != null)
+                            if (methodCallJob.MethodParameters.IsValidJson())
                             {
+                                var parametersFromJob = method.GetDefaultParameters(methodCallJob);
+                                
                                 if (parametersFromJob!.Length != defaultParameters.Length)
                                     throw new RecurringJobException("Job registration failed: The number of parameters provided does not match the expected number of parameters.");
 
