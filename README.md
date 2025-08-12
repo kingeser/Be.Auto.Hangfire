@@ -1,4 +1,23 @@
 
+# BKB.Be.Auto.Hangfire.Dashboard.RecurringJobManager
+
+This is a fork of [Be.Auto.Hangfire.Dashboard.RecurringJobManager](https://github.com/kingeser/Be.Auto.Hangfire) with additional bug fixes and enhancements.
+
+## Why This Fork?
+- Original maintainer appears inactive
+- Critical bugs needed fixing
+
+## Changes from Original
+- Bug fixes for job management
+
+## Migration from Original
+```csharp
+// Old
+Install-Package Be.Auto.Hangfire.Dashboard.RecurringJobManager
+// New  
+Install-Package BKB.Be.Auto.Hangfire.Dashboard.RecurringJobManager
+```
+
 # Be.Auto.Hangfire.Dashboard.RecurringJobManager
 
 ![image](https://github.com/user-attachments/assets/96cc0f8a-e509-4108-9f14-1d41e1ad2925)
