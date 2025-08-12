@@ -142,7 +142,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
                         try
                         {
-                            var parametersFromJob = method.GetDefaultParameters(methodCallJob);
+                            var parametersFromJob = method.GetDefaultParameters(methodCallJob) ?? [];
                             var defaultParameters = method.GetDefaultParameters();
 
                             if (parametersFromJob.Length != defaultParameters.Length)
