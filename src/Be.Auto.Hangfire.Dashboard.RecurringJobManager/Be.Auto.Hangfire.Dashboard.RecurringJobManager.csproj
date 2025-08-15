@@ -19,7 +19,7 @@
       <NeutralLanguage>en</NeutralLanguage>
       <PackageProjectUrl>https://github.com/kingeser/Be.Auto.Hangfire</PackageProjectUrl>
       <RepositoryUrl>https://github.com/kingeser/Be.Auto.Hangfire.git</RepositoryUrl>
-      <Version>1.1.1</Version>
+      <Version>1.1.3</Version>
       <PackOnBuild>true</PackOnBuild>
       <Description>A dashboard to manage Hangfire's recurring jobs.</Description>
       <LangVersion>12</LangVersion>
@@ -110,10 +110,10 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Cronos" Version="0.8.4" />
-    <PackageReference Include="HangFire.Core" Version="1.8.14" />
+    <PackageReference Include="Cronos" Version="0.11.1" />
+    <PackageReference Include="HangFire.Core" Version="1.8.21" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="NJsonSchema" Version="11.0.2" />
+    <PackageReference Include="NJsonSchema" Version="11.4.0" />
   </ItemGroup>
 
 </Project>
