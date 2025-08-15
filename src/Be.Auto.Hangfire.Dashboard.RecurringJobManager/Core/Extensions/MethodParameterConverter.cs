@@ -17,7 +17,7 @@ internal class MethodParameterConverter(MethodInfo methodInfo) : JsonConverter
 
     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
     {
-      
+
         var jsonObject = GetJsonObject(reader);
 
         var parameterValues = new object[_parameters.Length];
@@ -47,17 +47,7 @@ internal class MethodParameterConverter(MethodInfo methodInfo) : JsonConverter
 
         var readerValue = reader.Value?.ToString() ?? "{}";
 
-        while (Regex.IsMatch(readerValue, @"\\[\\nt\""]"))
-        {
-            readerValue = Regex.Unescape(readerValue); 
-        }
-
-        while (readerValue.StartsWith("\"") && readerValue.EndsWith("\""))
-        {
-            readerValue = readerValue.Substring(1, readerValue.Length - 2);
-          
-        }
-
+        readerValue = readerValue.UnescapeMulti();
 
         return JObject.Parse(readerValue);
 

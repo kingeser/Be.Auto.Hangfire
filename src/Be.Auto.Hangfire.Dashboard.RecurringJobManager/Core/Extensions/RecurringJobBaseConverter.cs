@@ -14,7 +14,15 @@ internal class RecurringJobBaseConverter : JsonConverter
 
     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
     {
-        var jobObject = JObject.Load(reader);
+        var jobObject = JObject.Load(reader,new JsonLoadSettings()
+        {
+            DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Replace,
+            CommentHandling = CommentHandling.Ignore,
+            LineInfoHandling = LineInfoHandling.Load,
+            
+        });
+
+        jobObject.TrimAllStrings();
 
         var jobType = jobObject["JobType"]?.ToString();
 

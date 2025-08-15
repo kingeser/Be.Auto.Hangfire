@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 
@@ -20,6 +21,8 @@ internal static class DictionaryExtensions
         {
             if (!dictionary.TryGetValue(property.Name, out var value)) continue;
 
+            value = value.UnescapeMulti();
+          
             var converter = TypeDescriptor.GetConverter(property.PropertyType);
 
             try

@@ -55,7 +55,7 @@ internal static class JsonExtensions
         if (string.IsNullOrEmpty(@this)) return false;
         try
         {
-            JToken.Parse(@this);
+            JToken.Parse(@this.UnescapeMulti());
             return true;
         }
         catch
@@ -64,21 +64,5 @@ internal static class JsonExtensions
         }
     }
 
-    public static string UnescapeJson(this string @json)
-    {
-
-        while (Regex.IsMatch(@json, @"\\[\\nt\""]"))
-        {
-            @json = Regex.Unescape(@json);
-        }
-
-        while (@json.StartsWith("\"") && @json.EndsWith("\""))
-        {
-            @json = @json.Substring(1, @json.Length - 2);
-
-        }
-
-        return @json;
-
-    }
+   
 }

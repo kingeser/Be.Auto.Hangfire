@@ -16,16 +16,19 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             return $"{@this.Name}({string.Join(",", @this.GetParameters().Select(x => $"{x.ParameterType.Name} {x.Name}"))})";
 
         }
-     
+
         public static object[] GetDefaultParameters(this MethodInfo @this, RecurringJobMethodCall job)
         {
+            if (string.IsNullOrEmpty(job.MethodParameters))
+                return [];
+
             var parameters = (object[])JsonConvert.DeserializeObject(
                 job.MethodParameters,
                 typeof(object[]),
                 new MethodParameterConverter(@this)
             );
 
-            return parameters;
+            return parameters ?? [];
         }
         public static object[] GetDefaultParameters(this MethodInfo method)
         {
@@ -106,7 +109,27 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             }
 
 
-            var instance = Activator.CreateInstance(type);
+            object instance;
+            try
+            {
+                instance = Activator.CreateInstance(type); // parametresiz constructor
+            }
+            catch (MissingMethodException)
+            {
+                // parametresiz constructor yoksa, en az parametreli constructor'u bul ve default değerlerle oluştur
+                var ctor = type.GetConstructors()
+                    .OrderBy(c => c.GetParameters().Length)
+                    .FirstOrDefault();
+
+                if (ctor == null)
+                    return null; // constructor yoksa instance oluşturulamaz
+
+                var args = ctor.GetParameters()
+                    .Select(p => CreateInstanceWithDefaults(p.ParameterType))
+                    .ToArray();
+
+                instance = ctor.Invoke(args);
+            }
 
 
             foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => p.CanWrite && p.GetIndexParameters().Length == 0))
@@ -149,7 +172,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                     Title = method.Name,
                     AllowAdditionalItems = false,
                     AllowAdditionalProperties = false,
-                    
+
                 };
 
                 foreach (var jSchema in schemas)
@@ -168,7 +191,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
                 return combinedSchema.ToJson(Formatting.None);
             }
-            catch 
+            catch
             {
                 return default;
             }
