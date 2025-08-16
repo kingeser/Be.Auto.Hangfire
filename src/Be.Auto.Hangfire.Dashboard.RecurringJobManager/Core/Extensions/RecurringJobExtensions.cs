@@ -31,7 +31,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             if (job.TimeZone == null)
                 throw new RecurringJobException("Job registration failed: The specified 'TimeZone' could not be found. Please provide a valid time zone.");
 
-            if (!CronExpression.TryParse(job.Cron,CronFormat.IncludeSeconds,out _) && !CronExpression.TryParse(job.Cron, CronFormat.Standard, out _))
+            if (!CronExpression.TryParse(job.Cron, CronFormat.IncludeSeconds, out _) && !CronExpression.TryParse(job.Cron, CronFormat.Standard, out _))
                 throw new RecurringJobException($"Job registration failed: The provided Cron expression '{job.Cron}' is invalid. Please provide a valid Cron expression.");
 
             switch (job.JobType)
@@ -39,11 +39,14 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
                 case JobType.WebRequest:
                     if (job is RecurringJobWebRequest webRequestJob)
                     {
+
+                        webRequestJob.UrlPath ??= string.Empty;
+
                         if (string.IsNullOrEmpty(webRequestJob.HostName))
                             throw new RecurringJobException("Job registration failed: The 'HostName' field cannot be null or empty.");
 
-                        if (string.IsNullOrEmpty(webRequestJob.UrlPath))
-                            throw new RecurringJobException("Job registration failed: The 'UrlPath' field cannot be null or empty.");
+                        if (!Uri.TryCreate(webRequestJob.HostName, UriKind.RelativeOrAbsolute, out var _))
+                            throw new RecurringJobException("Job registration failed: The 'HostName' invalid Uri!");
 
                         switch (webRequestJob.BodyParameterType)
                         {

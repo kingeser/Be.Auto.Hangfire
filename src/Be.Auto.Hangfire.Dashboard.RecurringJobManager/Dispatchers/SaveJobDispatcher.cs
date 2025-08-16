@@ -51,9 +51,9 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
             {
                 JobType.MethodCall => new RecurringJobMethodCall()
                 {
-                    Id =(await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Id))).First(),
+                    Id = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Id))).First(),
                     Cron = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Cron))).First(),
-                    Type =(await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.Type))).First(),
+                    Type = (await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.Type))).First(),
                     Method = (await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.Method))).First(),
                     TimeZoneId = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.TimeZoneId))).First(),
                     MisfireHandlingMode =
@@ -71,7 +71,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     Guid = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Guid))).First(),
                     Job = null,
                     PreventConcurrentExecution = Convert.ToBoolean((await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.PreventConcurrentExecution))).First()),
-                    
+
                 },
                 JobType.WebRequest => new RecurringJobWebRequest()
                 {
@@ -102,7 +102,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     Guid = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Guid))).First(),
                     Job = null,
                     PreventConcurrentExecution = Convert.ToBoolean((await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.PreventConcurrentExecution))).First()),
-                    
+
                 },
                 _ => default
             };

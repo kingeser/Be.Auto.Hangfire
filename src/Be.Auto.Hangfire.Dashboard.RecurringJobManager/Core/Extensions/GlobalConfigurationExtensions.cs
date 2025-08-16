@@ -58,6 +58,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 
         private static void AddApiRoutes()
         {
+            DashboardRoutes.Routes.Add("/api/web-request-job",new WebRequestJobSaveDispatcher());
             DashboardRoutes.Routes.Add("/jobs/get-job-cancelled", new GetJobsCancelledDispatcher());
             DashboardRoutes.Routes.Add("/jobs/get-job-stopped", new GetJobsStoppedDispatcher());
             DashboardRoutes.Routes.Add("/job-manager/get-jobs", new GetJobDispatcher());
@@ -100,6 +101,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             {
                 Active = page.RequestPath.StartsWith(JobExtensionPage.PageRoute),
                 Metric = DashboardMetrics.RecurringJobCount
+            });
+
+
+            NavigationMenu.Items.Add(page => new MenuItem("API Documentation", page.Url.To("/api/web-request-job"))
+            {
+                Active = page.RequestPath.StartsWith("/api/web-request-job"),
+               
             });
         }
 
