@@ -1,11 +1,13 @@
 ﻿using System;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 using Hangfire;
+using Hangfire.Common;
 using Newtonsoft.Json;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
 {
-    internal abstract class RecurringJobBase
+    internal abstract partial class RecurringJobBase
     {
         public  string Guid { get; set; }
         public string Id { get; set; }
@@ -18,9 +20,19 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
         public string LastJobState { get; set; }
         public string LastExecution { get; set; }
         public string CreatedAt { get; set; }
-        [JsonIgnore]
-        public bool Removed { get; set; }
+        public bool PreventConcurrentExecution { get; set; }
         public string TimeZoneId { get; set; }
+       public string Error { get; set; }
+        }
+
+
+    internal abstract partial class RecurringJobBase
+    {
+
+        [JsonIgnore]
+        public Job? Job { get; set; }
+
+
         [JsonIgnore]
         public TimeZoneInfo TimeZone
         {
@@ -37,7 +49,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
             }
         }
 
-        public string Error { get; set; }
+        [JsonIgnore]
+        public bool Removed { get; set; }
     }
 }
 

@@ -8,7 +8,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
     public class JobManagerOption
     {
         internal ICollection<Assembly> Assemblies { get; set; } = new List<Assembly>();
-        internal ConcurrentJobExecution ConcurrentJobExecution { get; set; } = ConcurrentJobExecution.Allow;
         internal WebRequestJobOption WebRequestJob { get; set; } = new WebRequestJobOption();
 
 
@@ -18,9 +17,10 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
             return this;
         }
 
+        [Obsolete("Prevent Concurrent Execution has been updated to be used on a per-job basis.")]
         public JobManagerOption DisableConcurrentlyJobExecution()
         {
-            this.ConcurrentJobExecution = ConcurrentJobExecution.Disable;
+           
             return this;
         }
 

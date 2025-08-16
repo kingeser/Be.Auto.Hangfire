@@ -69,6 +69,9 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     LastExecution = string.Empty,
                     LastJobId = string.Empty,
                     Guid = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Guid))).First(),
+                    Job = null,
+                    PreventConcurrentExecution = Convert.ToBoolean((await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.PreventConcurrentExecution))).First()),
+                    
                 },
                 JobType.WebRequest => new RecurringJobWebRequest()
                 {
@@ -97,7 +100,9 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     LastExecution = string.Empty,
                     LastJobId = string.Empty,
                     Guid = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Guid))).First(),
-
+                    Job = null,
+                    PreventConcurrentExecution = Convert.ToBoolean((await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.PreventConcurrentExecution))).First()),
+                    
                 },
                 _ => default
             };

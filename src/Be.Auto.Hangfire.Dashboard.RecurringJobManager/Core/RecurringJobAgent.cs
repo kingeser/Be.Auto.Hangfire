@@ -109,6 +109,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
                 new(nameof(job.JobType), job.JobType.ToString()),
                 new(nameof(job.MisfireHandlingMode), job.MisfireHandlingMode.ToString()),
                 new(nameof(job.Guid), job.Guid),
+                new(nameof(job.PreventConcurrentExecution),job.PreventConcurrentExecution.ToString())
             };
 
             switch (job.JobType)
@@ -143,6 +144,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
         public static List<RecurringJobBase> GetAllJobStopped() => GetAllJobs().Where(t => t.JobState == "Stopped").ToList();
 
         public static RecurringJobBase GetJob(string jobId) => GetAllJobs().Find(t => t.Id == jobId);
+
+        public static RecurringJobBase GetJob(Job job) => GetAllJobs().Find(t =>
+            t.Job?.Type?.FullName == job.Type.FullName &&
+            t.Job?.Method?.GenerateFullName() == job.Method.GenerateFullName() &&
+            t.Job?.ToString() == job.ToString() &&
+            t.Job?.Args?.SerializeObjectToJson() == job.Args.SerializeObjectToJson());
+
         public static List<RecurringJobBase> GetAllJobs()
         {
             var result = new List<RecurringJobBase>();
@@ -155,6 +163,10 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             {
                 var dto = MapPeriodicJob(connection, recurringJobBaseDto.Id, "Running", recurringJobBaseDto.Removed);
                 if (dto == null) return;
+
+
+                dto.Job = recurringJobBaseDto.Job;
+
                 result.Add(dto);
             });
 

@@ -19,8 +19,11 @@
         }
 
         // Add a new product
-        public void AddProduct(Product? product)
+        public async Task AddProduct(Product? product)
         {
+           await  Task.Delay(TimeSpan.FromSeconds(10));
+
+           
             _productList.Add(product);
         }
 
