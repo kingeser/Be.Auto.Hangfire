@@ -102,7 +102,7 @@
                     </select>
                 </div>
 
-          
+
 
                 <div class="form-group" v-show="job.JobType === 'MethodCall'">
                     <label for="Type">Type</label>
@@ -269,13 +269,13 @@
                                 <th>Actions</th>
                                 <th>Id</th>
                                 <th>Job Type</th>
-                                <th>Misfire Handling Mode</th>
-                                <th>Prevent Concurrent Execution</th>
                                 <th>Cron</th>
                                 <th>State</th>
+                                <th>Misfire Handling Mode</th>
                                 <th>Type / Host Name</th>
                                 <th>Method / Path</th>
                                 <th>Time Zone</th>
+                                <th>Prevent Concurrent Execution</th>
                                 <th>Created</th>
                                 <th>Last Execution</th>
                                 <th>Next Execution</th>
@@ -301,8 +301,6 @@
                                 </td>
                                 <td class="word-break ">{{ job.Id }}</td>
                                 <td :class="job.JobType">{{ job.JobType }}</td>
-                                <td :style="{color:stringToColor(job.MisfireHandlingMode)}" class="word-break ">{{ job.MisfireHandlingMode }}</td>
-                                <td :style="{color:stringToColor(job.PreventConcurrentExecution == true ? 'Yes' : 'No')}" class="word-break ">{{ job.PreventConcurrentExecution == true ? 'Yes' : 'No' }}</td>
                                 <td class="min-width min-width-125p ">
                                     <code class="cron-badge">
                                         {{ job.Cron }}
@@ -316,9 +314,12 @@
                                     </span>
                                 </td>
 
+                                <td :style="{color:stringToColor(job.MisfireHandlingMode)}" class="word-break ">{{ job.MisfireHandlingMode }}</td>
+
                                 <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.HostName : job.Type }}</td>
                                 <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.UrlPath : job.Method }}</td>
                                 <td :style="{color:stringToColor(job.TimeZoneId)}" class="word-break ">{{ job.TimeZoneId }}</td>
+                                <td :style="{color:stringToColor(job.PreventConcurrentExecution == true ? 'Yes' : 'No')}" class="word-break ">{{ job.PreventConcurrentExecution == true ? 'Yes' : 'No' }}</td>
                                 <td class="word-break ">{{ job.CreatedAt }}</td>
                                 <td class="word-break ">{{ job.LastExecution }}</td>
                                 <td class="word-break ">{{ job.NextExecution }}</td>
@@ -437,7 +438,7 @@
                 LastExecution: '',
                 CreatedAt: '',
                 Removed: false,
-                PreventConcurrentExecution:false,
+                PreventConcurrentExecution: false,
                 TimeZoneId: '',
                 Error: '',
                 MethodParameters: ''
@@ -1230,7 +1231,7 @@
                     LastExecution: '',
                     CreatedAt: '',
                     Removed: false,
-                    PreventConcurrentExecution:false,
+                    PreventConcurrentExecution: false,
                     TimeZoneId: '',
                     Error: '',
                     MethodParameters: ''
