@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Linq;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 using Hangfire.Common;
 using Hangfire.States;
 using System.Collections.Generic;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
-using System.Collections;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
 {

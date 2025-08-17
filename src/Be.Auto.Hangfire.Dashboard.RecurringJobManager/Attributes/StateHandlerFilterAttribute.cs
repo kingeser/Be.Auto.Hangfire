@@ -1,6 +1,4 @@
-﻿using Hangfire.Client;
-using Hangfire.Common;
-using Hangfire.Server;
+﻿using Hangfire.Common;
 using Hangfire.States;
 using Hangfire.Storage;
 

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 using Hangfire;
 using Hangfire.Common;

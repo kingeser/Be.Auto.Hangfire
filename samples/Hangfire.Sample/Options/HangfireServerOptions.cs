@@ -1,5 +1,3 @@
-using System;
-
 namespace Sample.Options;
 
 public class HangfireServerOptions

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -25,7 +24,7 @@ internal static class JsonExtensions
         try
         {
             result = JsonConvert.DeserializeObject<T>(@this);
-            return true;
+            return result != null;
         }
         catch
         {
@@ -39,7 +38,7 @@ internal static class JsonExtensions
     {
         try
         {
-            var jobs = JsonConvert.DeserializeObject<List<RecurringJobBase>>(@this,new RecurringJobBaseConverter());
+            var jobs = JsonConvert.DeserializeObject<List<RecurringJobBase>>(@this, new RecurringJobBaseConverter());
             result = true;
             return jobs;
         }
@@ -64,5 +63,5 @@ internal static class JsonExtensions
         }
     }
 
-   
+
 }

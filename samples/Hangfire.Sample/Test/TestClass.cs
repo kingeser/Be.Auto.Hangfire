@@ -1,5 +1,8 @@
 ﻿namespace Sample.Test
 {
+
+  
+
     public class TestClass
     {
         public string Name { get; set; }
@@ -17,10 +20,10 @@
         public async Task LongTest()
         {
 
-             await Task.Delay(TimeSpan.FromDays(1));
+            await Task.Delay(TimeSpan.FromDays(1));
         }
 
-        public  Task LongTestWithParams(params string[] args)
+        public Task LongTestWithParams(params string[] args)
         {
 
             return Task.Delay(TimeSpan.FromDays(1));

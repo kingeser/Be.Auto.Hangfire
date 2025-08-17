@@ -7,7 +7,6 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers;
 using Hangfire;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
-using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
 {

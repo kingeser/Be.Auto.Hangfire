@@ -1,5 +1,4 @@
 ﻿using System;
-using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 using Hangfire;
 using Hangfire.Common;

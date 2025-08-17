@@ -1,17 +1,9 @@
-using System;
-using System.Drawing;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Client;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 using Hangfire;
-using Hangfire.Dashboard;
 using Hangfire.SqlServer;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Sample.Options;
 using Sample.Test;
 
@@ -30,13 +22,17 @@ public static class Program
         builder.Services.AddScoped<IAppointmentSmsNotificationService>(t=> new AppointmentSmsNotificationService("https://domain.com"));
         builder.Services.AddScoped(t => new ProductService("https://domain.com"));
         builder.Services.AddScoped(t => new AppointmentSmsNotificationService("https://domain.com"));
-
-
+        builder.Services.AddScoped<IHangfireWebRequestJobApiClient>(t => new HangfireWebRequestJobApiClient(new Uri("https://localhost:44306/")));
+        builder.Services.AddScoped<HangfireApiClientTest>();
         ConfigureHangfire(builder, hangfireOptions);
 
         var app = builder.Build();
 
         ConfigureMiddleware(app, hangfireOptions);
+
+
+        
+
 
         app.Run();
 

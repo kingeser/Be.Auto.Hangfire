@@ -3,7 +3,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 
-internal class WebRequestJob
+public class WebRequestJob
 {
     public required string HostName { get; set; }
     public required string UrlPath { get; set; }
@@ -12,4 +12,5 @@ internal class WebRequestJob
     public required BodyParameterType BodyParameterType { get; set; }
     public required string BodyParameters { get; set; }
 }
+
 

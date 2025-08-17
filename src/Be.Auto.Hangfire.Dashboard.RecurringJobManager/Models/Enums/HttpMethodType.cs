@@ -4,7 +4,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums
     /// <summary>
     /// Represents the different HTTP methods that can be used in web requests.
     /// </summary>
-    internal enum HttpMethodType
+    public enum HttpMethodType
     {
         /// <summary>
         /// The GET method requests a representation of the specified resource. 

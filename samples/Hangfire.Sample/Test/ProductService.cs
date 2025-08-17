@@ -1,6 +1,5 @@
 ﻿namespace Sample.Test
 {
-  
     public class ProductService(string serviceUrl) :  IProductService
     {
         // This would be a mock in-memory list acting as a simple database for demonstration

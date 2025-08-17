@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
-        <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;net48;net8.0</TargetFrameworks>
     </PropertyGroup>
 
    <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
@@ -19,7 +19,7 @@
       <NeutralLanguage>en</NeutralLanguage>
       <PackageProjectUrl>https://github.com/kingeser/Be.Auto.Hangfire</PackageProjectUrl>
       <RepositoryUrl>https://github.com/kingeser/Be.Auto.Hangfire.git</RepositoryUrl>
-      <Version>1.2.0</Version>
+      <Version>1.2.1</Version>
       <PackOnBuild>true</PackOnBuild>
       <Description>A dashboard to manage Hangfire's recurring jobs.</Description>
       <LangVersion>12</LangVersion>

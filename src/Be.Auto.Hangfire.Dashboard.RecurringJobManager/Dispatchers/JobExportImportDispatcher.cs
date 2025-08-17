@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Hangfire.Annotations;
 using Hangfire.Dashboard;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using System.Net;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
-using Newtonsoft.Json;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 {

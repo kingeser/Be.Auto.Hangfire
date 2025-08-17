@@ -4,7 +4,7 @@
     /// Represents the different types of body parameters that can be used in HTTP requests.
     /// </summary>
     /// 
-    internal enum BodyParameterType
+    public enum BodyParameterType
     {
         None,
         /// <summary>

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,6 +10,8 @@ using System.Threading.Tasks;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+#pragma warning disable SYSLIB0014
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 {
@@ -90,13 +91,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
         private static async Task<Tuple<HttpWebResponse, string>> SendRequestWithBodyAsync(HttpWebRequest httpWebRequest, string body, string contentType)
         {
             httpWebRequest.ContentType = contentType;
-            using (var requestStream = new StreamWriter(await httpWebRequest.GetRequestStreamAsync()))
+            using var requestStream = new StreamWriter(await httpWebRequest.GetRequestStreamAsync());
+            if (!string.IsNullOrEmpty(body))
             {
-                if (!string.IsNullOrEmpty(body))
-                {
-                    await requestStream.WriteAsync(body);
-                }
+                await requestStream.WriteAsync(body);
+                await requestStream.FlushAsync();
             }
+
             return await GetResponseAsync(httpWebRequest);
         }
 
@@ -115,10 +116,9 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
                 formData.Append($"{WebUtility.UrlEncode(parameter.Name)}={WebUtility.UrlEncode(parameter.Value)}");
             }
 
-            using (var requestStream = new StreamWriter(await httpWebRequest.GetRequestStreamAsync()))
-            {
-                await requestStream.WriteAsync(formData.ToString());
-            }
+            using var requestStream = new StreamWriter(await httpWebRequest.GetRequestStreamAsync());
+            await requestStream.WriteAsync(formData.ToString());
+            await requestStream.FlushAsync();
 
             return await GetResponseAsync(httpWebRequest);
         }
@@ -131,7 +131,6 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             var parameters = bodyParameters.DeserializeObjectFromJson<List<HttpFormDataParameter>>();
 
             using var requestStream = await httpWebRequest.GetRequestStreamAsync();
-
             foreach (var param in parameters)
             {
                 var header = $"--{boundary}\r\nContent-Disposition: form-data; name=\"{param.Name}\"\r\n" +
@@ -163,7 +162,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
                 if (response.StatusCode != HttpStatusCode.OK) return new Tuple<HttpWebResponse, string>(response, string.Empty);
 
-                using var stream = response.GetResponseStream();
+                 using var stream = response.GetResponseStream();
 
                 if (stream == null) return new Tuple<HttpWebResponse, string>(response, string.Empty);
 

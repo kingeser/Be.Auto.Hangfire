@@ -9,10 +9,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models.Enums;
 using Hangfire;
-using Hangfire.Common;
 using Hangfire.Dashboard;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers;
@@ -70,7 +67,7 @@ internal sealed class WebRequestJobSaveDispatcher : IDashboardDispatcher
 
                                 case BodyParameterType.FormUrlEncoded:
                                     if (!webRequestJob.BodyParameters.TryDeserializeObjectFromJson<List<HttpFormUrlEncodedParameter>>(out var formUrlEncodedParameters))
-                                        errors.Add("The 'BodyParameters' field could not be deserialized into a valid list of 'HttpFormUrlEncodedParameter'.");
+                                        errors.Add("The 'BodyParameters' field could not be deserialized into a valid list of 'HttpFormUrlEncodedParameter'.\r\n Example : [{\"Name\":\"username\",\"Value\":\"burak.eser\"},{\"Name\":\"password\",\"Value\":\"123456\"},{\"Name\":\"rememberMe\",\"Value\":\"true\"}]\r\n");
                                     else
                                     {
                                         if (!formUrlEncodedParameters.Any())
@@ -82,7 +79,7 @@ internal sealed class WebRequestJobSaveDispatcher : IDashboardDispatcher
 
                                 case BodyParameterType.FormData:
                                     if (!webRequestJob.BodyParameters.TryDeserializeObjectFromJson<List<HttpFormDataParameter>>(out var formDataParameters))
-                                        errors.Add("The 'BodyParameters' field could not be deserialized into a valid list of 'HttpFormDataParameter'.");
+                                        errors.Add("The 'BodyParameters' field could not be deserialized into a valid list of 'HttpFormDataParameter'.\r\n Example : [{\"Name\":\"username\",\"Value\":\"burak.eser\",\"ContentType\":\"text/plain\"},{\"Name\":\"profilePicture\",\"Value\":\"BASE64_STRING_HERE\",\"ContentType\":\"image/png\"}]\r\n");
                                     else
                                     {
                                         if (!formDataParameters.Any())
@@ -133,8 +130,7 @@ internal sealed class WebRequestJobSaveDispatcher : IDashboardDispatcher
 
     private static async Task WriteDocumentAsync(DashboardContext context)
     {
-        await context.Response.WriteAsync(@"
-<!doctype html>
+        await context.Response.WriteAsync(@"<!doctype html>
 <html lang=""en"">
 <head>
   <meta charset=""utf-8"" />
@@ -192,161 +188,137 @@ internal sealed class WebRequestJobSaveDispatcher : IDashboardDispatcher
         <tr><th>Content-Type</th><td><code>application/json</code></td></tr>
         <tr><th>Authentication</th><td>As configured by your environment (e.g., API key / Bearer). Include details in <code>HeaderParameters</code> if needed.</td></tr>
       </table>
-      <p>Send a JSON body that matches the <code>WebRequestJob</code> model below. The request describes <em>another</em> HTTP call the system will perform.</p>
     </section>
 
     <section class=""card"">
       <h2>Model</h2>
       <pre><code>class WebRequestJob {
-  required string HostName;                 // e.g., ""https://api.example.com""
-  required string UrlPath;                  // e.g., ""/v1/customers""
-  required HttpMethodType HttpMethod;       // e.g., ""POST""
-  required List&lt;HttpHeaderParameter&gt; HeaderParameters;
-  required BodyParameterType BodyParameterType; // ""None"" | ""Json"" | ""Xml"" | ""FormUrlEncoded"" | ""FormData"" | ""PlainText""
-  required string BodyParameters;           // payload; semantics depend on BodyParameterType
+  string HostName;                 // e.g., ""https://api.example.com""
+  string UrlPath;                  // e.g., ""/v1/customers""
+  HttpMethodType HttpMethod;       // e.g., ""POST""
+  List&lt;HttpHeaderParameter&gt; HeaderParameters;
+  BodyParameterType BodyParameterType; // ""None"" | ""Json"" | ""Xml"" | ""FormUrlEncoded"" | ""FormData"" | ""PlainText""
+  string BodyParameters;           // JSON string. If FormUrlEncoded or FormData, serialize corresponding class array as JSON
 }
-
-enum HttpMethodType { GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, TRACE }
-
-enum BodyParameterType { None, Json, Xml, FormUrlEncoded, FormData, PlainText }
 
 class HttpHeaderParameter {
   string Name;
   string Value;
-}</code></pre>
+}
 
-      <h3>Field requirements</h3>
-      <table>
-        <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td><code>HostName</code></td><td>string</td><td>Yes</td><td>Target host (no scheme). Example: <code>https://api.example.com</code>.</td></tr>
-          <tr><td><code>UrlPath</code></td><td>string</td><td>Yes</td><td>Absolute path on the host. Example: <code>/v1/orders</code>.</td></tr>
-          <tr><td><code>HttpMethod</code></td><td><code>HttpMethodType</code></td><td>Yes</td><td>HTTP verb to use when executing the outbound request.</td></tr>
-          <tr><td><code>HeaderParameters</code></td><td>array of <code>HttpHeaderParameter</code></td><td>Yes</td><td>Headers to include (e.g., <code>Authorization</code>, <code>Content-Type</code>).</td></tr>
-          <tr><td><code>BodyParameterType</code></td><td><code>BodyParameterType</code></td><td>Yes</td><td>How to interpret <code>BodyParameters</code>.</td></tr>
-          <tr><td><code>BodyParameters</code></td><td>string</td><td>Yes</td><td>Payload as a string (JSON/XML/form-encoded/plain text). Use empty string for <code>None</code>.</td></tr>
-        </tbody>
-      </table>
-    </section>
+class HttpFormUrlEncodedParameter {
+  string Name;
+  string Value;
+}
 
-    <section class=""card"">
-      <h2>JSON Schema (for validation)</h2>
-      <pre><code>{
-  ""$schema"": ""https://json-schema.org/draft/2020-12/schema"",
-  ""type"": ""object"",
-  ""required"": [
-    ""HostName"",""UrlPath"",""HttpMethod"",
-    ""HeaderParameters"",""BodyParameterType"",""BodyParameters""
-  ],
-  ""properties"": {
-    ""HostName"": { ""type"": ""string"", ""minLength"": 1 },
-    ""UrlPath"": { ""type"": ""string"", ""pattern"": ""^/.*"" },
-    ""HttpMethod"": { ""type"": ""string"", ""enum"": [""GET"",""POST"",""PUT"",""DELETE"",""PATCH"",""HEAD"",""OPTIONS"",""TRACE""] },
-    ""HeaderParameters"": {
-      ""type"": ""array"",
-      ""items"": {
-        ""type"": ""object"",
-        ""required"": [""Name"",""Value""],
-        ""properties"": {
-          ""Name"": { ""type"": ""string"", ""minLength"": 1 },
-          ""Value"": { ""type"": ""string"" }
-        },
-        ""additionalProperties"": false
-      }
-    },
-    ""BodyParameterType"": { ""type"": ""string"", ""enum"": [""None"",""Json"",""Xml"",""FormUrlEncoded"",""FormData"",""PlainText""] },
-    ""BodyParameters"": { ""type"": ""string"" }
-  },
-  ""additionalProperties"": false
-}</code></pre>
+class HttpFormDataParameter {
+  string Name;
+  string Value;        // Base64 string if file, plain value if normal field
+  string ContentType;  // e.g., ""text/plain"", ""image/png"", ""application/pdf""
+}
+
+enum HttpMethodType { GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, TRACE }
+enum BodyParameterType { None, Json, Xml, FormUrlEncoded, FormData, PlainText }</code></pre>
     </section>
 
     <section class=""card"">
       <h2>Request Examples</h2>
-      <div class=""grid"">
-        <div>
+    
           <h3>cURL</h3>
-          <pre><code>curl -X POST https://your-api-host.com/api/web-request-job   -H ""Content-Type: application/json""   -d '{
+          <pre><code>curl -X POST https://your-api-host.com/api/web-request-job \
+  -H ""Content-Type: application/json"" \
+  -d '{
     ""HostName"": ""https://api.example.com"",
     ""UrlPath"": ""/v1/customers"",
     ""HttpMethod"": ""POST"",
     ""HeaderParameters"": [
-      { ""Name"": ""Authorization"", ""Value"": ""Bearer &lt;token&gt;"" },
+      { ""Name"": ""Authorization"", ""Value"": ""Bearer <token>"" },
       { ""Name"": ""Content-Type"", ""Value"": ""application/json"" }
     ],
     ""BodyParameterType"": ""Json"",
-    ""BodyParameters"": ""{\""name\"":\""Jane Doe\"",\""email\"":\""jane@example.com\""}""
+    ""BodyParameters"": {""name"":""Jane Doe"",""email"":""jane@example.com""}
+  }'
+
+# FormUrlEncoded example (BodyParameters is JSON string of array)
+curl -X POST https://your-api-host.com/api/web-request-job \
+  -H ""Content-Type: application/json"" \
+  -d '{
+    ""HostName"": ""https://api.example.com"",
+    ""UrlPath"": ""/v1/login"",
+    ""HttpMethod"": ""POST"",
+    ""HeaderParameters"": [
+      { ""Name"": ""Content-Type"", ""Value"": ""application/x-www-form-urlencoded"" }
+    ],
+    ""BodyParameterType"": ""FormUrlEncoded"",
+    ""BodyParameters"": [{""Name"":""username"",""Value"":""jane""},{""Name"":""password"",""Value"":""123456""}]
+  }'
+
+# FormData example (BodyParameters is JSON string of array)
+curl -X POST https://your-api-host.com/api/web-request-job \
+  -H ""Content-Type: application/json"" \
+  -d '{
+    ""HostName"": ""https://api.example.com"",
+    ""UrlPath"": ""/v1/upload"",
+    ""HttpMethod"": ""POST"",
+    ""HeaderParameters"": [
+      { ""Name"": ""Authorization"", ""Value"": ""Bearer <token>"" }
+    ],
+    ""BodyParameterType"": ""FormData"",
+    ""BodyParameters"": [{""Name"":""username"",""Value"":""burak.eser"",""ContentType"":""text/plain""},{""Name"":""profilePicture"",""Value"":""BASE64_STRING_HERE"",""ContentType"":""image/png""}]
   }'</code></pre>
-        </div>
-<br/>
-        <div>
+     
           <h3>.NET (HttpClient)</h3>
-          <pre><code>var job = new {
+          <pre><code>// Json example
+var jobJson = new {
   HostName = ""https://api.example.com"",
   UrlPath = ""/v1/customers"",
   HttpMethod = ""POST"",
   HeaderParameters = new [] {
-    new { Name = ""Authorization"", Value = ""Bearer &lt;token&gt;"" },
+    new { Name = ""Authorization"", Value = ""Bearer <token>"" },
     new { Name = ""Content-Type"", Value = ""application/json"" }
   },
   BodyParameterType = ""Json"",
-  BodyParameters = ""{\""name\"":\""Jane Doe\"",\""email\"":\""jane@example.com\""}""
+  BodyParameters = {""name"":""Jane Doe"",""email"":""jane@example.com""}
 };
+await http.PostAsJsonAsync(""/api/web-request-job"", jobJson);
 
-using var http = new HttpClient { BaseAddress = new Uri(""https://your-api-host.com"") };
-var res = await http.PostAsJsonAsync(""/api/web-request-job"", job);
-res.EnsureSuccessStatusCode();</code></pre>
-        </div>
-      </div>
+// FormUrlEncoded example
+var jobFormUrl = new {
+  HostName = ""https://api.example.com"",
+  UrlPath = ""/v1/login"",
+  HttpMethod = ""POST"",
+  HeaderParameters = new [] {
+    new { Name = ""Content-Type"", Value = ""application/x-www-form-urlencoded"" }
+  },
+  BodyParameterType = ""FormUrlEncoded"",
+  BodyParameters = [{""Name"":""username"",""Value"":""jane""},{""Name"":""password"",""Value"":""123456""}]
+};
+await http.PostAsJsonAsync(""/api/web-request-job"", jobFormUrl);
 
-      <h3>Body payloads by type</h3>
-      <table>
-        <thead><tr><th>BodyParameterType</th><th>BodyParameters (string)</th><th>Notes</th></tr></thead>
-        <tbody>
-          <tr>
-            <td><code>None</code></td>
-            <td><code>""""</code></td>
-            <td>No body will be sent.</td>
-          </tr>
-          <tr>
-            <td><code>Json</code></td>
-            <td><code>{""name"":""Jane""}</code></td>
-            <td>Ensure header includes <code>Content-Type: application/json</code>.</td>
-          </tr>
-          <tr>
-            <td><code>Xml</code></td>
-            <td><code>&lt;User&gt;&lt;Name&gt;Jane&lt;/Name&gt;&lt;/User&gt;</code></td>
-            <td>Use <code>Content-Type: application/xml</code>.</td>
-          </tr>
-          <tr>
-            <td><code>FormUrlEncoded</code></td>
-            <td><code>name=Jane&amp;email=jane%40example.com</code></td>
-            <td>Use <code>Content-Type: application/x-www-form-urlencoded</code>.</td>
-          </tr>
-          <tr>
-            <td><code>FormData</code></td>
-            <td><code>----boundary... (multipart body as text)</code></td>
-            <td>Provide the full multipart body as a string; include correct <code>Content-Type</code> with boundary.</td>
-          </tr>
-          <tr>
-            <td><code>PlainText</code></td>
-            <td><code>Any raw text...</code></td>
-            <td>Use <code>Content-Type: text/plain</code>.</td>
-          </tr>
-        </tbody>
-      </table>
+// FormData example
+var jobFormData = new {
+  HostName = ""https://api.example.com"",
+  UrlPath = ""/v1/upload"",
+  HttpMethod = ""POST"",
+  HeaderParameters = new [] {
+    new { Name = ""Authorization"", Value = ""Bearer <token>"" }
+  },
+  BodyParameterType = ""FormData"",
+  BodyParameters = [{""Name"":""username"",""Value"":""burak.eser"",""ContentType"":""text/plain""},{""Name"":""profilePicture"",""Value"":""BASE64_STRING_HERE"",""ContentType"":""image/png""}]
+};
+await http.PostAsJsonAsync(""/api/web-request-job"", jobFormData);</code></pre>
+    
     </section>
 
     <section class=""card"">
       <h2>Response</h2>
-      <p>Typical responses from <code>/api/web-request-job</code>:</p>
       <table>
         <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
         <tbody>
           <tr><td class=""status ok"">202 Accepted</td><td>Job accepted for processing.</td></tr>
           <tr><td class=""status ok"">200 OK</td><td>Job created and executed immediately (if synchronous).</td></tr>
           <tr><td class=""status warn"">400 Bad Request</td><td>Validation failed (see message for missing or invalid fields).</td></tr>
-          <tr><td class=""status warn"">415 Unsupported Media Type</td><td><code>BodyParameterType</code> and <code>Content-Type</code> mismatch.</td></tr>
+          <tr><td class=""status warn"">415 Unsupported Media Type</td><td>BodyParameterType and Content-Type mismatch.</td></tr>
           <tr><td class=""status bad"">500 Internal Server Error</td><td>Unexpected error.</td></tr>
         </tbody>
       </table>
@@ -355,12 +327,12 @@ res.EnsureSuccessStatusCode();</code></pre>
     <section class=""card"">
       <h2>Validation Rules</h2>
       <ul>
-        <li><strong>HostName</strong> must be present and not contain protocol (no <code>http://</code> or <code>https://</code>).</li>
-        <li><strong>UrlPath</strong> must start with <kbd>/</kbd>.</li>
-        <li><strong>HttpMethod</strong> must be one of: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, TRACE.</li>
-        <li><strong>HeaderParameters</strong> each require non-empty <code>Name</code>. Duplicate names will be sent in order provided.</li>
-        <li><strong>BodyParameterType</strong> dictates how <strong>BodyParameters</strong> is forwarded and which <code>Content-Type</code> is expected.</li>
-        <li>If <strong>BodyParameterType</strong> is <code>None</code>, <strong>BodyParameters</strong> should be an empty string.</li>
+        <li>HostName must include protocol (http:// or https://).</li>
+        <li>UrlPath must start with <kbd>/</kbd>.</li>
+        <li>HttpMethod must be one of: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, TRACE.</li>
+        <li>HeaderParameters each require non-empty Name. Duplicate names will be sent in order provided.</li>
+        <li>BodyParameterType dictates how BodyParameters is interpreted.</li>
+        <li>If BodyParameterType is None, BodyParameters should be an empty string.</li>
       </ul>
     </section>
 
@@ -375,18 +347,128 @@ Content-Type: application/json
   ""UrlPath"": ""/v1/orders/123"",
   ""HttpMethod"": ""GET"",
   ""HeaderParameters"": [
-    { ""Name"": ""Authorization"", ""Value"": ""Bearer &lt;token&gt;"" }
+    { ""Name"": ""Authorization"", ""Value"": ""Bearer <token>"" }
   ],
   ""BodyParameterType"": ""None"",
   ""BodyParameters"": """"
 }</code></pre>
     </section>
 
+<section class=""card"">
+  <h2>Client Usage</h2>
+  <p>To simplify sending web request jobs, you can use the <code>HangfireWebRequestJobApiClient</code>. 
+     It supports all body types and automatically serializes the data as required.</p>
+
+  <h3>Instantiation</h3>
+  <pre><code>var client = new HangfireWebRequestJobApiClient(new Uri(""https://your-api-host.com""));
+client.Headers.Add(new HttpHeaderParameter { Name = ""Authorization"", Value = ""Bearer &lt;token&gt;"" });</code></pre>
+
+  <h3>JSON Body Example</h3>
+  <pre><code>var jobJson = new WebRequestJobBodyJson
+{
+    Uri = new Uri(""https://api.example.com/v1/customers""),
+    Method = HttpMethodType.POST,
+    HeaderParameters = new []
+    {
+        new HttpHeaderParameter { Name = ""Content-Type"", Value = ""application/json"" }
+    },
+    BodyParameters = new { name = ""Jane Doe"", email = ""jane@example.com"" }
+};
+
+var response = await client.AddAsync(jobJson);
+Console.WriteLine(response.StatusCode);</code></pre>
+
+  <h3>XML Body Example</h3>
+  <pre><code>var xmlDoc = new XmlDocument();
+xmlDoc.LoadXml(""&lt;Customer&gt;&lt;Name&gt;Jane&lt;/Name&gt;&lt;Email&gt;jane@example.com&lt;/Email&gt;&lt;/Customer&gt;"");
+
+var jobXml = new WebRequestJobBodyXml
+{
+    Uri = new Uri(""https://api.example.com/v1/customers""),
+    Method = HttpMethodType.POST,
+    HeaderParameters = new []
+    {
+        new HttpHeaderParameter { Name = ""Content-Type"", Value = ""application/xml"" }
+    },
+    BodyParameters = xmlDoc
+};
+
+var response = await client.AddAsync(jobXml);</code></pre>
+
+  <h3>FormUrlEncoded Example</h3>
+  <pre><code>var jobFormUrl = new WebRequestJobBodyFormUrlEncoded
+{
+    Uri = new Uri(""https://api.example.com/v1/login""),
+    Method = HttpMethodType.POST,
+    HeaderParameters = new []
+    {
+        new HttpHeaderParameter { Name = ""Content-Type"", Value = ""application/x-www-form-urlencoded"" }
+    },
+    BodyParameters = new[]
+    {
+        new HttpFormUrlEncodedParameter { Name = ""username"", Value = ""jane"" },
+        new HttpFormUrlEncodedParameter { Name = ""password"", Value = ""123456"" }
+    }
+};
+
+var response = await client.AddAsync(jobFormUrl);</code></pre>
+
+  <h3>FormData Example</h3>
+  <pre><code>var jobFormData = new WebRequestJobBodyFormData
+{
+    Uri = new Uri(""https://api.example.com/v1/upload""),
+    Method = HttpMethodType.POST,
+    HeaderParameters = new []
+    {
+        new HttpHeaderParameter { Name = ""Authorization"", Value = ""Bearer &lt;token&gt;"" }
+    },
+    BodyParameters = new[]
+    {
+        new HttpFormDataParameter { Name = ""username"", Value = ""burak.eser"", ContentType = ""text/plain"" },
+        new HttpFormDataParameter { Name = ""profilePicture"", Value = ""BASE64_STRING_HERE"", ContentType = ""image/png"" }
+    }
+};
+
+var response = await client.AddAsync(jobFormData);</code></pre>
+
+  <h3>PlainText Body Example</h3>
+  <pre><code>var jobText = new WebRequestJobBodyPlainText
+{
+    Uri = new Uri(""https://api.example.com/v1/notes""),
+    Method = HttpMethodType.POST,
+    HeaderParameters = new []
+    {
+        new HttpHeaderParameter { Name = ""Content-Type"", Value = ""text/plain"" }
+    },
+    BodyParameters = ""This is a plain text note.""
+};
+
+var response = await client.AddAsync(jobText);</code></pre>
+
+  <h3>None Body Example</h3>
+  <pre><code>var jobNone = new WebRequestJobBodyNone
+{
+    Uri = new Uri(""https://api.example.com/v1/ping""),
+    Method = HttpMethodType.GET,
+    HeaderParameters = new []
+    {
+        new HttpHeaderParameter { Name = ""Authorization"", Value = ""Bearer &lt;token&gt;"" }
+    }
+};
+
+var response = await client.AddAsync(jobNone);</code></pre>
+
+  <p>All responses are returned as <code>WebRequestJobResponse</code>, containing <code>StatusCode</code>, <code>ExceptionCode</code>, and <code>ExceptionMessage</code>.</p>
+</section>
+
+
     <footer class=""card"">
       <p>© Web Request Job API – README</p>
     </footer>
   </main>
 </body>
-</html>");
+</html>
+
+");
     }
 }
