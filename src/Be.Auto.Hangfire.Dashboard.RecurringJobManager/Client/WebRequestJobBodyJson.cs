@@ -11,6 +11,6 @@ public class WebRequestJobBodyJson
     public required Uri Uri { get; set; }
     public required HttpMethodType Method { get; set; }
     public List<HttpHeaderParameter> HeaderParameters { get; set; }
-    public required JObject BodyParameters { get; set; }
+    public required object BodyParameters { get; set; }
     public BodyParameterType BodyParameterType => BodyParameterType.Json;
 }

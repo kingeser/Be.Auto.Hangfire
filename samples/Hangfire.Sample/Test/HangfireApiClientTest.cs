@@ -11,12 +11,16 @@ public class HangfireApiClientTest(IHangfireWebRequestJobApiClient apiClient)
     public async Task TestAsync()
     {
 
-        await apiClient.AddAsync(new WebRequestJobBodyJson()
+        await apiClient.AddAsync(new WebRequestJobBodyXml()
         {
-            BodyParameters = JObject.Parse("{}"),
+            BodyParameters = new Product(1)
+            {
+             
+            },
             Method = HttpMethodType.POST,
             Uri = new Uri("htt543ps://www.google.543com/search=543burak eser"),
             HeaderParameters =new List<HttpHeaderParameter>(),
+            
             
         });
 

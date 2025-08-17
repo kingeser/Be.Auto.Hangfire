@@ -9,6 +9,10 @@ internal static class JsonExtensions
 {
     public static string SerializeObjectToJson(this object @this)
     {
+        if (@this == null) return string.Empty;
+
+        if (@this is string) return string.Empty;
+
         return JsonConvert.SerializeObject(@this, new JsonSerializerSettings()
         {
             Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() },

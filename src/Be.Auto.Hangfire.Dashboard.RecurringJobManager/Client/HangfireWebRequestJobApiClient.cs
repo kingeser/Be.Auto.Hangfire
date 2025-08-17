@@ -22,7 +22,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Client
             {
                 UrlPath = job.Uri?.PathAndQuery,
                 HostName = $"{job.Uri?.Scheme}://{job.Uri?.Host}{(job.Uri?.IsDefaultPort == true ? "" : $":{job.Uri?.Port}")}",
-                BodyParameters = job.BodyParameters?.ToString(Formatting.None),
+                BodyParameters = job.BodyParameters?.SerializeObjectToJson(),
                 BodyParameterType = job.BodyParameterType,
                 HeaderParameters = job.HeaderParameters ?? [],
                 HttpMethod = job.Method,
@@ -37,11 +37,11 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Client
 
                 UrlPath = job.Uri?.PathAndQuery,
                 HostName = $"{job.Uri?.Scheme}://{job.Uri?.Host}{(job.Uri?.IsDefaultPort == true ? "" : $":{job.Uri?.Port}")}",
-                BodyParameters = job.BodyParameters?.OuterXml,
+                BodyParameters = job.BodyParameters?.SerializeObjectToXml(),
                 BodyParameterType = job.BodyParameterType,
                 HeaderParameters = job.HeaderParameters,
                 HttpMethod = job.Method,
-
+                
             });
         }
 
