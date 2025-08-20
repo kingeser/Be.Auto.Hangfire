@@ -62,6 +62,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
             foreach (var job in allJobs)
             {
+                if(string.IsNullOrEmpty(job.LastJobId)) continue;
+
                 var jobDetails = monitor.JobDetails(job.LastJobId);
 
                 var cancelledState = jobDetails?.History?.Where(state => state.StateName == "Cancelled")?.ToList() ?? new List<StateHistoryDto>();
