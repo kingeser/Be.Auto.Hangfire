@@ -81,7 +81,7 @@
                 </div>
                 <div class="form-group">
                     <label for="TimeZoneId">Time Zone</label>
-                    <select id="TimeZoneId" name="TimeZoneId" class="form-control" v-model="job.TimeZoneId">
+                    <select id="TimeZoneId" name="TimeZoneId" class="form-control" v-model="job.TimeZoneId" data-live-search="true">
                         <option value="">Please select</option>
                         <option v-for="(item, index) in timeZones" :key="index" :value="item.Item1">{{ item.Item2 }}</option>
                     </select>
@@ -95,14 +95,17 @@
 
 
                 <div class="form-group">
-                    <label for="PreventConcurrentExecution">Prevent Concurrent Execution</label>
-                    <select id="PreventConcurrentExecution" name="PreventConcurrentExecution" class="form-control" v-model="job.PreventConcurrentExecution">
+                    <label for="LimitConcurrency">Limit Concurrency Execution</label>
+                    <select id="LimitConcurrency" name="LimitConcurrency" class="form-control" v-model="job.LimitConcurrency">
                         <option value="true">Yes</option>
                         <option value="false">No</option>
                     </select>
                 </div>
 
-
+                <div class="form-group" v-show="job.LimitConcurrency === 'true' || job.LimitConcurrency === true">
+                    <label for="MaxConcurrentTasks">Max Concurrent Tasks</label>
+                    <input type="number" maxlength="3" min="1" max="999" class="form-control" v-model="job.MaxConcurrentTasks" id="MaxConcurrentTasks" name="MaxConcurrentTasks" placeholder="Example: 3">
+                </div>
 
                 <div class="form-group" v-show="job.JobType === 'MethodCall'">
                     <label for="Type">Type</label>
@@ -275,7 +278,8 @@
                                 <th>Type / Host Name</th>
                                 <th>Method / Path</th>
                                 <th>Time Zone</th>
-                                <th>Prevent Concurrent Execution</th>
+                                <th>Limit Concurrency</th>
+                                <th>Max Concurrent Tasks</th>
                                 <th>Created</th>
                                 <th>Last Execution</th>
                                 <th>Next Execution</th>
@@ -319,7 +323,8 @@
                                 <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.HostName : job.Type }}</td>
                                 <td class="word-break ">{{ job.JobType === 'WebRequest' ? job.UrlPath : job.Method }}</td>
                                 <td :style="{color:stringToColor(job.TimeZoneId)}" class="word-break ">{{ job.TimeZoneId }}</td>
-                                <td :style="{color:stringToColor(job.PreventConcurrentExecution == true ? 'Yes' : 'No')}" class="word-break ">{{ job.PreventConcurrentExecution == true ? 'Yes' : 'No' }}</td>
+                                <td :style="{color:stringToColor(job.LimitConcurrency == true ? 'Yes' : 'No')}" class="word-break ">{{ job.LimitConcurrency == true ? 'Yes' : 'No' }}</td>
+                                <td class="word-break ">{{ job.MaxConcurrentTasks }}</td>
                                 <td class="word-break ">{{ job.CreatedAt }}</td>
                                 <td class="word-break ">{{ job.LastExecution }}</td>
                                 <td class="word-break ">{{ job.NextExecution }}</td>
@@ -414,7 +419,8 @@
             const headerParametersJsonEditor = ref(null);
             const bodyParametersJsonEditor = ref(null);
             const methodParametersIsExist = ref(false);
-            const preventConcurrentExecution = ref(false);
+            const LimitConcurrency = ref(false);
+            const MaxConcurrentTasks = ref(1);
             const isInProgress = ref(false);
             const searchTerm = ref('');
             const job = ref({
@@ -438,7 +444,8 @@
                 LastExecution: '',
                 CreatedAt: '',
                 Removed: false,
-                PreventConcurrentExecution: false,
+                LimitConcurrency: false,
+                MaxConcurrentTasks: 1,
                 TimeZoneId: '',
                 Error: '',
                 MethodParameters: ''
@@ -1231,7 +1238,8 @@
                     LastExecution: '',
                     CreatedAt: '',
                     Removed: false,
-                    PreventConcurrentExecution: false,
+                    LimitConcurrency: false,
+                    MaxConcurrentTasks: 1,
                     TimeZoneId: '',
                     Error: '',
                     MethodParameters: ''
@@ -1267,6 +1275,11 @@
 
                 if (!job.value.Cron) {
                     errors.value.push("Cron expression is missing. Please specify the schedule for the job.");
+                }
+
+                if (job.value.LimitConcurrency && job.value.MaxConcurrentTasks <= 0) {
+
+                    errors.value.push("Max Concurrent Tasks must be at least 1.");
                 }
 
                 switch (job.value.JobType) {

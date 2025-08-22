@@ -8,7 +8,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
 {
     internal abstract partial class RecurringJobBase
     {
-        public  string Guid { get; set; }
+        public string Guid { get; set; }
         public string Id { get; set; }
         public string Cron { get; set; }
         public abstract JobType JobType { get; }
@@ -19,10 +19,11 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Models
         public string LastJobState { get; set; }
         public string LastExecution { get; set; }
         public string CreatedAt { get; set; }
-        public bool PreventConcurrentExecution { get; set; }
+        public bool LimitConcurrency { get; set; } = true;
+        public int MaxConcurrentTasks { get; set; } = 1;
         public string TimeZoneId { get; set; }
-       public string Error { get; set; }
-        }
+        public string Error { get; set; }
+    }
 
 
     internal abstract partial class RecurringJobBase

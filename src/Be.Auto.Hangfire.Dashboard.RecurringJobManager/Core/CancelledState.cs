@@ -5,7 +5,7 @@ using Hangfire.States;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 
-internal class CancelledState(DateTime createdAt) : IState
+internal class CancelledState(DateTime createdAt,int maxCount) : IState
 {
     public Dictionary<string, string> SerializeData()
     {
@@ -18,7 +18,7 @@ internal class CancelledState(DateTime createdAt) : IState
         return result;
     }
     public string Name => "Cancelled";
-    public string Reason => "It is not allowed to perform multiple same tasks.";
+    public string Reason => $"It is not allowed to perform more than {maxCount} of the same task concurrently.";
     public bool IsFinal => true;
     public bool IgnoreJobLoadException => true;
 }

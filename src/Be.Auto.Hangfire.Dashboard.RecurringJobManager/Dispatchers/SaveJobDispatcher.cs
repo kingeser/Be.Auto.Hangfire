@@ -70,8 +70,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     LastJobId = string.Empty,
                     Guid = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Guid))).First(),
                     Job = null,
-                    PreventConcurrentExecution = Convert.ToBoolean((await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.PreventConcurrentExecution))).First()),
-
+                    LimitConcurrency = Convert.ToBoolean((await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.LimitConcurrency))).First()),
+                    MaxConcurrentTasks =  Convert.ToInt32((await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.MaxConcurrentTasks))).First()),
                 },
                 JobType.WebRequest => new RecurringJobWebRequest()
                 {
@@ -101,8 +101,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     LastJobId = string.Empty,
                     Guid = (await context.Request.GetFormValuesAsync(nameof(RecurringJobBase.Guid))).First(),
                     Job = null,
-                    PreventConcurrentExecution = Convert.ToBoolean((await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.PreventConcurrentExecution))).First()),
-
+                    LimitConcurrency = Convert.ToBoolean((await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.LimitConcurrency))).First()),
+                    MaxConcurrentTasks = Convert.ToInt32((await context.Request.GetFormValuesAsync(nameof(RecurringJobMethodCall.MaxConcurrentTasks))).First()),
                 },
                 _ => default
             };

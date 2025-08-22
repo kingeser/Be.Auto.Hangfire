@@ -34,6 +34,12 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             if (!CronExpression.TryParse(job.Cron, CronFormat.IncludeSeconds, out _) && !CronExpression.TryParse(job.Cron, CronFormat.Standard, out _))
                 throw new RecurringJobException($"Job registration failed: The provided Cron expression '{job.Cron}' is invalid. Please provide a valid Cron expression.");
 
+
+            if(job.LimitConcurrency && job.MaxConcurrentTasks<=0)
+                throw new RecurringJobException($"Job registration failed: Max Concurrent Tasks must be at least 1.");
+
+
+
             switch (job.JobType)
             {
                 case JobType.WebRequest:

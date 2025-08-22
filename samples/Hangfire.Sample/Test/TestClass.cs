@@ -20,13 +20,13 @@
         public async Task LongTest()
         {
 
-            await Task.Delay(TimeSpan.FromDays(1));
+            await Task.Delay(TimeSpan.FromSeconds(10));
         }
 
         public Task LongTestWithParams(params string[] args)
         {
 
-            return Task.Delay(TimeSpan.FromDays(1));
+            return Task.Delay(TimeSpan.FromSeconds(10));
         }
     }
 }

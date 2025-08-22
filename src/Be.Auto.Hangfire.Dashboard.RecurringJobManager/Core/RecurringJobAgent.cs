@@ -62,7 +62,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
             foreach (var job in allJobs)
             {
-                if(string.IsNullOrEmpty(job.LastJobId)) continue;
+                if (string.IsNullOrEmpty(job.LastJobId)) continue;
 
                 var jobDetails = monitor.JobDetails(job.LastJobId);
 
@@ -111,7 +111,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
                 new(nameof(job.JobType), job.JobType.ToString()),
                 new(nameof(job.MisfireHandlingMode), job.MisfireHandlingMode.ToString()),
                 new(nameof(job.Guid), job.Guid),
-                new(nameof(job.PreventConcurrentExecution),job.PreventConcurrentExecution.ToString())
+                new(nameof(job.LimitConcurrency),job.LimitConcurrency.ToString()),
+                new(nameof(job.MaxConcurrentTasks),job.MaxConcurrentTasks.ToString())
             };
 
             switch (job.JobType)
@@ -169,6 +170,9 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
 
                 dto.Job = recurringJobBaseDto.Job;
 
+                if (dto.MaxConcurrentTasks <= 0)
+                    dto.MaxConcurrentTasks = 1;
+
                 result.Add(dto);
             });
 
@@ -178,6 +182,10 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core
             {
                 var dto = MapPeriodicJob(connection, jobId, "Stopped", false);
                 if (dto == null) return;
+
+                if (dto.MaxConcurrentTasks <= 0)
+                    dto.MaxConcurrentTasks = 1;
+
                 result.Add(dto);
             });
 

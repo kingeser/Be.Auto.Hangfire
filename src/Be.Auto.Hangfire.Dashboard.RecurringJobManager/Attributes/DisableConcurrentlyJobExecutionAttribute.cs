@@ -3,6 +3,7 @@ using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions;
 using Hangfire.Common;
 using Hangfire.States;
 using System.Collections.Generic;
+using System.Linq;
 using Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core;
 
 namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
@@ -20,22 +21,26 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Attributes
 
             var jobData = RecurringJobAgent.GetJob(context.BackgroundJob.Job);
 
-            if (jobData is { PreventConcurrentExecution: false }) return;
+            if (jobData is { LimitConcurrency: false }) return;
 
             var type = context.BackgroundJob.Job.Type.FullName;
             var methodName = context.BackgroundJob.Job.Method.GenerateFullName();
             var recurringJobId = context.BackgroundJob.Job.ToString();
             var args = context.BackgroundJob.Job.Args;
-            
-            if (processingJobs.Exists(t =>
-                    t.Value.Job.Method.GenerateFullName().Equals(methodName, StringComparison.InvariantCultureIgnoreCase)
-                    && $"{t.Value.Job.Type.FullName}".Equals(type, StringComparison.InvariantCultureIgnoreCase)
-                    && t.Value.Job.ToString() == recurringJobId
-                    && AreArgsEqual(t.Value.Job.Args, args)
-                    && !context.CandidateState.IsFinal))
+            var inProgressCount = processingJobs.Count(t =>
+                t.Value.Job.Method.GenerateFullName().Equals(methodName, StringComparison.InvariantCultureIgnoreCase)
+                && $"{t.Value.Job.Type.FullName}".Equals(type, StringComparison.InvariantCultureIgnoreCase)
+                && t.Value.Job.ToString() == recurringJobId
+                && AreArgsEqual(t.Value.Job.Args, args)
+                && !context.CandidateState.IsFinal);
+
+            var maxConcurrentTasks = jobData?.MaxConcurrentTasks ?? 1;
+
+            if (inProgressCount >= maxConcurrentTasks)
             {
 
-                context.CandidateState = new CancelledState(context.BackgroundJob.CreatedAt);
+
+                context.CandidateState = new CancelledState(context.BackgroundJob.CreatedAt, maxConcurrentTasks);
             }
 
         }
