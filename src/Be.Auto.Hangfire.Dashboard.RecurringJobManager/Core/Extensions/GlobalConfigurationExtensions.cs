@@ -99,7 +99,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Core.Extensions
             NavigationMenu.Items.Add(page => new MenuItem(JobExtensionPage.Title, page.Url.To("/job-manager"))
             {
                 Active = page.RequestPath.StartsWith(JobExtensionPage.PageRoute),
-                Metric = DashboardMetrics.RecurringJobCount
+                Metric = TagDashboardMetrics.JobsCountMetric
             });
 
 

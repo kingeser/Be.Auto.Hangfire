@@ -796,7 +796,22 @@
                 if (!e.target.checked) {
                     selectedJobIds.value = [];
                 } else {
-                    selectedJobIds.value = jobs.value.map(job => job.Id);
+
+
+                    if (searchTerm.value) {
+
+                        const search = searchTerm.value.toLowerCase();
+
+                        selectedJobIds.value = jobs.value.filter(item => {
+                            return Object.keys(item).some(key =>
+                                String(item[key]).toLowerCase().includes(search)
+                            );
+                        }).map(job => job.Id);
+                    }
+                    else {
+                        selectedJobIds.value = jobs.value.map(job => job.Id);
+                    }
+                  
                 }
 
 
