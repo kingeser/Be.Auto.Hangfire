@@ -14,13 +14,13 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
     {
         public async Task Dispatch([NotNull] DashboardContext context)
         {
+
+
             var response = new Response { Status = true };
 
             try
             {
-
-                var selectedJobs = context.Request.GetQuery("SelectedJobs");
-
+                var selectedJobs = (await context.Request.GetFormValuesAsync("SelectedJobs"))?.FirstOrDefault();
 
                 if (string.IsNullOrWhiteSpace(selectedJobs))
                 {
@@ -31,7 +31,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     return;
                 }
 
-                var action = context.Request.GetQuery("Action");
+                var action = (await context.Request.GetFormValuesAsync("Action")).FirstOrDefault();
 
 
                 if (string.IsNullOrWhiteSpace(action))
@@ -42,8 +42,8 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     return;
                 }
 
-              
-               var selectedJobsArray = selectedJobs.Split('|').Where(t => !string.IsNullOrEmpty(t)).ToArray();
+
+                var selectedJobsArray = selectedJobs.Split('|').Where(t => !string.IsNullOrEmpty(t)).ToArray();
 
                 var notValidJobIds = selectedJobsArray.Where(t => !RecurringJobAgent.IsValidJobId(t)).ToArray();
 
@@ -63,7 +63,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     case "Start":
                         RecurringJobAgent.StartBackgroundJob(selectedJobsArray);
                         break;
-                
+
                     default:
                         response.Status = false;
                         response.Message = $"Action '{action}' is not recognized. Valid actions are 'Start' and 'Stop'.";

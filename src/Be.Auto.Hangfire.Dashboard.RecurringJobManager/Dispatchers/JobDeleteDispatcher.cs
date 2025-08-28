@@ -19,7 +19,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 
             try
             {
-                var selectedJobs = context.Request.GetQuery("SelectedJobs");
+                var selectedJobs = (await context.Request.GetFormValuesAsync("SelectedJobs")).FirstOrDefault();
 
                 if (string.IsNullOrWhiteSpace(selectedJobs))
                 {

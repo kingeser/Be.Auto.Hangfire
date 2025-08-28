@@ -944,8 +944,28 @@
                 }).then((result) => {
                     if (result.value) {
 
+                        // 🔄 Loading göstermek için yeni Swal başlat
+                        Swal.fire({
+                            title: 'Starting jobs...',
+                            text: 'Please wait while the jobs are being started.',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
 
-                        axios.get('job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Start").then(response => {
+                        const formData = new URLSearchParams();
+                        formData.append('SelectedJobs', selectedJobIds.value.join('|'));
+                        formData.append('Action', 'Start');
+
+                        axios.post('job-manager/job-agent', formData, {
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            }
+                        }).then(response => {
+
+                            Swal.close(); // ✅ İşlem başarılı -> loading ekranını kapat
 
                             selectedJobIds.value = [];
 
@@ -955,16 +975,17 @@
 
                         }).catch(e => {
 
+                            Swal.close(); // ❌ Hata -> loading ekranını kapat
+
                             showModal.value = false;
 
                             Swal.fire({
                                 title: 'Error!',
                                 icon: 'error',
-                                text: e.response.data.Message,
+                                text: e.response?.data?.Message || 'An unexpected error occurred.',
                                 confirmButtonText: 'OK'
                             });
                         });
-
                     }
                 });
 
@@ -972,8 +993,6 @@
 
             };
             const stopSelectedJobs = () => {
-
-
                 Swal.fire({
                     title: 'Are you sure?',
                     text: 'Do you want to stop the selected ' + selectedJobIds.value.length + ' jobs?',
@@ -984,7 +1003,28 @@
                 }).then((result) => {
                     if (result.value) {
 
-                        axios.get('job-manager/job-agent?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Stop").then(response => {
+                        // Loading ekranını göster
+                        Swal.fire({
+                            title: 'Stopping jobs...',
+                            text: 'Please wait while the jobs are being stopped.',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        const formData = new URLSearchParams();
+                        formData.append('SelectedJobs', selectedJobIds.value.join('|'));
+                        formData.append('Action', 'Stop');
+
+                        axios.post('job-manager/job-agent', formData, {
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            }
+                        }).then(response => {
+
+                            Swal.close(); // Loading ekranını kapat
 
                             console.info("stopSelectedJobs", response);
 
@@ -994,21 +1034,23 @@
 
                             GetJobs();
 
-
                         }).catch(e => {
+
+                            Swal.close(); // Loading ekranını kapat
 
                             showModal.value = false;
 
                             Swal.fire({
                                 title: 'Error!',
                                 icon: 'error',
-                                text: e.response.data.Message,
+                                text: e.response?.data?.Message || 'An unexpected error occurred.',
                                 confirmButtonText: 'OK'
                             });
                         });
 
                     }
                 });
+
 
             };
 
@@ -1038,34 +1080,47 @@
                             }).then((result) => {
                                 if (result.value) {
 
-
+                                    // Loading ekranını göster
+                                    Swal.fire({
+                                        title: 'Importing...',
+                                        text: 'Please wait while jobs are being imported.',
+                                        allowOutsideClick: false,
+                                        didOpen: () => {
+                                            Swal.showLoading();
+                                        }
+                                    });
 
                                     const formData = new FormData();
                                     formData.append('SelectedJobs', content);
                                     formData.append('Action', 'Import');
+
                                     axios.post('job-manager/job-export-import', formData, {
                                         headers: {
                                             'Content-Type': 'multipart/form-data'
                                         }
                                     })
                                         .then(response => {
+                                            Swal.close(); // Loading ekranını kapat
+
                                             selectedJobIds.value = [];
                                             closeModal();
                                             GetJobs();
                                         })
                                         .catch(e => {
+                                            Swal.close(); // Loading ekranını kapat
+
                                             showModal.value = false;
+
                                             Swal.fire({
                                                 title: 'Error!',
                                                 icon: 'error',
-                                                text: e.response.data.Message,
+                                                text: e.response?.data?.Message || 'An unexpected error occurred.',
                                                 confirmButtonText: 'OK'
                                             });
                                         });
-
-
                                 }
                             });
+
 
 
                         } catch (parseError) {
@@ -1107,7 +1162,28 @@
                 }).then((result) => {
                     if (result.value) {
 
-                        axios.get('job-manager/job-export-import?SelectedJobs=' + selectedJobIds.value.join('|') + "&Action=Export").then(response => {
+                        // Loading ekranını göster
+                        Swal.fire({
+                            title: 'Exporting jobs...',
+                            text: 'Please wait while the jobs are being exported.',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        const formData = new URLSearchParams();
+                        formData.append('SelectedJobs', selectedJobIds.value.join('|'));
+                        formData.append('Action', 'Export');
+
+                        axios.post('job-manager/job-export-import', formData, {
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            }
+                        }).then(response => {
+
+                            Swal.close(); // Loading ekranını kapat
 
                             console.info("exportSelectedJobs", response);
 
@@ -1132,23 +1208,23 @@
                             document.body.removeChild(link);
                             window.URL.revokeObjectURL(url);
 
-
-
-
                         }).catch(e => {
+
+                            Swal.close(); // Loading ekranını kapat
 
                             showModal.value = false;
 
                             Swal.fire({
                                 title: 'Error!',
                                 icon: 'error',
-                                text: e.response.data.Message,
+                                text: e.response?.data?.Message || 'An unexpected error occurred.',
                                 confirmButtonText: 'OK'
                             });
                         });
 
                     }
                 });
+
 
             };
 
@@ -1163,7 +1239,27 @@
                 }).then((result) => {
                     if (result.value) {
 
-                        axios.get('job-manager/delete-job?SelectedJobs=' + selectedJobIds.value.join('|')).then(response => {
+                        // Loading ekranını göster
+                        Swal.fire({
+                            title: 'Deleting jobs...',
+                            text: 'Please wait while the jobs are being deleted.',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        const formData = new URLSearchParams();
+                        formData.append('SelectedJobs', selectedJobIds.value.join('|'));
+
+                        axios.post('job-manager/delete-job', formData, {
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            }
+                        }).then(response => {
+
+                            Swal.close(); // Loading ekranını kapat
 
                             selectedJobIds.value = [];
 
@@ -1171,21 +1267,23 @@
 
                             GetJobs();
 
-
                         }).catch(e => {
+
+                            Swal.close(); // Loading ekranını kapat
 
                             showModal.value = false;
 
                             Swal.fire({
                                 title: 'Error!',
                                 icon: 'error',
-                                text: e.response.data.Message,
+                                text: e.response?.data?.Message || 'An unexpected error occurred.',
                                 confirmButtonText: 'OK'
                             });
                         });
 
                     }
                 });
+
             };
             const getBodyParameterTypes = () => {
 

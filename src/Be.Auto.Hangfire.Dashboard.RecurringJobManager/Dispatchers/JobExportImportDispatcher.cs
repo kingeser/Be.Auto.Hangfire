@@ -18,19 +18,10 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
 
             try
             {
-                var selectedJobs = string.Empty;
-                var action = string.Empty;
 
-                if (context.Request.Method == "GET")
-                {
-                    selectedJobs = context.Request.GetQuery("SelectedJobs");
-                    action = context.Request.GetQuery("Action");
-                }
-                if (context.Request.Method == "POST")
-                {
-                    selectedJobs = (await context.Request.GetFormValuesAsync("SelectedJobs")).FirstOrDefault() ?? "[]";
-                    action = (await context.Request.GetFormValuesAsync("Action")).FirstOrDefault();
-                }
+
+                var selectedJobs = (await context.Request.GetFormValuesAsync("SelectedJobs")).FirstOrDefault() ?? "[]";
+                var action = (await context.Request.GetFormValuesAsync("Action")).FirstOrDefault();
 
                 if (string.IsNullOrWhiteSpace(selectedJobs))
                 {
@@ -84,7 +75,7 @@ namespace Be.Auto.Hangfire.Dashboard.RecurringJobManager.Dispatchers
                     case "Import":
                         {
 
-                        
+
                             var jobs = selectedJobs.TryDeserializeJobs(out var result);
 
                             if (!result)
